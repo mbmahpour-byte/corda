@@ -261,7 +261,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   async function createSetlist() {
     if (!newName.trim()) return
     const { data, error } = await supabase.from('setlists')
-      .insert({ name: newName.trim(), event_type: newEvent, date: newDate || null })
+      .insert({ name: newName.trim(), event_type: newEvent, event_date: newDate || null })
       .select().single()
     if (!error) {
       setCreating(false); setNewName(''); setNewDate('')
@@ -379,7 +379,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
                 <span style={s.evPill(sl.event_type)}>
                   {sl.event_type === 'sheva' ? 'SB' : sl.event_type === 'kumzitz' ? 'KZ' : sl.event_type === 'wedding' ? 'WD' : 'ALL'}
                 </span>
-                {sl.date && <span style={{ color:'#555', fontSize:12 }}>{sl.date}</span>}
+                {sl.event_date && <span style={{ color:'#555', fontSize:12 }}>{sl.event_date}</span>}
               </div>
             </div>
             <button onClick={e => deleteSetlist(sl.id, e)}
@@ -407,7 +407,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <span style={s.evPill(active.event_type)}>
             {active.event_type === 'sheva' ? 'SB' : active.event_type === 'kumzitz' ? 'KZ' : active.event_type === 'wedding' ? 'WD' : 'ALL'}
           </span>
-          {active.date && <span style={{ color:'#555', fontSize:12 }}>{active.date}</span>}
+          {active.event_date && <span style={{ color:'#555', fontSize:12 }}>{active.event_date}</span>}
           <span style={{ color:'#444', fontSize:12 }}>{slots.length} songs</span>
         </div>
       </div>
