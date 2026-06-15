@@ -657,6 +657,8 @@ export default function App() {
   const [kfTopNote, setKfTopNote] = useState('A4')
   const [kfSongRange, setKfSongRange] = useState('medium')
   const [kfResult, setKfResult] = useState(null)
+  const [kfApplySongId, setKfApplySongId] = useState('')
+  const [kfApplied, setKfApplied] = useState(false)
 
   useEffect(() => { fetchSongs() }, [])
 
@@ -896,13 +898,34 @@ Keep chords simple (Dm, G, Am, F etc). Jewish music style.`
           )}
           <button onClick={runKeyFinder} style={s.runBtn}>Find best key</button>
           {kfResult && (
-            <div style={s.kfResult}>
-              <div style={s.kfResultKey}>{kfResult.key}</div>
-              <div style={s.kfResultSub}>Suggested key</div>
-              <div style={s.kfAlts}>
-                {kfResult.alts.map(k => <span key={k} style={s.kfAlt}>{k}</span>)}
+            <>
+              <div style={s.kfResult}>
+                <div style={s.kfResultKey}>{kfResult.key}</div>
+                <div style={s.kfResultSub}>Suggested key</div>
+                <div style={s.kfAlts}>
+                  {kfResult.alts.map(k => <span key={k} style={s.kfAlt}>{k}</span>)}
+                </div>
               </div>
-            </div>
+              <div style={{ margin:'8px 12px 0', background:'#161616', border:'1px solid #222', borderRadius:14, padding:14 }}>
+                <div style={s.kfLabel}>Apply to song</div>
+                <div style={{ display:'flex', gap:8 }}>
+                  <select value={kfApplySongId} onChange={e => { setKfApplySongId(e.target.value); setKfApplied(false) }}
+                    style={{ flex:1, padding:'9px 10px', background:'#1e1e1e', border:'1px solid #2a2a2a', borderRadius:8, color: kfApplySongId ? '#fff' : '#555', fontSize:13, boxSizing:'border-box' }}>
+                    <option value="">Select a song...</option>
+                    {songs.map(s => <option key={s.id} value={s.id}>{s.name}{s.artist ? ` — ${s.artist}` : ''}</option>)}
+                  </select>
+                  <button
+                    disabled={!kfApplySongId || kfApplied}
+                    onClick={async () => {
+                      await updateSong(kfApplySongId, 'key', kfResult.key)
+                      setKfApplied(true)
+                    }}
+                    style={{ padding:'9px 16px', background: kfApplied ? '#1a2e1a' : (!kfApplySongId ? '#1a1a1a' : '#fff'), border:'none', borderRadius:8, color: kfApplied ? '#6fcf6f' : (!kfApplySongId ? '#444' : '#000'), fontSize:13, fontWeight:600, cursor: kfApplySongId && !kfApplied ? 'pointer' : 'default', flexShrink:0 }}>
+                    {kfApplied ? 'Applied ✓' : 'Apply'}
+                  </button>
+                </div>
+              </div>
+            </>
           )}
         </>}
 
