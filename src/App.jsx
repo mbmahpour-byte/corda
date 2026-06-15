@@ -647,6 +647,8 @@ export default function App() {
   const [expandedId, setExpandedId] = useState(null)
   const [gigSongs, setGigSongs] = useState(null)
   const [gigReturnTab, setGigReturnTab] = useState('songs')
+  const [aiLoadingId, setAiLoadingId] = useState(null)
+  const [fillVersions, setFillVersions] = useState({})
 
   const [kfCrowd, setKfCrowd] = useState('mixed')
   const [kfComfort, setKfComfort] = useState('medium')
@@ -668,6 +670,48 @@ export default function App() {
   async function updateSong(id, field, value) {
     await supabase.from('songs').update({ [field]: value }).eq('id', id)
     setSongs(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
+  }
+
+  async function fillWithClaude(song) {
+    setAiLoadingId(song.id)
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `Give me the chord chart for "${song.name}"${song.artist ? ` by ${song.artist}` : ''} in the key of ${song.key || 'D'}.
+Format it exactly like this — nothing else, no explanation:
+
+TEMPO: [tempo feel]
+NOTES: [one line performance tip]
+CHORDS:
+[Section]: [chords using | as bar separator]
+
+Sections should be: Intro, Verse, Chorus, Bridge (only include sections that exist).
+Keep chords simple (Dm, G, Am, F etc). Jewish music style.`
+          }]
+        })
+      })
+      const data = await res.json()
+      const text = data.content?.[0]?.text || ''
+      const tempoMatch = text.match(/TEMPO:\s*(.+)/i)
+      const notesMatch = text.match(/NOTES:\s*(.+)/i)
+      const chordsMatch = text.match(/CHORDS:\n([\s\S]+)/i)
+      const updates = {}
+      if (tempoMatch) updates.tempo = tempoMatch[1].trim()
+      if (notesMatch) updates.notes = notesMatch[1].trim()
+      if (chordsMatch) updates.chords = chordsMatch[1].trim()
+      if (Object.keys(updates).length) {
+        await supabase.from('songs').update(updates).eq('id', song.id)
+        setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updates } : s))
+        setFillVersions(prev => ({ ...prev, [song.id]: (prev[song.id] || 0) + 1 }))
+      }
+    } catch(e) { console.error(e) }
+    setAiLoadingId(null)
   }
 
   async function deleteSong(id) {
@@ -779,12 +823,18 @@ export default function App() {
                       </div>
                     </div>
                     <div style={{marginBottom:10}}>
-                      <label style={s.fieldLabel}>Chords</label>
-                      <textarea defaultValue={song.chords||''} onBlur={e => updateSong(song.id,'chords',e.target.value)} rows={3} style={s.chordBox} />
+                      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
+                        <span style={{ ...s.fieldLabel, marginBottom:0, display:'inline' }}>Chords</span>
+                        <button onClick={() => fillWithClaude(song)} disabled={aiLoadingId === song.id}
+                          style={{ background:'none', border:'1px solid #1e3a5a', borderRadius:6, color: aiLoadingId === song.id ? '#555' : '#60a5fa', fontSize:11, fontWeight:600, padding:'3px 8px', cursor: aiLoadingId === song.id ? 'default' : 'pointer' }}>
+                          {aiLoadingId === song.id ? 'Filling...' : '✦ Fill with Claude'}
+                        </button>
+                      </div>
+                      <textarea key={`chords-${song.id}-${fillVersions[song.id]||0}`} defaultValue={song.chords||''} onBlur={e => updateSong(song.id,'chords',e.target.value)} rows={3} style={s.chordBox} />
                     </div>
                     <div style={{marginBottom:14}}>
                       <label style={s.fieldLabel}>Notes</label>
-                      <textarea defaultValue={song.notes||''} onBlur={e => updateSong(song.id,'notes',e.target.value)} rows={2} style={s.fieldTextarea} />
+                      <textarea key={`notes-${song.id}-${fillVersions[song.id]||0}`} defaultValue={song.notes||''} onBlur={e => updateSong(song.id,'notes',e.target.value)} rows={2} style={s.fieldTextarea} />
                     </div>
                     <button onClick={() => deleteSong(song.id)} style={s.deleteBtn}>Remove song</button>
                   </div>
