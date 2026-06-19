@@ -1,16 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Inter:wght@400;500;600&display=swap');
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #0f0f0f;
-  color: #f0f0f0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #080808;
+  color: #F5F0E8;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
 }
+
+#root { width: 100% !important; max-width: 100% !important; border: none !important; text-align: left !important; }
 
 input, select, textarea, button {
   font-family: inherit;
   -webkit-appearance: none;
   appearance: none;
-}::-webkit-scrollbar { display: none; }
+}
+
+select option { background: #111111; color: #F5F0E8; }
+
+::-webkit-scrollbar { display: none; }
 html, body { overflow-x: hidden; width: 100%; }
