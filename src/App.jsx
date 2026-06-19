@@ -423,7 +423,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
                 {songs.map((_, i) => (
                   <div key={i} onClick={() => setIdx(i)}
                     style={{ padding:'6px 3px', cursor:'pointer' }}>
-                    <div style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#333', transition:'all 0.2s' }} />
+                    <div style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#444', transition:'all 0.2s' }} />
                   </div>
                 ))}
               </div>
@@ -1404,9 +1404,15 @@ export default function App() {
             <button style={s.filterPill(favFilter)} onClick={() => setFavFilter(f => !f)}>★ Favorites</button>
           </div>
           <div style={{ ...s.searchRow, display:'flex', gap:8, alignItems:'center' }}>
-            <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'auto', flex:1 }}
-              autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+            <div style={{ position:'relative', flex:1 }}>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'100%', paddingRight: search ? 36 : 14 }}
+                autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+              {search && (
+                <button onClick={() => setSearch('')}
+                  style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'#555', fontSize:18, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>×</button>
+              )}
+            </div>
             <button
               onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
               disabled={filtered.length === 0}
