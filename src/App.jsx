@@ -251,7 +251,7 @@ const s = {
   navBtn: (active) => ({
     flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative',
     gap:4, padding:'10px 0', background:'none', border:'none', cursor:'pointer',
-    color: active ? GOLD : '#2e2e2e', fontSize:10, fontWeight:500, letterSpacing:'0.06em',
+    color: active ? GOLD : '#555', fontSize:10, fontWeight:500, letterSpacing:'0.06em',
     textTransform:'uppercase', transition:'color 0.15s', fontFamily:'Inter, sans-serif',
   }),
   navIcon: { fontSize:20, lineHeight:1 },
@@ -266,12 +266,12 @@ const s = {
   }),
   searchRow: { padding:'10px 12px', flexShrink:0, width:'100%' },
   searchInput: {
-    width:'93.8%', padding:'10px 14px', background:'#0f0f0f',
+    width:'100%', padding:'10px 14px', background:'#0f0f0f',
     border:'1px solid #1c1c1c', borderRadius:8, color:'#F5F0E8',
     fontSize:14, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
   },
-  alphaHeader: { padding:'14px 18px 5px', color:'#2e2e2e', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
+  alphaHeader: { padding:'14px 18px 5px', color:'#3a3a3a', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
   card: (expanded, event) => ({
     margin:'0 10px 7px',
     background:'linear-gradient(135deg, #131313, #0f0f0f)',
@@ -293,7 +293,7 @@ const s = {
   },
   starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:17, padding:0, lineHeight:1, color:GOLD },
   chevron: (open) => ({
-    color:'#2e2e2e', fontSize:11, transition:'transform 0.2s',
+    color:'#444', fontSize:11, transition:'transform 0.2s',
     transform: open ? 'rotate(180deg)' : 'rotate(0deg)', display:'block',
   }),
   evPill: (ev) => {
@@ -326,13 +326,14 @@ const s = {
   patchName: { fontSize:13, fontWeight:600, color:'#F5F0E8', marginBottom:3, fontFamily:'Inter, sans-serif' },
   patchSrc: { fontSize:11, color:'#666660', marginBottom:6 },
   patchWhen: { fontSize:11, color:'#444', lineHeight:1.5 },
-  empty: { textAlign:'center', padding:'60px 20px', color:'#2e2e2e', fontSize:15 },
+  empty: { textAlign:'center', padding:'60px 20px', color:'#555', fontSize:15 },
 }
 
 function GigMode({ songs, onExit, onSaveKey }) {
   const [idx, setIdx] = useState(0)
   const [offset, setOffset] = useState(0)
   const [keySaved, setKeySaved] = useState(false)
+  const [fontSize, setFontSize] = useState(17)
   const touchStart = useRef(null)
 
   // Wake lock — acquire on mount and re-acquire after visibility change
@@ -400,13 +401,13 @@ function GigMode({ songs, onExit, onSaveKey }) {
           >−</button>
 
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4, flex:1 }}>
-            <span style={{ color:'#2e2e2e', fontSize:9, fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
+            <span style={{ color:'#555', fontSize:9, fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
               Song {idx + 1} of {songs.length}
             </span>
             {songs.length <= 12 && (
               <div style={{ display:'flex', gap:4 }}>
                 {songs.map((_, i) => (
-                  <div key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#1c1c1c', cursor:'pointer', transition:'all 0.2s' }} />
+                  <div key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#333', cursor:'pointer', transition:'all 0.2s' }} />
                 ))}
               </div>
             )}
@@ -420,14 +421,14 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
         {/* Second row: exit + key badge + save key */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px 12px', borderBottom:'1px solid #1c1c1c' }}>
-          <button onClick={onExit} style={{ background:'none', border:'none', color:'#2e2e2e', fontSize:11, cursor:'pointer', padding:0, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>✕ Exit</button>
+          <button onClick={onExit} style={{ background:'none', border:'none', color:'#555', fontSize:11, cursor:'pointer', padding:0, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>✕ Exit</button>
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
             <span style={{ background:GOLD_GLOW, color:GOLD, border:`1px solid ${GOLD_DIM}`, borderRadius:6, fontSize:22, fontWeight:800, padding:'5px 18px', fontFamily:'Playfair Display, serif' }}>
               {displayKey || '—'}
             </span>
             {offset !== 0 && (
-              <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{offset > 0 ? `+${offset}` : offset} st</span>
+              <span style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{offset > 0 ? `+${offset}` : offset} st</span>
             )}
           </div>
 
@@ -446,32 +447,47 @@ function GigMode({ songs, onExit, onSaveKey }) {
         {song.artist && <div style={{ fontSize:14, color:'#666660', marginBottom:24, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>{song.artist}</div>}
 
         {song.patch && (
-          <div style={{ fontSize:12, color:'#2e2e2e', marginBottom:20, fontStyle:'italic', fontFamily:'Inter, sans-serif' }}>{song.patch}</div>
+          <div style={{ fontSize:12, color:'#555', marginBottom:20, fontStyle:'italic', fontFamily:'Inter, sans-serif' }}>{song.patch}</div>
         )}
 
         {displayChords && (
           <div style={{ marginBottom:24 }}>
             <div style={{ maxWidth:'90%', margin:'0 auto' }}>
-              <ChordLyricDisplay text={displayChords} fontSize={17} centerSections={true} />
+              <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
             </div>
           </div>
         )}
 
         {song.notes && (
-          <div style={{ color:'#2e2e2e', fontSize:13, lineHeight:1.7, borderTop:'1px solid #1c1c1c', paddingTop:16, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
+          <div style={{ color:'#888', fontSize:13, lineHeight:1.7, borderTop:'1px solid #1c1c1c', paddingTop:16, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
         )}
       </div>
 
-      {/* Bottom nav: prev / tempo / next */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', borderTop:'1px solid #1c1c1c', flexShrink:0, paddingBottom:'calc(12px + env(safe-area-inset-bottom))' }}>
+      {/* Bottom nav: prev / tempo+font / next */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 16px', borderTop:'1px solid #1c1c1c', flexShrink:0, paddingBottom:'calc(10px + env(safe-area-inset-bottom))' }}>
         <button
           onClick={prev} disabled={atStart}
-          style={{ background:'none', border:`1px solid ${atStart ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: atStart ? '#1c1c1c' : GOLD, fontSize:28, padding:'8px 24px', cursor: atStart ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s' }}
+          style={{ background:'none', border:`1px solid ${atStart ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: atStart ? '#1c1c1c' : GOLD, fontSize:28, padding:'8px 20px', cursor: atStart ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
         >‹</button>
-        <div style={{ color:'#2e2e2e', fontSize:11, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>{song.tempo || ''}</div>
+
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5, flex:1, minWidth:0, padding:'0 8px' }}>
+          <div style={{ color:'#555', fontSize:10, letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
+            {song.tempo || ''}
+            {song.bpm && song.tempo && <span style={{ color:'#333', margin:'0 5px' }}>·</span>}
+            {song.bpm && <span style={{ color:'#444', textTransform:'none' }}>{song.bpm} bpm</span>}
+          </div>
+          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+            <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
+              style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
+            <span style={{ color:'#2e2e2e', fontSize:9, fontFamily:'Inter, sans-serif' }}>{fontSize}px</span>
+            <button onClick={() => setFontSize(f => Math.min(30, f + 2))}
+              style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
+          </div>
+        </div>
+
         <button
           onClick={next} disabled={atEnd}
-          style={{ background:'none', border:`1px solid ${atEnd ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: atEnd ? '#1c1c1c' : GOLD, fontSize:28, padding:'8px 24px', cursor: atEnd ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s' }}
+          style={{ background:'none', border:`1px solid ${atEnd ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: atEnd ? '#1c1c1c' : GOLD, fontSize:28, padding:'8px 20px', cursor: atEnd ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
         >›</button>
       </div>
     </div>
@@ -616,7 +632,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
       )}
 
       {setlists.length === 0 && !creating && (
-        <div style={{ textAlign:'center', padding:'60px 20px', color:'#2e2e2e', fontSize:14, fontFamily:'Inter, sans-serif' }}>No set lists yet.</div>
+        <div style={{ textAlign:'center', padding:'60px 20px', color:'#555', fontSize:14, fontFamily:'Inter, sans-serif' }}>No set lists yet.</div>
       )}
       {setlists.map(sl => (
         <div key={sl.id} onClick={() => openSetlist(sl)}
@@ -632,7 +648,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
               </div>
             </div>
             <button onClick={e => deleteSetlist(sl.id, e)}
-              style={{ background:'none', border:'none', color:'#2e2e2e', fontSize:22, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0 }}>×</button>
+              style={{ background:'none', border:'none', color:'#444', fontSize:22, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0 }}>×</button>
           </div>
         </div>
       ))}
@@ -656,7 +672,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
             {active.event_type === 'sheva' ? 'SB' : active.event_type === 'kumzitz' ? 'KZ' : active.event_type === 'wedding' ? 'WD' : 'ALL'}
           </span>
           {active.event_date && <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{active.event_date}</span>}
-          <span style={{ color:'#2e2e2e', fontSize:11, fontFamily:'Inter, sans-serif' }}>{slots.length} songs</span>
+          <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{slots.length} songs</span>
         </div>
       </div>
 
@@ -681,9 +697,9 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
             </div>
           )}
 
-          {loadingSlots && <div style={{ color:'#2e2e2e', textAlign:'center', padding:20, fontFamily:'Inter, sans-serif' }}>Loading...</div>}
+          {loadingSlots && <div style={{ color:'#555', textAlign:'center', padding:20, fontFamily:'Inter, sans-serif' }}>Loading...</div>}
           {!loadingSlots && slots.length === 0 && (
-            <div style={{ color:'#2e2e2e', textAlign:'center', padding:'40px 0', fontSize:13, fontFamily:'Inter, sans-serif' }}>Search above to add songs.</div>
+            <div style={{ color:'#555', textAlign:'center', padding:'40px 0', fontSize:13, fontFamily:'Inter, sans-serif' }}>Search above to add songs.</div>
           )}
 
           <div onTouchMove={onListTouchMove} onTouchEnd={onListTouchEnd}>
@@ -707,16 +723,16 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
                     opacity: isDragging ? 0.35 : 1,
                     transition:'background 0.1s, border-color 0.1s, opacity 0.1s',
                   }}>
-                  <span style={{ color:'#2e2e2e', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:18, textAlign:'right', fontFamily:'Inter, sans-serif' }}>{i + 1}</span>
+                  <span style={{ color:'#444', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:18, textAlign:'right', fontFamily:'Inter, sans-serif' }}>{i + 1}</span>
                   <span onTouchStart={e => onHandleTouchStart(e, i)}
-                    style={{ color:'#2e2e2e', fontSize:16, cursor:'grab', touchAction:'none', userSelect:'none', paddingRight:2 }}>⠿</span>
+                    style={{ color:'#444', fontSize:16, cursor:'grab', touchAction:'none', userSelect:'none', paddingRight:2 }}>⠿</span>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:14, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{song?.name}</div>
                     {song?.artist && <div style={{ fontSize:11, color:'#666660', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                   </div>
                   {song?.key && <span style={s.keyBadge}>{song.key}</span>}
                   <button onClick={() => removeSong(slot.id)}
-                    style={{ background:'none', border:'none', color:'#2e2e2e', fontSize:22, cursor:'pointer', padding:'0 2px', lineHeight:1, flexShrink:0 }}>×</button>
+                    style={{ background:'none', border:'none', color:'#444', fontSize:22, cursor:'pointer', padding:'0 2px', lineHeight:1, flexShrink:0 }}>×</button>
                 </div>
               )
             })}
@@ -925,6 +941,8 @@ export default function App() {
   const [gigReturnTab, setGigReturnTab] = useState('songs')
   const [aiLoadingId, setAiLoadingId] = useState(null)
   const [aiError, setAiError] = useState('')
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const [tagFilter, setTagFilter] = useState('')
 
   // Fill-all state
   const [fillAllConfirm, setFillAllConfirm] = useState(false)
@@ -943,13 +961,13 @@ export default function App() {
   const [kfComfort, setKfComfort] = useState('medium')
   const [kfHasSinger, setKfHasSinger] = useState(false)
   const [kfVoice, setKfVoice] = useState(() => {
-    try { const p = JSON.parse(localStorage.getItem('niggun_singer_profile')); return p?.voice || 'baritone' } catch { return 'baritone' }
+    try { const p = JSON.parse(localStorage.getItem('corda_singer_profile')); return p?.voice || 'baritone' } catch { return 'baritone' }
   })
   const [kfTopNote, setKfTopNote] = useState(() => {
-    try { const p = JSON.parse(localStorage.getItem('niggun_singer_profile')); return p?.topNote || 'A4' } catch { return 'A4' }
+    try { const p = JSON.parse(localStorage.getItem('corda_singer_profile')); return p?.topNote || 'A4' } catch { return 'A4' }
   })
   const [kfSongRange, setKfSongRange] = useState(() => {
-    try { const p = JSON.parse(localStorage.getItem('niggun_singer_profile')); return p?.songRange || 'medium' } catch { return 'medium' }
+    try { const p = JSON.parse(localStorage.getItem('corda_singer_profile')); return p?.songRange || 'medium' } catch { return 'medium' }
   })
   const [kfResult, setKfResult] = useState(null)
   const [kfApplySongId, setKfApplySongId] = useState('')
@@ -1117,11 +1135,16 @@ export default function App() {
     setKfSongDropdown(false)
   }
 
+  const allTags = [...new Set(
+    songs.flatMap(s => (s.tags || '').split(',').map(t => t.trim()).filter(Boolean))
+  )].sort()
+
   const filtered = songs.filter(s => {
     const matchEvent = eventFilter === 'all' || s.event_type === eventFilter || s.event_type === 'all'
     const matchQ = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.artist||'').toLowerCase().includes(search.toLowerCase())
     const matchFav = !favFilter || s.is_favorite
-    return matchEvent && matchQ && matchFav
+    const matchTag = !tagFilter || (s.tags || '').split(',').map(t => t.trim()).includes(tagFilter)
+    return matchEvent && matchQ && matchFav && matchTag
   })
 
   const alphaGroups = groupAlphabetically(filtered)
@@ -1130,7 +1153,7 @@ export default function App() {
     const isExpanded = expandedId === song.id
     return (
       <div key={song.id} style={s.card(isExpanded, song.event_type)}>
-        <div style={s.cardHeader} onClick={() => setExpandedId(isExpanded ? null : song.id)}>
+        <div style={s.cardHeader} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
           <div style={s.cardLeft}>
             <div style={s.cardName}>{song.name}</div>
             <div style={s.cardArtist}>{song.artist || <span style={{color:'#333'}}>—</span>}</div>
@@ -1223,12 +1246,26 @@ export default function App() {
               <textarea defaultValue={song.notes||''} onBlur={e => updateSong(song.id,'notes',e.target.value)} rows={2} style={s.fieldTextarea} />
             </div>
 
-            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-              <button onClick={() => deleteSong(song.id)} style={s.deleteBtn}>Remove song</button>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8 }}>
+              <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
+                <button
+                  onClick={() => { setGigSongs([song]); setGigReturnTab('songs'); setTab('gig') }}
+                  style={{ padding:'8px 12px', background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
+                  ▶ Play
+                </button>
+                {deleteConfirmId === song.id
+                  ? <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+                      <span style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif' }}>Delete?</span>
+                      <button onClick={() => { deleteSong(song.id); setDeleteConfirmId(null) }} style={{ padding:'6px 10px', background:'none', border:'1px solid #c04040', borderRadius:4, color:'#c04040', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Yes</button>
+                      <button onClick={() => setDeleteConfirmId(null)} style={{ padding:'6px 8px', background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>No</button>
+                    </div>
+                  : <button onClick={() => setDeleteConfirmId(song.id)} style={s.deleteBtn}>Remove</button>
+                }
+              </div>
               <button
                 onClick={() => saveExpandedCard(song.id)}
                 disabled={xSaving}
-                style={{ padding:'8px 18px', background: xSaved ? 'transparent' : GOLD, border: xSaved ? '1px solid #2d4d2d' : 'none', borderRadius:4, color: xSaved ? '#5a9e5a' : '#000', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                style={{ flexShrink:0, padding:'8px 16px', background: xSaved ? 'transparent' : GOLD, border: xSaved ? '1px solid #2d4d2d' : 'none', borderRadius:4, color: xSaved ? '#5a9e5a' : '#000', fontSize:12, fontWeight:600, cursor:'pointer', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                 {xSaved ? 'Saved ✓' : xSaving ? 'Saving...' : 'Save changes'}
               </button>
             </div>
@@ -1257,7 +1294,7 @@ export default function App() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:5 }}>
             <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.2em', color:GOLD }}>performance library</span>
-            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, color:'#2e2e2e', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
+            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, color:'#555', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
           </div>
         </div>
       </div>
@@ -1273,10 +1310,27 @@ export default function App() {
             ))}
             <button style={s.filterPill(favFilter)} onClick={() => setFavFilter(f => !f)}>★ Favorites</button>
           </div>
-          <div style={s.searchRow}>
+          <div style={{ ...s.searchRow, display:'flex', gap:8, alignItems:'center' }}>
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search songs or artist..." style={s.searchInput} />
+              placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'auto', flex:1 }} />
+            <button
+              onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
+              disabled={filtered.length === 0}
+              title="Open filtered songs in Gig Mode"
+              style={{ flexShrink:0, padding:'9px 12px', background:'transparent', border:`1px solid ${filtered.length ? GOLD_DIM : '#1c1c1c'}`, borderRadius:8, color: filtered.length ? GOLD : '#2e2e2e', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
+              ▶
+            </button>
           </div>
+
+          {allTags.length > 0 && (
+            <div style={{ display:'flex', gap:6, padding:'0 16px 6px', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 }}>
+              {allTags.map(tag => (
+                <button key={tag} style={s.filterPill(tagFilter === tag)} onClick={() => setTagFilter(tagFilter === tag ? '' : tag)}>
+                  #{tag}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Fill all missing chords bar */}
           {!loading && (() => {
@@ -1303,7 +1357,7 @@ export default function App() {
             if (missingCount === 0) return null
             return (
               <div style={{ margin:'0 12px 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                <span style={{ color:'#2e2e2e', fontSize:11, fontFamily:'Inter, sans-serif' }}>{missingCount} song{missingCount !== 1 ? 's' : ''} missing chords</span>
+                <span style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{missingCount} song{missingCount !== 1 ? 's' : ''} missing chords</span>
                 <button
                   onClick={() => setFillAllConfirm(true)}
                   style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:11, fontWeight:600, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
@@ -1377,7 +1431,7 @@ export default function App() {
               <div style={{ display:'flex', gap:8, marginTop:10 }}>
                 <button
                   onClick={() => {
-                    localStorage.setItem('niggun_singer_profile', JSON.stringify({ voice: kfVoice, topNote: kfTopNote, songRange: kfSongRange }))
+                    localStorage.setItem('corda_singer_profile', JSON.stringify({ voice: kfVoice, topNote: kfTopNote, songRange: kfSongRange }))
                     setKfProfileSaved(true)
                     setTimeout(() => setKfProfileSaved(false), 2000)
                   }}
@@ -1386,7 +1440,7 @@ export default function App() {
                 </button>
                 <button
                   onClick={() => {
-                    localStorage.removeItem('niggun_singer_profile')
+                    localStorage.removeItem('corda_singer_profile')
                     setKfVoice('baritone')
                     setKfTopNote('A4')
                     setKfSongRange('medium')

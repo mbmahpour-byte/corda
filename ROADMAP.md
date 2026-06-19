@@ -113,13 +113,16 @@ A performance chord book for a live Jewish music keyboardist. Built to be used o
 - [ ] Add `tags` and `bpm` columns to Supabase `songs` table (`ALTER TABLE songs ADD COLUMN IF NOT EXISTS tags text, ADD COLUMN IF NOT EXISTS bpm integer`)
 
 ### Features
-- [ ] Tag-based filtering in the Songs tab (filter by tag pill)
-- [ ] BPM display in Gig Mode (next to tempo)
-- [ ] Song notes visible in Gig Mode
+- [x] Tag-based filtering in the Songs tab (filter by tag pill)
+- [x] BPM display in Gig Mode (next to tempo)
+- [x] Song notes visible in Gig Mode
+- [x] Font size control in Gig Mode (A− / A+ buttons in bottom bar)
+- [x] Play single song in Gig Mode from expanded card (▶ Play button)
+- [x] Play filtered song list directly from Songs tab (▶ button in search row)
+- [x] Two-step delete confirmation (Remove → Delete? Yes/No)
 - [ ] Setlist: show total duration estimate based on average song length
 - [ ] Quick-add song from Gig Mode (add a placeholder mid-performance)
 - [ ] Chord chart print/export (PDF or share sheet)
-- [ ] Font size control in Gig Mode (pinch-to-zoom or +/− text size)
 - [ ] Search within chord charts (find a specific word/section)
 - [ ] Song history / recently played
 
