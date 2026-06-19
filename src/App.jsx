@@ -27,9 +27,7 @@ const EVENT_COLORS = {
   wedding: { bg:'#160e02', text:'#c4862a', border:'#281a04' },
   all:     { bg:'#111', text:'#555', border:'#1c1c1c' },
 }
-const EVENT_ACCENT = {
-  kumzitz:'#5a9e5a', sheva:'#8b6fd4', wedding:'#c4862a', all:'#2a2a2a'
-}
+
 const GOLD = '#C9A84C'
 const GOLD_DIM = 'rgba(201,168,76,0.25)'
 const GOLD_GLOW = 'rgba(201,168,76,0.12)'
@@ -410,17 +408,23 @@ function GigMode({ songs, onExit, onSaveKey }) {
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px 6px' }}>
           <button
             onClick={() => setOffset(o => o - 1)}
-            style={{ width:44, height:44, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:26, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
-          >−</button>
+            style={{ width:48, height:48, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
+          >
+            <span style={{ fontSize:22, lineHeight:1 }}>−</span>
+            <span style={{ fontSize:7, letterSpacing:'0.1em', opacity:0.6, fontFamily:'Inter, sans-serif' }}>SEMI</span>
+          </button>
 
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:4, flex:1 }}>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:1 }}>
             <span style={{ color:'#555', fontSize:9, fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
               Song {idx + 1} of {songs.length}
             </span>
             {songs.length <= 12 && (
-              <div style={{ display:'flex', gap:4 }}>
+              <div style={{ display:'flex', gap:2 }}>
                 {songs.map((_, i) => (
-                  <div key={i} onClick={() => setIdx(i)} style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#333', cursor:'pointer', transition:'all 0.2s' }} />
+                  <div key={i} onClick={() => setIdx(i)}
+                    style={{ padding:'6px 3px', cursor:'pointer' }}>
+                    <div style={{ width: i === idx ? 16 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#333', transition:'all 0.2s' }} />
+                  </div>
                 ))}
               </div>
             )}
@@ -428,8 +432,11 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
           <button
             onClick={() => setOffset(o => o + 1)}
-            style={{ width:44, height:44, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:26, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}
-          >+</button>
+            style={{ width:48, height:48, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
+          >
+            <span style={{ fontSize:22, lineHeight:1 }}>+</span>
+            <span style={{ fontSize:7, letterSpacing:'0.1em', opacity:0.6, fontFamily:'Inter, sans-serif' }}>SEMI</span>
+          </button>
         </div>
 
         {/* Second row: exit + key badge + save key */}
@@ -753,6 +760,9 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
                     {song?.artist && <div style={{ fontSize:11, color:'#666660', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                   </div>
                   {song?.key && <span style={s.keyBadge}>{song.key}</span>}
+                  {song && !song.chords?.trim() && (
+                    <span title="No chord chart" style={{ color:'#c04040', fontSize:11, fontFamily:'Inter, sans-serif', flexShrink:0 }}>!</span>
+                  )}
                   <button onClick={() => removeSong(slot.id)}
                     style={{ background:'none', border:'none', color:'#444', fontSize:22, cursor:'pointer', padding:'0 2px', lineHeight:1, flexShrink:0 }}>×</button>
                 </div>
@@ -972,6 +982,7 @@ export default function App() {
   const [tab, setTab] = useState('songs')
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState(false)
   const [search, setSearch] = useState('')
   const [eventFilter, setEventFilter] = useState('all')
   const [favFilter, setFavFilter] = useState(false)
@@ -1034,8 +1045,9 @@ export default function App() {
 
   async function fetchSongs() {
     setLoading(true)
+    setLoadError(false)
     const { data, error } = await supabase.from('songs').select('*').order('created_at', { ascending: true })
-    if (!error) setSongs(data || [])
+    if (error) { setLoadError(true) } else { setSongs(data || []) }
     setLoading(false)
   }
 
@@ -1359,7 +1371,7 @@ export default function App() {
               onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
               disabled={filtered.length === 0}
               title="Open filtered songs in Gig Mode"
-              style={{ flexShrink:0, padding:'9px 12px', background:'transparent', border:`1px solid ${filtered.length ? GOLD_DIM : '#1c1c1c'}`, borderRadius:8, color: filtered.length ? GOLD : '#2e2e2e', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
+              style={{ flexShrink:0, padding:'9px 12px', background:'transparent', border:`1px solid ${filtered.length ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: filtered.length ? GOLD : '#333', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
               ▶
             </button>
           </div>
@@ -1426,8 +1438,18 @@ export default function App() {
 
           {loading
             ? <div style={s.empty}>Loading...</div>
+            : loadError
+            ? <div style={s.empty}>
+                <div style={{ marginBottom:12 }}>Couldn't load songs.</div>
+                <button onClick={fetchSongs} style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:12, padding:'8px 20px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Retry</button>
+              </div>
+            : filtered.length === 0 && songs.length === 0
+            ? <div style={s.empty}>
+                <div style={{ marginBottom:12 }}>No songs yet.</div>
+                <button onClick={() => setTab('add')} style={{ background:GOLD, border:'none', borderRadius:4, color:'#000', fontSize:12, fontWeight:600, padding:'8px 20px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>+ Add your first song</button>
+              </div>
             : filtered.length === 0
-            ? <div style={s.empty}>No songs yet.</div>
+            ? <div style={s.empty}>No songs match your filters.</div>
             : alphaGroups.map(({ letter, songs: groupSongs }) => (
                 <div key={letter}>
                   <div style={s.alphaHeader}>{letter}</div>
