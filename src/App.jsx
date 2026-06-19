@@ -351,8 +351,8 @@ function GigMode({ songs, onExit, onSaveKey }) {
   useEffect(() => { setOffset(0); setKeySaved(false) }, [idx])
 
   if (!songs.length) return (
-    <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'#2e2e2e' }}>
-      <div style={{ fontSize:15, marginBottom:24, fontFamily:'Inter, sans-serif' }}>No songs to show</div>
+    <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+      <div style={{ fontSize:15, marginBottom:24, fontFamily:'Inter, sans-serif', color:'#555' }}>No songs to show</div>
       <button onClick={onExit} style={{ background:'none', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:14, padding:'10px 24px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Exit</button>
     </div>
   )
@@ -435,7 +435,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
           <button
             onClick={saveKey}
             disabled={!displayKey || !offset}
-            style={{ background:'transparent', border:`1px solid ${keySaved ? '#2d4d2d' : (offset ? GOLD_DIM : '#1c1c1c')}`, borderRadius:4, color: keySaved ? '#5a9e5a' : (offset ? GOLD : '#2e2e2e'), fontSize:11, fontWeight:600, padding:'6px 12px', cursor: offset ? 'pointer' : 'default', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+            style={{ background:'transparent', border:`1px solid ${keySaved ? '#2d4d2d' : (offset ? GOLD_DIM : '#1c1c1c')}`, borderRadius:4, color: keySaved ? '#5a9e5a' : (offset ? GOLD : '#444'), fontSize:11, fontWeight:600, padding:'6px 12px', cursor: offset ? 'pointer' : 'default', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
             {keySaved ? 'Saved ✓' : 'Save key'}
           </button>
         </div>
@@ -450,13 +450,14 @@ function GigMode({ songs, onExit, onSaveKey }) {
           <div style={{ fontSize:12, color:'#555', marginBottom:20, fontStyle:'italic', fontFamily:'Inter, sans-serif' }}>{song.patch}</div>
         )}
 
-        {displayChords && (
-          <div style={{ marginBottom:24 }}>
-            <div style={{ maxWidth:'90%', margin:'0 auto' }}>
-              <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
+        {displayChords
+          ? <div style={{ marginBottom:24 }}>
+              <div style={{ maxWidth:'90%', margin:'0 auto' }}>
+                <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
+              </div>
             </div>
-          </div>
-        )}
+          : <div style={{ color:'#2e2e2e', fontSize:13, fontStyle:'italic', fontFamily:'Inter, sans-serif', marginBottom:24 }}>No chord chart — add chords from the Songs tab.</div>
+        }
 
         {song.notes && (
           <div style={{ color:'#888', fontSize:13, lineHeight:1.7, borderTop:'1px solid #1c1c1c', paddingTop:16, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
@@ -473,13 +474,13 @@ function GigMode({ songs, onExit, onSaveKey }) {
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5, flex:1, minWidth:0, padding:'0 8px' }}>
           <div style={{ color:'#555', fontSize:10, letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
             {song.tempo || ''}
-            {song.bpm && song.tempo && <span style={{ color:'#333', margin:'0 5px' }}>·</span>}
+            {song.bpm && song.tempo && <span style={{ color:'#555', margin:'0 5px' }}>·</span>}
             {song.bpm && <span style={{ color:'#444', textTransform:'none' }}>{song.bpm} bpm</span>}
           </div>
           <div style={{ display:'flex', gap:6, alignItems:'center' }}>
             <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
               style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
-            <span style={{ color:'#2e2e2e', fontSize:9, fontFamily:'Inter, sans-serif' }}>{fontSize}px</span>
+            <span style={{ color:'#444', fontSize:9, fontFamily:'Inter, sans-serif' }}>{fontSize}px</span>
             <button onClick={() => setFontSize(f => Math.min(30, f + 2))}
               style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
           </div>
@@ -511,8 +512,14 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   useEffect(() => { fetchSetlists() }, [])
 
   async function fetchSetlists() {
-    const { data } = await supabase.from('setlists').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase.from('setlists').select('*, setlist_songs(id)').order('created_at', { ascending: false })
     setSetlists(data || [])
+  }
+
+  function fmtDate(d) {
+    if (!d) return ''
+    const [y, m, day] = d.split('-')
+    return new Date(+y, +m - 1, +day).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
   }
 
   async function openSetlist(sl) {
@@ -640,11 +647,12 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ minWidth:0, flex:1 }}>
               <div style={{ fontSize:16, fontWeight:500, color:'#F5F0E8', marginBottom:4, fontFamily:'Playfair Display, serif' }}>{sl.name}</div>
-              <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+              <div style={{ display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
                 <span style={s.evPill(sl.event_type)}>
                   {sl.event_type === 'sheva' ? 'SB' : sl.event_type === 'kumzitz' ? 'KZ' : sl.event_type === 'wedding' ? 'WD' : 'ALL'}
                 </span>
-                {sl.event_date && <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{sl.event_date}</span>}
+                {sl.event_date && <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{fmtDate(sl.event_date)}</span>}
+                <span style={{ color:'#333', fontSize:11, fontFamily:'Inter, sans-serif' }}>{sl.setlist_songs?.length || 0} songs</span>
               </div>
             </div>
             <button onClick={e => deleteSetlist(sl.id, e)}
@@ -671,7 +679,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <span style={s.evPill(active.event_type)}>
             {active.event_type === 'sheva' ? 'SB' : active.event_type === 'kumzitz' ? 'KZ' : active.event_type === 'wedding' ? 'WD' : 'ALL'}
           </span>
-          {active.event_date && <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{active.event_date}</span>}
+          {active.event_date && <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{fmtDate(active.event_date)}</span>}
           <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{slots.length} songs</span>
         </div>
       </div>
@@ -680,7 +688,8 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
         <div style={{ padding:'12px', paddingBottom:32 }}>
           <input placeholder="Search songs to add..." value={songSearch}
             onChange={e => setSongSearch(e.target.value)}
-            style={{ width:'100%', padding:'9px 12px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }} />
+            style={{ width:'100%', padding:'9px 12px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            autoCorrect="off" autoCapitalize="none" spellCheck={false} />
 
           {filteredSongs.length > 0 && (
             <div style={{ background:'linear-gradient(135deg,#111111,#0d0d0d)', border:'1px solid #1c1c1c', borderRadius:8, overflow:'hidden', marginTop:4, marginBottom:12 }}>
@@ -832,8 +841,8 @@ function AddSongTab({ onSaved }) {
       <div style={{ background:'linear-gradient(135deg,#111111,#0d0d0d)', border:'1px solid #1c1c1c', borderLeft:`3px solid ${GOLD}`, borderRadius:14, padding:14, marginBottom:12 }}>
         <div style={{ fontSize:9, color:'#666660', fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:12, fontFamily:'Inter, sans-serif' }}>Song Info</div>
         {[
-          ['Song name', <input key="name" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Od Yishama" style={inp2()} autoFocus />],
-          ['Artist', <input key="artist" value={artist} onChange={e=>setArtist(e.target.value)} placeholder="e.g. MBD, Traditional..." style={inp2()} />],
+          ['Song name', <input key="name" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Od Yishama" style={inp2()} autoFocus autoCorrect="off" autoCapitalize="words" spellCheck={false} />],
+          ['Artist', <input key="artist" value={artist} onChange={e=>setArtist(e.target.value)} placeholder="e.g. MBD, Traditional..." style={inp2()} autoCorrect="off" autoCapitalize="words" spellCheck={false} />],
         ].map(([label, input]) => (
           <div key={label} style={{ marginBottom:10 }}>
             <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>{label}</label>
@@ -1312,7 +1321,8 @@ export default function App() {
           </div>
           <div style={{ ...s.searchRow, display:'flex', gap:8, alignItems:'center' }}>
             <input value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'auto', flex:1 }} />
+              placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'auto', flex:1 }}
+              autoCorrect="off" autoCapitalize="none" spellCheck={false} />
             <button
               onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
               disabled={filtered.length === 0}
@@ -1329,6 +1339,21 @@ export default function App() {
                   #{tag}
                 </button>
               ))}
+            </div>
+          )}
+
+          {/* Filtered count — show when any filter is active */}
+          {!loading && (search || eventFilter !== 'all' || favFilter || tagFilter) && (
+            <div style={{ padding:'4px 16px 2px', display:'flex', alignItems:'center', gap:8 }}>
+              <span style={{ fontSize:10, color:'#444', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
+                {filtered.length} song{filtered.length !== 1 ? 's' : ''}
+              </span>
+              {(search || eventFilter !== 'all' || favFilter || tagFilter) && (
+                <button onClick={() => { setSearch(''); setEventFilter('all'); setFavFilter(false); setTagFilter('') }}
+                  style={{ background:'none', border:'none', color:'#444', fontSize:10, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, textDecoration:'underline', textUnderlineOffset:2 }}>
+                  Clear filters
+                </button>
+              )}
             </div>
           )}
 
@@ -1486,6 +1511,7 @@ export default function App() {
                         onFocus={() => setKfSongDropdown(true)}
                         placeholder="Search songs..."
                         style={{ width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+                        autoCorrect="off" autoCapitalize="none" spellCheck={false}
                       />
 
                       {/* Dropdown results */}
