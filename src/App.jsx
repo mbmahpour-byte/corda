@@ -1219,7 +1219,7 @@ export default function App() {
         <div style={s.cardHeader} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
           <div style={s.cardLeft}>
             <div style={s.cardName}>{song.name}</div>
-            <div style={s.cardArtist}>{song.artist || <span style={{color:'#333'}}>—</span>}</div>
+            <div style={s.cardArtist}>{song.artist || <span style={{color:'#555'}}>—</span>}</div>
           </div>
           <div style={s.cardRight}>
             <span style={s.evPill(song.event_type)}>
@@ -1283,7 +1283,7 @@ export default function App() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                 <span style={{ ...s.fieldLabel, marginBottom:0, display:'inline' }}>Chords</span>
                 <button onClick={() => fillWithGemini(song)} disabled={aiLoadingId === song.id}
-                  style={{ background:'transparent', border:`1px solid ${aiLoadingId === song.id ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: aiLoadingId === song.id ? '#2e2e2e' : GOLD, fontSize:10, fontWeight:600, padding:'3px 8px', cursor: aiLoadingId === song.id ? 'default' : 'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                  style={{ background:'transparent', border:`1px solid ${aiLoadingId === song.id ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4, color: aiLoadingId === song.id ? '#444' : GOLD, fontSize:10, fontWeight:600, padding:'3px 8px', cursor: aiLoadingId === song.id ? 'default' : 'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                   {aiLoadingId === song.id ? 'Searching...' : '✦ Fill with Chords'}
                 </button>
               </div>
@@ -1381,7 +1381,7 @@ export default function App() {
               onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
               disabled={filtered.length === 0}
               title="Open filtered songs in Gig Mode"
-              style={{ flexShrink:0, padding:'9px 12px', background:'transparent', border:`1px solid ${filtered.length ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: filtered.length ? GOLD : '#333', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
+              style={{ flexShrink:0, padding:'9px 12px', background:'transparent', border:`1px solid ${filtered.length ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: filtered.length ? GOLD : '#444', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
               ▶
             </button>
           </div>
@@ -1624,7 +1624,7 @@ export default function App() {
                         await updateSong(kfApplySongId, 'key', kfResult.key)
                         setKfApplied(true)
                       }}
-                      style={{ width:'100%', padding:'11px 0', background: kfApplied ? 'transparent' : (!kfApplySongId ? 'transparent' : GOLD), border: kfApplied ? '1px solid #2d4d2d' : `1px solid ${!kfApplySongId ? '#1c1c1c' : GOLD}`, borderRadius:4, color: kfApplied ? '#5a9e5a' : (!kfApplySongId ? '#2e2e2e' : '#000'), fontSize:13, fontWeight:600, cursor: kfApplySongId && !kfApplied ? 'pointer' : 'default', boxSizing:'border-box', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                      style={{ width:'100%', padding:'11px 0', background: kfApplied ? 'transparent' : (!kfApplySongId ? 'transparent' : GOLD), border: kfApplied ? '1px solid #2d4d2d' : `1px solid ${!kfApplySongId ? '#1c1c1c' : GOLD}`, borderRadius:4, color: kfApplied ? '#5a9e5a' : (!kfApplySongId ? '#444' : '#000'), fontSize:13, fontWeight:600, cursor: kfApplySongId && !kfApplied ? 'pointer' : 'default', boxSizing:'border-box', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                       {kfApplied ? `Applied ${kfResult.key} ✓` : 'Apply key'}
                     </button>
                   </div>
