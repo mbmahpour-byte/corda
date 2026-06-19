@@ -13,7 +13,7 @@ A performance chord book for a live Jewish music keyboardist. Built to be used o
 | Database | Supabase (PostgreSQL) |
 | Hosting | Vercel (serverless functions + static) |
 | Chord AI | Gemini 2.5 Flash via `/api/chords.js` with Google Search grounding |
-| Fill AI | Claude Sonnet via `/api/claude.js` |
+| AI Proxy | Claude Sonnet proxy via `/api/claude.js` (available for future features) |
 | PWA | Web App Manifest + Service Worker + PNG icons |
 
 ---
@@ -29,9 +29,9 @@ A performance chord book for a live Jewish music keyboardist. Built to be used o
 - [x] Dynamic song count in header (`· 78 songs`)
 - [x] Expandable song cards with full detail editor
 - [x] Fields: name, artist, key, event type, patch/sound, tempo, BPM, tags, chords, notes
-- [x] Inline save on blur for all fields
+- [x] Inline save on blur for all fields (including name + artist editing from expanded card)
 - [x] Star/unstar favorites
-- [x] Delete song
+- [x] Delete song (two-step confirmation)
 
 ### Chord Charts
 - [x] `[chord]` inline notation parser and renderer
@@ -65,8 +65,11 @@ A performance chord book for a live Jewish music keyboardist. Built to be used o
 
 ### Set List Builder
 - [x] Create named set lists with event type and date
+- [x] Inline rename set list (tap name in header to edit)
+- [x] Two-step delete confirmation for set lists
 - [x] Add songs by search, drag-and-drop reorder (mouse + touch)
 - [x] Remove songs from set
+- [x] ! indicator on songs with no chord chart
 - [x] ▶ Play button launches Gig Mode with the set list
 - [x] Persisted in Supabase `setlists` + `setlist_songs` tables
 
