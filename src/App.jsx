@@ -269,7 +269,7 @@ const s = {
     fontSize:14, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
   },
-  alphaHeader: { padding:'14px 18px 5px', color:'#3a3a3a', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
+  alphaHeader: { padding:'14px 18px 5px', color:'#444', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
   card: (expanded) => ({
     margin:'0 10px 7px',
     background: expanded ? 'linear-gradient(135deg, #171717, #111111)' : 'linear-gradient(135deg, #131313, #0f0f0f)',
@@ -324,7 +324,7 @@ const s = {
   patchCard: { background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderRadius:12, padding:12 },
   patchName: { fontSize:13, fontWeight:600, color:'#F5F0E8', marginBottom:3, fontFamily:'Inter, sans-serif' },
   patchSrc: { fontSize:11, color:'#666660', marginBottom:6 },
-  patchWhen: { fontSize:11, color:'#444', lineHeight:1.5 },
+  patchWhen: { fontSize:11, color:'#555', lineHeight:1.5 },
   empty: { textAlign:'center', padding:'60px 20px', color:'#555', fontSize:15 },
 }
 
@@ -754,7 +754,16 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
             </div>
           )}
 
-          {loadingSlots && <div style={{ color:'#555', textAlign:'center', padding:20, fontFamily:'Inter, sans-serif' }}>Loading...</div>}
+          {loadingSlots && (
+            <div style={{ padding:'4px 0' }}>
+              {[1,2,3].map(i => (
+                <div key={i} className="skeleton" style={{ marginBottom:4, background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderRadius:8, padding:'14px 10px', opacity: 1 - i * 0.2 }}>
+                  <div style={{ height:13, width:`${50 + i * 15}%`, background:'#222', borderRadius:4, marginBottom:7 }} />
+                  <div style={{ height:10, width:`${30 + i * 10}%`, background:'#1a1a1a', borderRadius:4 }} />
+                </div>
+              ))}
+            </div>
+          )}
           {!loadingSlots && slots.length === 0 && (
             <div style={{ color:'#555', textAlign:'center', padding:'40px 0', fontSize:13, fontFamily:'Inter, sans-serif' }}>Search above to add songs.</div>
           )}
@@ -1061,6 +1070,7 @@ export default function App() {
 
   // Sync expanded card state when a different song is expanded
   useEffect(() => {
+    setAiError('')
     if (expandedId) {
       const song = songs.find(s => s.id === expandedId)
       if (song) {
@@ -1303,15 +1313,15 @@ export default function App() {
               </div>
               <div>
                 <label style={s.fieldLabel}>Tempo</label>
-                <input defaultValue={song.tempo||''} onBlur={e => updateSong(song.id,'tempo',e.target.value)} placeholder="e.g. Slow build..." style={s.fieldInput} />
+                <input key={`tempo-${song.id}-${song.tempo||''}`} defaultValue={song.tempo||''} onBlur={e => updateSong(song.id,'tempo',e.target.value)} placeholder="e.g. Slow build..." style={s.fieldInput} />
               </div>
               <div>
                 <label style={s.fieldLabel}>BPM</label>
-                <input type="number" inputMode="numeric" defaultValue={song.bpm||''} onBlur={e => updateSong(song.id,'bpm', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g. 72" style={s.fieldInput} />
+                <input key={`bpm-${song.id}-${song.bpm||''}`} type="number" inputMode="numeric" defaultValue={song.bpm||''} onBlur={e => updateSong(song.id,'bpm', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g. 72" style={s.fieldInput} />
               </div>
               <div style={{gridColumn:'1/-1'}}>
                 <label style={s.fieldLabel}>Tags</label>
-                <input defaultValue={song.tags||''} onBlur={e => updateSong(song.id,'tags', e.target.value || null)} placeholder="e.g. slow, niggun, shabbos" style={s.fieldInput} autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+                <input key={`tags-${song.id}-${song.tags||''}`} defaultValue={song.tags||''} onBlur={e => updateSong(song.id,'tags', e.target.value || null)} placeholder="e.g. slow, niggun, shabbos" style={s.fieldInput} autoCorrect="off" autoCapitalize="none" spellCheck={false} />
               </div>
             </div>
 
@@ -1343,7 +1353,7 @@ export default function App() {
 
             <div style={{marginBottom:14}}>
               <label style={s.fieldLabel}>Notes</label>
-              <textarea defaultValue={song.notes||''} onBlur={e => updateSong(song.id,'notes',e.target.value)} rows={2} style={s.fieldTextarea} />
+              <textarea key={`notes-${song.id}-${song.notes||''}`} defaultValue={song.notes||''} onBlur={e => updateSong(song.id,'notes',e.target.value)} rows={2} style={s.fieldTextarea} autoCorrect="off" autoCapitalize="sentences" spellCheck={false} />
             </div>
 
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', gap:8 }}>
@@ -1632,6 +1642,7 @@ export default function App() {
                           setKfSongDropdown(true)
                         }}
                         onFocus={() => setKfSongDropdown(true)}
+                        onBlur={() => setTimeout(() => setKfSongDropdown(false), 150)}
                         placeholder="Search songs..."
                         style={{ width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
                         autoCorrect="off" autoCapitalize="none" spellCheck={false}
@@ -1728,13 +1739,15 @@ export default function App() {
           ))}
         </div>}
 
-        {tab === 'add' && <AddSongTab onSaved={async () => { await fetchSongs(); setTab('songs') }} />}
+        {tab === 'add' && <div className="tab-fade"><AddSongTab onSaved={async () => { await fetchSongs(); setTab('songs') }} /></div>}
 
         {tab === 'setlist' && (
-          <SetListBuilder
-            songs={songs}
-            onPlay={setlistSongs => { setGigSongs(setlistSongs); setGigReturnTab('setlist'); setTab('gig') }}
-          />
+          <div className="tab-fade">
+            <SetListBuilder
+              songs={songs}
+              onPlay={setlistSongs => { setGigSongs(setlistSongs); setGigReturnTab('setlist'); setTab('gig') }}
+            />
+          </div>
         )}
 
       </div>
