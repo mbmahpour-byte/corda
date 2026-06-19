@@ -528,6 +528,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   const [dragIdx, setDragIdx] = useState(null)
   const [dragOverIdx, setDragOverIdx] = useState(null)
   const [deleteConfirmSlId, setDeleteConfirmSlId] = useState(null)
+  const [editingSlName, setEditingSlName] = useState(false)
   const dragState = useRef(null)
 
   useEffect(() => { fetchSetlists() }, [])
@@ -543,10 +544,19 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
     return new Date(+y, +m - 1, +day).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
   }
 
+  async function renameSetlist(newName) {
+    const trimmed = newName.trim()
+    setEditingSlName(false)
+    if (!trimmed || trimmed === active.name) return
+    await supabase.from('setlists').update({ name: trimmed }).eq('id', active.id)
+    setActive(prev => ({ ...prev, name: trimmed }))
+  }
+
   async function openSetlist(sl) {
     setActive(sl)
     setLoadingSlots(true)
     setSongSearch('')
+    setEditingSlName(false)
     const { data } = await supabase.from('setlist_songs').select('*, songs(*)').eq('setlist_id', sl.id).order('position')
     setSlots(data || [])
     setLoadingSlots(false)
@@ -699,7 +709,17 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
           <button onClick={() => { setActive(null); fetchSetlists() }}
             style={{ background:'none', border:'none', color:GOLD, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>‹</button>
-          <div style={{ flex:1, fontSize:16, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{active.name}</div>
+          {editingSlName
+            ? <input autoFocus defaultValue={active.name}
+                onBlur={e => renameSetlist(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setEditingSlName(false) }}
+                style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid ${GOLD_DIM}`, color:'#F5F0E8', fontSize:16, fontFamily:'Playfair Display, serif', fontWeight:500, padding:'0 0 2px', outline:'none', minWidth:0 }}
+              />
+            : <div onClick={() => setEditingSlName(true)} title="Tap to rename"
+                style={{ flex:1, fontSize:16, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif', cursor:'text' }}>
+                {active.name}
+              </div>
+          }
           <button onClick={() => onPlay(slotSongs)} disabled={slotSongs.length === 0}
             style={{ background: slotSongs.length ? GOLD : 'transparent', border:`1px solid ${slotSongs.length ? GOLD : '#1c1c1c'}`, borderRadius:4, color: slotSongs.length ? '#000' : '#444', fontSize:12, fontWeight:600, padding:'7px 14px', cursor: slotSongs.length ? 'pointer' : 'default', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
             ▶ Play
