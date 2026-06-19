@@ -986,6 +986,7 @@ function AddSongTab({ onSaved }) {
           placeholder={'Intro: Dm | Gm | A7 | Dm\nVerse: Dm | Gm | Dm | A7\nChorus: F | Bb | C | Dm'}
           rows={4}
           style={{ width:'100%', padding:'10px 12px', background:'#080808', border:`1px solid ${GOLD_DIM}`, borderRadius:6, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', boxSizing:'border-box' }}
+          autoCorrect="off" autoCapitalize="none" spellCheck={false}
         />
         <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:6, marginTop:10, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Performance notes</label>
         <textarea
@@ -1303,7 +1304,7 @@ export default function App() {
               </div>
               <div style={{gridColumn:'1/-1'}}>
                 <label style={s.fieldLabel}>Tags</label>
-                <input defaultValue={song.tags||''} onBlur={e => updateSong(song.id,'tags', e.target.value || null)} placeholder="e.g. slow, niggun, shabbos" style={s.fieldInput} />
+                <input defaultValue={song.tags||''} onBlur={e => updateSong(song.id,'tags', e.target.value || null)} placeholder="e.g. slow, niggun, shabbos" style={s.fieldInput} autoCorrect="off" autoCapitalize="none" spellCheck={false} />
               </div>
             </div>
 
@@ -1329,6 +1330,7 @@ export default function App() {
                 rows={isChordLyricFormat(xChords) ? 3 : 4}
                 placeholder="Chords will appear here..."
                 style={s.chordBox}
+                autoCorrect="off" autoCapitalize="none" spellCheck={false}
               />
             </div>
 
@@ -1561,6 +1563,7 @@ export default function App() {
                     setKfVoice('baritone')
                     setKfTopNote('A4')
                     setKfSongRange('medium')
+                    setKfHasSinger(false)
                   }}
                   style={{ padding:'8px 12px', background:'transparent', border:'1px solid #1c1c1c', borderRadius:4, color:'#444', fontSize:11, fontWeight:500, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>
                   Clear
