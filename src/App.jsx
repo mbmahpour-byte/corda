@@ -225,12 +225,12 @@ function groupAlphabetically(songs) {
 }
 
 const TABS = [
-  { id:'songs', icon:'♪', label:'Songs' },
-  { id:'keyfinder', icon:'♭', label:'Key Finder' },
-  { id:'patches', icon:'◈', label:'Patches' },
-  { id:'add', icon:'+', label:'Add Song' },
-  { id:'gig', icon:'▶', label:'Gig' },
-  { id:'setlist', icon:'≡', label:'Set List' },
+  { id:'songs',     icon:'♪', label:'Songs'   },
+  { id:'keyfinder', icon:'♭', label:'Keys'    },
+  { id:'patches',   icon:'◈', label:'Sounds'  },
+  { id:'add',       icon:'+', label:'Add'     },
+  { id:'gig',       icon:'▶', label:'Gig'     },
+  { id:'setlist',   icon:'≡', label:'Sets'    },
 ]
 
 const s = {
@@ -270,14 +270,15 @@ const s = {
     fontFamily:'Inter, sans-serif',
   },
   alphaHeader: { padding:'14px 18px 5px', color:'#3a3a3a', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
-  card: (expanded, event) => ({
+  card: (expanded) => ({
     margin:'0 10px 7px',
-    background:'linear-gradient(135deg, #131313, #0f0f0f)',
-    border:'1px solid #1c1c1c',
+    background: expanded ? 'linear-gradient(135deg, #171717, #111111)' : 'linear-gradient(135deg, #131313, #0f0f0f)',
+    border: expanded ? `1px solid #2a2a2a` : '1px solid #1c1c1c',
     borderLeft:`3px solid ${GOLD}`,
     borderRadius:14,
     overflow:'hidden',
-    transition:'box-shadow 0.2s',
+    transition:'box-shadow 0.25s, background 0.2s',
+    boxShadow: expanded ? `0 4px 32px rgba(201,168,76,0.07), 0 1px 8px rgba(0,0,0,0.4)` : 'none',
   }),
   cardHeader: { padding:'14px 16px', display:'flex', alignItems:'center', gap:10, cursor:'pointer' },
   cardLeft: { flex:1, minWidth:0 },
@@ -444,7 +445,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
           <button onClick={onExit} style={{ background:'none', border:'none', color:'#555', fontSize:11, cursor:'pointer', padding:0, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>✕ Exit</button>
 
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <span style={{ background:GOLD_GLOW, color:GOLD, border:`1px solid ${GOLD_DIM}`, borderRadius:6, fontSize:22, fontWeight:800, padding:'5px 18px', fontFamily:'Playfair Display, serif' }}>
+            <span style={{ background:GOLD_GLOW, color:GOLD, border:`1px solid ${GOLD_DIM}`, borderRadius:8, fontSize:28, fontWeight:800, padding:'4px 20px', fontFamily:'Playfair Display, serif', letterSpacing:'-0.02em' }}>
               {displayKey || '—'}
             </span>
             {offset !== 0 && (
@@ -471,10 +472,8 @@ function GigMode({ songs, onExit, onSaveKey }) {
         )}
 
         {displayChords
-          ? <div style={{ marginBottom:24 }}>
-              <div style={{ maxWidth:'90%', margin:'0 auto' }}>
-                <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
-              </div>
+          ? <div style={{ marginBottom:24 }} className="gig-chords">
+              <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
             </div>
           : <div style={{ color:'#555', fontSize:13, fontStyle:'italic', fontFamily:'Inter, sans-serif', marginBottom:24 }}>No chord chart — add chords from the Songs tab.</div>
         }
@@ -497,12 +496,11 @@ function GigMode({ songs, onExit, onSaveKey }) {
             {song.bpm && song.tempo && <span style={{ color:'#555', margin:'0 5px' }}>·</span>}
             {song.bpm && <span style={{ color:'#444', textTransform:'none' }}>{song.bpm} bpm</span>}
           </div>
-          <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+          <div style={{ display:'flex', gap:4, alignItems:'center' }}>
             <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
-              style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
-            <span style={{ color:'#444', fontSize:9, fontFamily:'Inter, sans-serif' }}>{fontSize}px</span>
+              style={{ background:'none', border:'1px solid #222', borderRadius:4, color:'#666660', fontSize:12, padding:'5px 11px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1, minWidth:36 }}>A−</button>
             <button onClick={() => setFontSize(f => Math.min(30, f + 2))}
-              style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'3px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
+              style={{ background:'none', border:'1px solid #222', borderRadius:4, color:'#666660', fontSize:12, padding:'5px 11px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1, minWidth:36 }}>A+</button>
           </div>
         </div>
 
@@ -1236,11 +1234,20 @@ export default function App() {
   function renderSongCard(song) {
     const isExpanded = expandedId === song.id
     return (
-      <div key={song.id} style={s.card(isExpanded, song.event_type)}>
+      <div key={song.id} style={s.card(isExpanded)}>
         <div style={s.cardHeader} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
           <div style={s.cardLeft}>
             <div style={s.cardName}>{song.name}</div>
-            <div style={s.cardArtist}>{song.artist || <span style={{color:'#555'}}>—</span>}</div>
+            <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
+              <div style={s.cardArtist}>{song.artist || <span style={{color:'#555'}}>—</span>}</div>
+              {!isExpanded && song.tags && (
+                <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
+                  {(song.tags).split(',').map(t=>t.trim()).filter(Boolean).slice(0,3).map(tag => (
+                    <span key={tag} style={{ fontSize:9, color:'#555', background:'#161616', border:'1px solid #222', borderRadius:10, padding:'1px 6px', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>#{tag}</span>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div style={s.cardRight}>
             <span style={s.evPill(song.event_type)}>
@@ -1394,7 +1401,7 @@ export default function App() {
 
       <div style={s.scroll}>
 
-        {tab === 'songs' && <>
+        {tab === 'songs' && <div className="tab-fade">
           <div style={s.filterRow}>
             {['all','kumzitz','sheva','wedding'].map(ev => (
               <button key={ev} style={s.filterPill(eventFilter === ev)} onClick={() => setEventFilter(ev)}>
@@ -1483,7 +1490,22 @@ export default function App() {
           })()}
 
           {loading
-            ? <div style={s.empty}>Loading...</div>
+            ? <div style={{ padding:'0 10px', marginTop:8 }}>
+                {[1,2,3,4,5].map(i => (
+                  <div key={i} className="skeleton" style={{ margin:'0 0 7px', background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderLeft:`3px solid #2a2218`, borderRadius:14, padding:'14px 16px', opacity: 1 - i * 0.12 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                      <div style={{ flex:1 }}>
+                        <div style={{ height:14, width:`${55 + (i * 17) % 35}%`, background:'#222', borderRadius:4, marginBottom:8 }} />
+                        <div style={{ height:10, width:`${30 + (i * 13) % 25}%`, background:'#1a1a1a', borderRadius:4 }} />
+                      </div>
+                      <div style={{ display:'flex', gap:6 }}>
+                        <div style={{ width:28, height:20, background:'#1a1a1a', borderRadius:4 }} />
+                        <div style={{ width:24, height:20, background:'#1a1a1a', borderRadius:4 }} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             : loadError
             ? <div style={s.empty}>
                 <div style={{ marginBottom:12 }}>Couldn't load songs.</div>
@@ -1503,9 +1525,9 @@ export default function App() {
                 </div>
               ))
           }
-        </>}
+        </div>}
 
-        {tab === 'keyfinder' && <>
+        {tab === 'keyfinder' && <div className="tab-fade">
           <div style={s.kfCard}>
             <div style={s.kfLabel}>Crowd</div>
             {[
@@ -1669,9 +1691,9 @@ export default function App() {
               })()}
             </>
           )}
-        </>}
+        </div>}
 
-        {tab === 'patches' && <>
+        {tab === 'patches' && <div className="tab-fade">
           {[
             { label:'Piano', items:[
               {name:'Warm Grand Piano',src:'Grand Piano Pack → Sampler',when:'Primary for any event'},
@@ -1704,7 +1726,7 @@ export default function App() {
               </div>
             </div>
           ))}
-        </>}
+        </div>}
 
         {tab === 'add' && <AddSongTab onSaved={async () => { await fetchSongs(); setTab('songs') }} />}
 
