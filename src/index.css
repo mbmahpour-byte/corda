@@ -54,6 +54,10 @@ body {
   margin: 0;
 }
 
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
 #root {
   width: 1126px;
   max-width: 100%;

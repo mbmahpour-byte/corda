@@ -652,8 +652,8 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
               style={{ padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', colorScheme:'dark', fontFamily:'Inter, sans-serif' }} />
           </div>
           <div style={{ display:'flex', gap:8 }}>
-            <button onClick={createSetlist}
-              style={{ flex:1, padding:'9px 0', background:GOLD, border:'none', borderRadius:4, color:'#000', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>Create</button>
+            <button onClick={createSetlist} disabled={!newName.trim()}
+              style={{ flex:1, padding:'9px 0', background: newName.trim() ? GOLD : '#1c1c1c', border:'none', borderRadius:4, color: newName.trim() ? '#000' : '#444', fontSize:13, fontWeight:600, cursor: newName.trim() ? 'pointer' : 'default', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>Create</button>
             <button onClick={() => { setCreating(false); setNewName('') }}
               style={{ padding:'9px 14px', background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#666660', fontSize:13, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Cancel</button>
           </div>
@@ -697,7 +697,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
     <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:150, display:'flex', flexDirection:'column' }}>
       <div style={{ padding:'12px 14px 10px', borderBottom:'1px solid #1c1c1c', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
-          <button onClick={() => setActive(null)}
+          <button onClick={() => { setActive(null); fetchSetlists() }}
             style={{ background:'none', border:'none', color:GOLD, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>‹</button>
           <div style={{ flex:1, fontSize:16, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{active.name}</div>
           <button onClick={() => onPlay(slotSongs)} disabled={slotSongs.length === 0}
@@ -786,7 +786,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 }
 
 function inp2() {
-  return { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }
+  return { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif', outline:'none' }
 }
 
 function AddSongTab({ onSaved }) {
@@ -924,7 +924,7 @@ function AddSongTab({ onSaved }) {
           </div>
           <div>
             <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>BPM</label>
-            <input type="number" value={bpm} onChange={e=>setBpm(e.target.value)} placeholder="e.g. 72" style={inp2()} />
+            <input type="number" inputMode="numeric" value={bpm} onChange={e=>setBpm(e.target.value)} placeholder="e.g. 72" style={inp2()} />
           </div>
           <div>
             <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Tags</label>
@@ -1235,6 +1235,14 @@ export default function App() {
         {isExpanded && (
           <div style={s.detail}>
             <div style={s.detailGrid}>
+              <div style={{gridColumn:'1/-1'}}>
+                <label style={s.fieldLabel}>Song name</label>
+                <input key={`name-${song.id}`} defaultValue={song.name} onBlur={e => { if (e.target.value.trim()) updateSong(song.id,'name',e.target.value.trim()) }} style={s.fieldInput} autoCorrect="off" autoCapitalize="words" spellCheck={false} />
+              </div>
+              <div style={{gridColumn:'1/-1'}}>
+                <label style={s.fieldLabel}>Artist</label>
+                <input key={`artist-${song.id}`} defaultValue={song.artist||''} onBlur={e => updateSong(song.id,'artist',e.target.value.trim()||null)} placeholder="e.g. MBD, Traditional..." style={s.fieldInput} autoCorrect="off" autoCapitalize="words" spellCheck={false} />
+              </div>
               <div>
                 <label style={s.fieldLabel}>Key</label>
                 <div style={{ display:'flex', gap:6 }}>
@@ -1245,7 +1253,7 @@ export default function App() {
                     onClick={handleTranspose}
                     disabled={xKey === xChordsKey}
                     title="Transpose chords to selected key"
-                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: xKey !== xChordsKey ? GOLD : '#333', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
+                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: xKey !== xChordsKey ? GOLD : '#444', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
                     Transpose
                   </button>
                 </div>
@@ -1271,7 +1279,7 @@ export default function App() {
               </div>
               <div>
                 <label style={s.fieldLabel}>BPM</label>
-                <input type="number" defaultValue={song.bpm||''} onBlur={e => updateSong(song.id,'bpm', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g. 72" style={s.fieldInput} />
+                <input type="number" inputMode="numeric" defaultValue={song.bpm||''} onBlur={e => updateSong(song.id,'bpm', e.target.value ? parseInt(e.target.value) : null)} placeholder="e.g. 72" style={s.fieldInput} />
               </div>
               <div style={{gridColumn:'1/-1'}}>
                 <label style={s.fieldLabel}>Tags</label>
