@@ -235,7 +235,7 @@ const TABS = [
 
 const s = {
   app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
-  header: { padding:'18px 16px 0', background:'#080808', flexShrink:0 },
+  header: { padding:'18px 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 18px)', background:'#080808', flexShrink:0 },
   scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:90, overflowX:'hidden' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
@@ -703,7 +703,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 
   return (
     <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:150, display:'flex', flexDirection:'column' }}>
-      <div style={{ padding:'12px 14px 10px', borderBottom:'1px solid #1c1c1c', flexShrink:0 }}>
+      <div style={{ padding:'12px 14px 10px', paddingTop:'calc(env(safe-area-inset-top) + 12px)', borderBottom:'1px solid #1c1c1c', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
           <button onClick={() => { setActive(null); fetchSetlists() }}
             style={{ background:'none', border:'none', color:GOLD, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>‹</button>
