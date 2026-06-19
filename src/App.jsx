@@ -350,6 +350,19 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
   useEffect(() => { setOffset(0); setKeySaved(false) }, [idx])
 
+  // Keyboard navigation
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp')   setIdx(i => Math.max(0, i - 1))
+      else if (e.key === 'ArrowRight' || e.key === 'ArrowDown') setIdx(i => Math.min(songs.length - 1, i + 1))
+      else if (e.key === 'Escape') onExit()
+      else if (e.key === '+' || e.key === '=') setOffset(o => o + 1)
+      else if (e.key === '-' || e.key === '_') setOffset(o => o - 1)
+    }
+    document.addEventListener('keydown', onKey)
+    return () => document.removeEventListener('keydown', onKey)
+  }, [songs.length, onExit])
+
   if (!songs.length) return (
     <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
       <div style={{ fontSize:15, marginBottom:24, fontFamily:'Inter, sans-serif', color:'#555' }}>No songs to show</div>
@@ -443,7 +456,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
       {/* Scrollable content */}
       <div style={{ flex:1, overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:'24px 24px 32px' }}>
-        <div style={{ fontFamily:'Playfair Display, serif', fontSize:52, fontWeight:700, lineHeight:1.1, letterSpacing:'-0.02em', marginBottom:8, color:'#F5F0E8' }}>{song.name}</div>
+        <div style={{ fontFamily:'Playfair Display, serif', fontSize: song.name.length > 28 ? 32 : song.name.length > 18 ? 42 : 52, fontWeight:700, lineHeight:1.1, letterSpacing:'-0.02em', marginBottom:8, color:'#F5F0E8' }}>{song.name}</div>
         {song.artist && <div style={{ fontSize:14, color:'#666660', marginBottom:24, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>{song.artist}</div>}
 
         {song.patch && (
@@ -769,10 +782,12 @@ function AddSongTab({ onSaved }) {
   const [bpm, setBpm] = useState('')
   const [saving, setSaving] = useState(false)
   const [aiLoading, setAiLoading] = useState(false)
+  const [addAiError, setAddAiError] = useState('')
 
   async function searchChords() {
     if (!name.trim()) return
     setAiLoading(true)
+    setAddAiError('')
     try {
       const res = await fetch('/api/chords', {
         method: 'POST',
@@ -780,13 +795,25 @@ function AddSongTab({ onSaved }) {
         body: JSON.stringify({ songName: name, artist, key })
       })
       const data = await res.json()
+      if (!res.ok) {
+        setAddAiError(data.error || 'Chord search failed')
+        setAiLoading(false)
+        return
+      }
       const parsed = parseChordResponse(data.text || '')
-      if (parsed.unknown) { setAiLoading(false); return }
+      if (parsed.unknown) {
+        setAddAiError('No chords found online for this song. Enter them manually or try Google.')
+        setAiLoading(false)
+        return
+      }
       if (parsed.tempo) setTempo(parsed.tempo)
       if (parsed.notes) setNotes(parsed.notes)
       if (parsed.chords) setChords(parsed.chords)
       if (parsed.key) setKey(parsed.key)
-    } catch(e) { console.error(e) }
+    } catch(e) {
+      setAddAiError('Network error. Check your connection and try again.')
+      console.error(e)
+    }
     setAiLoading(false)
   }
 
@@ -851,13 +878,13 @@ function AddSongTab({ onSaved }) {
         ))}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
           <div>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>Key</label>
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Key</label>
             <select value={key} onChange={e=>setKey(e.target.value)} style={inp2()}>
               {KEYS.map(k=><option key={k}>{k}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>Event</label>
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Event</label>
             <select value={event} onChange={e=>setEvent(e.target.value)} style={inp2()}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
@@ -866,33 +893,33 @@ function AddSongTab({ onSaved }) {
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>Patch</label>
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Patch</label>
             <select value={patch} onChange={e=>setPatch(e.target.value)} style={inp2()}>
               {PATCHES.map(p=><option key={p}>{p}</option>)}
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>Tempo</label>
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Tempo</label>
             <input value={tempo} onChange={e=>setTempo(e.target.value)} placeholder="e.g. Slow, Upbeat..." style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>BPM</label>
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>BPM</label>
             <input type="number" value={bpm} onChange={e=>setBpm(e.target.value)} placeholder="e.g. 72" style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:11, color:'#555', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.06em' }}>Tags</label>
-            <input value={tags} onChange={e=>setTags(e.target.value)} placeholder="e.g. slow, niggun" style={inp2()} />
+            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Tags</label>
+            <input value={tags} onChange={e=>setTags(e.target.value)} placeholder="e.g. slow, niggun" style={inp2()} autoCorrect="off" autoCapitalize="none" />
           </div>
         </div>
       </div>
 
       <div style={{ background:'linear-gradient(135deg,#111111,#0d0d0d)', border:'1px solid #1c1c1c', borderLeft:`3px solid ${GOLD}`, borderRadius:14, padding:14, marginBottom:12 }}>
         <div style={{ fontSize:9, color:'#666660', fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:12, fontFamily:'Inter, sans-serif' }}>Find Chords</div>
-        <div style={{ display:'flex', gap:8, marginBottom:12 }}>
+        <div style={{ display:'flex', gap:8, marginBottom: addAiError ? 8 : 12 }}>
           <button onClick={searchChords} disabled={aiLoading || !name.trim()} style={{
             flex:1, padding:'11px 0', background:'transparent',
             border:`1px solid ${aiLoading || !name.trim() ? '#1c1c1c' : GOLD_DIM}`, borderRadius:4,
-            color: aiLoading || !name.trim() ? '#2e2e2e' : GOLD,
+            color: aiLoading || !name.trim() ? '#444' : GOLD,
             fontSize:12, fontWeight:600, cursor: name.trim() ? 'pointer' : 'not-allowed',
             fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase',
           }}>
@@ -905,6 +932,9 @@ function AddSongTab({ onSaved }) {
             fontFamily:'Inter, sans-serif', letterSpacing:'0.04em', textTransform:'uppercase',
           }}>⌕ Google</a>
         </div>
+        {addAiError && (
+          <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:10, lineHeight:1.5 }}>{addAiError}</div>
+        )}
         <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Chords</label>
         {chords && isChordLyricFormat(chords) && (
           <div style={{ background:'#080808', border:`1px solid ${GOLD_DIM}`, borderRadius:6, padding:'10px 12px', marginBottom:8, overflowX:'auto' }}>
@@ -928,7 +958,7 @@ function AddSongTab({ onSaved }) {
 
       <button onClick={save} disabled={saving || aiLoading || !name.trim()} style={{
         width:'100%', padding:15, background: name.trim() && !saving && !aiLoading ? GOLD : '#111',
-        border:'none', borderRadius:4, color: name.trim() && !saving && !aiLoading ? '#000' : '#2e2e2e',
+        border:'none', borderRadius:4, color: name.trim() && !saving && !aiLoading ? '#000' : '#444',
         fontSize:14, fontWeight:600, cursor: name.trim() && !saving && !aiLoading ? 'pointer' : 'not-allowed',
         fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase',
       }}>
@@ -968,7 +998,9 @@ export default function App() {
 
   const [kfCrowd, setKfCrowd] = useState('mixed')
   const [kfComfort, setKfComfort] = useState('medium')
-  const [kfHasSinger, setKfHasSinger] = useState(false)
+  const [kfHasSinger, setKfHasSinger] = useState(() => {
+    try { const p = JSON.parse(localStorage.getItem('corda_singer_profile')); return p?.hasSinger || false } catch { return false }
+  })
   const [kfVoice, setKfVoice] = useState(() => {
     try { const p = JSON.parse(localStorage.getItem('corda_singer_profile')); return p?.voice || 'baritone' } catch { return 'baritone' }
   })
@@ -1191,7 +1223,7 @@ export default function App() {
                     onClick={handleTranspose}
                     disabled={xKey === xChordsKey}
                     title="Transpose chords to selected key"
-                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: xKey !== xChordsKey ? GOLD : '#2e2e2e', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
+                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: xKey !== xChordsKey ? GOLD : '#333', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
                     Transpose
                   </button>
                 </div>
@@ -1456,7 +1488,7 @@ export default function App() {
               <div style={{ display:'flex', gap:8, marginTop:10 }}>
                 <button
                   onClick={() => {
-                    localStorage.setItem('corda_singer_profile', JSON.stringify({ voice: kfVoice, topNote: kfTopNote, songRange: kfSongRange }))
+                    localStorage.setItem('corda_singer_profile', JSON.stringify({ voice: kfVoice, topNote: kfTopNote, songRange: kfSongRange, hasSinger: kfHasSinger }))
                     setKfProfileSaved(true)
                     setTimeout(() => setKfProfileSaved(false), 2000)
                   }}
