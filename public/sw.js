@@ -1,5 +1,5 @@
-const CACHE = 'niggun-v1'
-const SHELL = ['/', '/manifest.json', '/icon-512.svg', '/icon-192.svg']
+const CACHE = 'corda-v2'
+const SHELL = ['/', '/manifest.json', '/icon-192.png', '/icon-512.png', '/favicon.svg']
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)))
