@@ -270,14 +270,14 @@ const s = {
     fontFamily:'Inter, sans-serif',
   },
   alphaHeader: { padding:'14px 18px 5px', color:'#444', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
-  card: (expanded) => ({
+  card: (expanded, hasChords = true) => ({
     margin:'0 10px 7px',
     background: expanded ? 'linear-gradient(135deg, #171717, #111111)' : 'linear-gradient(135deg, #131313, #0f0f0f)',
     border: expanded ? `1px solid #2a2a2a` : '1px solid #1c1c1c',
-    borderLeft:`3px solid ${GOLD}`,
+    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.22)'}`,
     borderRadius:14,
     overflow:'hidden',
-    transition:'box-shadow 0.25s, background 0.2s',
+    transition:'box-shadow 0.25s, background 0.2s, border-left-color 0.2s',
     boxShadow: expanded ? `0 4px 32px rgba(201,168,76,0.07), 0 1px 8px rgba(0,0,0,0.4)` : 'none',
   }),
   cardHeader: { padding:'14px 16px', display:'flex', alignItems:'center', gap:10, cursor:'pointer' },
@@ -317,11 +317,11 @@ const s = {
   kfResultSub: { fontSize:9, color:'#666660', marginTop:8, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.15em' },
   kfAlts: { display:'flex', gap:8, justifyContent:'center', marginTop:14, flexWrap:'wrap' },
   kfAlt: { padding:'5px 14px', border:`1px solid ${GOLD_DIM}`, borderRadius:20, color:GOLD, fontSize:13, background:GOLD_GLOW, fontFamily:'Inter, sans-serif' },
-  runBtn: { width:'calc(100% - 24px)', margin:'10px 12px', padding:15, background:GOLD, border:'none', borderRadius:4, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' },
+  runBtn: { width:'calc(100% - 24px)', margin:'10px 12px', padding:15, background:GOLD, border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' },
   patchSection: { margin:'12px 12px 0' },
   patchSectionLabel: { fontSize:9, color:'#666660', fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:10, fontFamily:'Inter, sans-serif' },
   patchGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:20 },
-  patchCard: { background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderRadius:12, padding:12 },
+  patchCard: { background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderLeft:'2px solid rgba(201,168,76,0.3)', borderRadius:12, padding:12 },
   patchName: { fontSize:13, fontWeight:600, color:'#F5F0E8', marginBottom:3, fontFamily:'Inter, sans-serif' },
   patchSrc: { fontSize:11, color:'#666660', marginBottom:6 },
   patchWhen: { fontSize:11, color:'#555', lineHeight:1.5 },
@@ -468,7 +468,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
         {song.artist && <div style={{ fontSize:14, color:'#666660', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>{song.artist}</div>}
 
         {song.patch && (
-          <div style={{ fontSize:12, color:'#555', marginBottom:20, fontStyle:'italic', fontFamily:'Inter, sans-serif' }}>{song.patch}</div>
+          <div style={{ fontSize:12, color:'#666660', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.03em' }}>{song.patch}</div>
         )}
 
         {displayChords
@@ -1247,7 +1247,7 @@ export default function App() {
   function renderSongCard(song) {
     const isExpanded = expandedId === song.id
     return (
-      <div key={song.id} style={s.card(isExpanded)} className="song-card">
+      <div key={song.id} style={s.card(isExpanded, !!song.chords?.trim())} className="song-card">
         <div style={s.cardHeader} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
           <div style={s.cardLeft}>
             <div style={s.cardName}>{song.name}</div>
@@ -1328,6 +1328,8 @@ export default function App() {
               </div>
             </div>
 
+            <div style={{ height:1, background:'#161616', margin:'4px -16px 14px' }} />
+
             <div style={{marginBottom:10}}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                 <span style={{ ...s.fieldLabel, marginBottom:0, display:'inline' }}>Chords</span>
@@ -1353,6 +1355,8 @@ export default function App() {
                 autoCorrect="off" autoCapitalize="none" spellCheck={false}
               />
             </div>
+
+            <div style={{ height:1, background:'#161616', margin:'4px -16px 14px' }} />
 
             <div style={{marginBottom:14}}>
               <label style={s.fieldLabel}>Notes</label>
@@ -1415,13 +1419,15 @@ export default function App() {
       <div style={s.scroll}>
 
         {tab === 'songs' && <div className="tab-fade">
-          <div style={s.filterRow}>
-            {['all','kumzitz','sheva','wedding'].map(ev => (
-              <button key={ev} className="pill" style={s.filterPill(eventFilter === ev)} onClick={() => setEventFilter(ev)}>
-                {ev === 'all' ? 'All' : ev === 'sheva' ? 'Sheva Brachos' : ev.charAt(0).toUpperCase() + ev.slice(1)}
-              </button>
-            ))}
-            <button className="pill" style={s.filterPill(favFilter)} onClick={() => setFavFilter(f => !f)}>★ Favorites</button>
+          <div className="filter-row-wrap">
+            <div style={s.filterRow}>
+              {['all','kumzitz','sheva','wedding'].map(ev => (
+                <button key={ev} className="pill" style={s.filterPill(eventFilter === ev)} onClick={() => setEventFilter(ev)}>
+                  {ev === 'all' ? 'All' : ev === 'sheva' ? 'Sheva Brachos' : ev.charAt(0).toUpperCase() + ev.slice(1)}
+                </button>
+              ))}
+              <button className="pill" style={s.filterPill(favFilter)} onClick={() => setFavFilter(f => !f)}>★ Faves</button>
+            </div>
           </div>
           <div style={{ ...s.searchRow, display:'flex', gap:8, alignItems:'center' }}>
             <div style={{ position:'relative', flex:1 }}>

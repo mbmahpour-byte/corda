@@ -77,7 +77,21 @@ input:focus, select:focus, textarea:focus,
 /* Filter/tag pill press state */
 .pill:active { transform: scale(0.96); }
 
+/* Filter row: fade right edge to show more pills are scrollable */
+.filter-row-wrap { position: relative; }
+.filter-row-wrap::after {
+  content: '';
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 28px;
+  background: linear-gradient(to left, #080808 40%, transparent);
+  pointer-events: none;
+}
+
 /* Responsive: 320px — tighten padding */
 @media (max-width: 340px) {
   .song-card { margin-left: 8px !important; margin-right: 8px !important; }
 }
+
+/* Gig mode: prevent text selection during swipe */
+.gig-song * { user-select: none; -webkit-user-select: none; }
