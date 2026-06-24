@@ -167,9 +167,9 @@ function ChordLyricDisplay({ text, fontSize = 14, centerSections = false }) {
           </div>
         )
         if (block.type === 'couplet') return (
-          <div key={idx} style={{ marginBottom:10 }}>
+          <div key={idx} style={{ marginBottom:14 }}>
             <div style={{ color:GOLD, whiteSpace:'pre-wrap', fontWeight:600, lineHeight:1.3, fontSize }}>{block.chordRow || '\u200B'}</div>
-            <div style={{ color:'#F5F0E8', whiteSpace:'pre-wrap', lineHeight:1.5, fontSize }}>{block.lyricRow || '\u200B'}</div>
+            <div style={{ color:'#EDE8DF', whiteSpace:'pre-wrap', lineHeight:1.6, fontSize }}>{block.lyricRow || '\u200B'}</div>
           </div>
         )
         // lyric
@@ -235,97 +235,99 @@ const TABS = [
 
 const s = {
   app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
-  header: { padding:'18px 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 18px)', background:'#080808', flexShrink:0 },
+  header: { padding:'0 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 20px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #0f0f0f' },
   scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(90px + env(safe-area-inset-bottom))', overflowX:'hidden' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
-    background:'rgba(8,8,8,0.97)',
-    backdropFilter:'blur(20px)',
-    WebkitBackdropFilter:'blur(20px)',
-    borderTop:'1px solid #1c1c1c',
+    background:'rgba(6,6,6,0.98)',
+    backdropFilter:'blur(24px)',
+    WebkitBackdropFilter:'blur(24px)',
+    borderTop:'1px solid #161616',
     display:'flex', paddingBottom:'env(safe-area-inset-bottom)',
     zIndex:100, height:64,
   },
   navBtn: (active) => ({
     flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative',
-    gap:4, padding:'10px 0', background: active ? 'rgba(201,168,76,0.05)' : 'none', border:'none', cursor:'pointer',
-    color: active ? GOLD : '#555', fontSize:10, fontWeight:500, letterSpacing:'0.06em',
-    textTransform:'uppercase', transition:'color 0.15s, background 0.2s', fontFamily:'Inter, sans-serif',
+    gap:3, padding:'10px 0', background:'none', border:'none', cursor:'pointer',
+    color: active ? GOLD : '#4a4a4a', fontSize:9, fontWeight:600, letterSpacing:'0.08em',
+    textTransform:'uppercase', transition:'color 0.15s', fontFamily:'Inter, sans-serif',
   }),
-  navIcon: { fontSize:20, lineHeight:1 },
-  filterRow: { display:'flex', gap:6, padding:'12px 16px 0', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 },
+  navIcon: { fontSize:19, lineHeight:1 },
+  filterRow: { display:'flex', gap:6, padding:'14px 14px 0', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 },
   filterPill: (active) => ({
-    padding:'5px 14px', borderRadius:20,
-    border: active ? 'none' : '1px solid #2a2a2a',
+    padding:'6px 16px', borderRadius:100,
+    border: active ? 'none' : '1px solid #222',
     cursor:'pointer', fontSize:11, fontWeight:500, whiteSpace:'nowrap', transition:'all 0.15s',
     background: active ? GOLD : 'transparent',
-    color: active ? '#000' : '#666660',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
+    color: active ? '#000' : '#5a5a5a',
+    fontFamily:'Inter, sans-serif', letterSpacing:'0.03em',
   }),
   searchRow: { padding:'10px 12px', flexShrink:0, width:'100%' },
   searchInput: {
-    width:'100%', padding:'10px 14px', background:'#0f0f0f',
-    border:'1px solid #1c1c1c', borderRadius:8, color:'#F5F0E8',
-    fontSize:14, outline:'none', boxSizing:'border-box', display:'block',
+    width:'100%', padding:'11px 16px', background:'#0c0c0c',
+    border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8',
+    fontSize:15, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
   },
-  alphaHeader: { padding:'14px 18px 5px', color:'#444', fontSize:9, fontWeight:600, letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
+  alphaHeader: { padding:'18px 18px 6px', color:'#3a3a3a', fontSize:9, fontWeight:700, letterSpacing:'0.2em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
   card: (expanded, hasChords = true) => ({
-    margin:'0 10px 7px',
-    background: expanded ? 'linear-gradient(135deg, #171717, #111111)' : 'linear-gradient(135deg, #131313, #0f0f0f)',
-    border: expanded ? `1px solid #2a2a2a` : '1px solid #1c1c1c',
-    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.22)'}`,
-    borderRadius:14,
+    margin:'0 12px 8px',
+    background: expanded ? 'linear-gradient(160deg, #181818, #111)' : '#111',
+    border: `1px solid ${expanded ? '#252525' : '#171717'}`,
+    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.18)'}`,
+    borderRadius:16,
     overflow:'hidden',
-    transition:'box-shadow 0.25s, background 0.2s, border-left-color 0.2s',
-    boxShadow: expanded ? `0 4px 32px rgba(201,168,76,0.07), 0 1px 8px rgba(0,0,0,0.4)` : 'none',
+    transition:'box-shadow 0.2s, background 0.15s, border-color 0.15s',
+    boxShadow: expanded
+      ? `0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.05)`
+      : '0 1px 4px rgba(0,0,0,0.6)',
   }),
-  cardHeader: { padding:'14px 16px', display:'flex', alignItems:'center', gap:10, cursor:'pointer' },
+  cardHeader: { padding:'15px 16px', display:'flex', alignItems:'center', gap:12, cursor:'pointer', minHeight:62 },
   cardLeft: { flex:1, minWidth:0 },
-  cardName: { fontSize:18, fontWeight:500, color:'#F5F0E8', marginBottom:3, lineHeight:1.2, fontFamily:'Playfair Display, serif' },
-  cardArtist: { fontSize:12, color:'#666660', fontFamily:'Inter, sans-serif' },
-  cardRight: { display:'flex', alignItems:'center', gap:8, flexShrink:0 },
+  cardName: { fontSize:17, fontWeight:500, color:'#F5F0E8', marginBottom:3, lineHeight:1.25, fontFamily:'Playfair Display, serif', letterSpacing:'-0.01em' },
+  cardArtist: { fontSize:12, color:'#5a5a5a', fontFamily:'Inter, sans-serif' },
+  cardRight: { display:'flex', alignItems:'center', gap:7, flexShrink:0 },
   keyBadge: {
-    background:GOLD_GLOW, color:GOLD, border:`1px solid ${GOLD_DIM}`,
-    borderRadius:6, fontSize:12, fontWeight:700, padding:'3px 10px',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.02em',
+    background:'rgba(201,168,76,0.08)', color:GOLD, border:`1px solid rgba(201,168,76,0.2)`,
+    borderRadius:6, fontSize:11, fontWeight:700, padding:'3px 9px',
+    fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
   },
-  starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:17, padding:0, lineHeight:1, color:GOLD },
+  starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:16, padding:'0 1px', lineHeight:1, color:GOLD, opacity:0.9 },
   chevron: (open) => ({
-    color:'#444', fontSize:11, transition:'transform 0.2s',
+    color:'#3a3a3a', fontSize:10, transition:'transform 0.2s',
     transform: open ? 'rotate(180deg)' : 'rotate(0deg)', display:'block',
   }),
   evPill: (ev) => {
     const c = EVENT_COLORS[ev] || EVENT_COLORS.all
     return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:4, fontSize:9, fontWeight:600, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
   },
-  detail: { borderTop:'1px solid #1c1c1c', padding:'16px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0a0a0a' },
-  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12, width:'100%', boxSizing:'border-box' },
-  fieldLabel: { fontSize:9, color:'#666660', display:'block', marginBottom:5, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' },
-  fieldSelect: { width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldInput: { width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldTextarea: { width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
-  chordBox: { width:'100%', padding:'10px 12px', background:'#080808', border:`1px solid ${GOLD_DIM}`, borderRadius:6, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:60, boxSizing:'border-box' },
-  deleteBtn: { padding:'8px 16px', background:'none', border:'1px solid #2a2020', borderRadius:4, color:'#c04040', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
-  kfCard: { margin:'12px', background:'linear-gradient(135deg,#111111,#0d0d0d)', border:'1px solid #1c1c1c', borderRadius:14, padding:16, marginBottom:10 },
-  kfLabel: { fontSize:9, color:'#666660', fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:12, fontFamily:'Inter, sans-serif' },
-  kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:10 },
-  kfRowLabel: { fontSize:14, color:'#F5F0E8', fontFamily:'Inter, sans-serif' },
-  kfSelect: { padding:'7px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
-  kfResult: { margin:'0 12px', background:'linear-gradient(135deg,#111111,#0d0d0d)', border:`1px solid ${GOLD_DIM}`, borderRadius:14, padding:28, textAlign:'center' },
-  kfResultKey: { fontSize:72, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.04em', fontFamily:'Playfair Display, serif' },
-  kfResultSub: { fontSize:9, color:'#666660', marginTop:8, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.15em' },
+  detail: { borderTop:'1px solid #161616', padding:'18px 16px 16px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0a0a0a' },
+  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14, width:'100%', boxSizing:'border-box' },
+  fieldLabel: { fontSize:9, color:'#555', display:'block', marginBottom:6, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' },
+  fieldSelect: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldInput: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldTextarea: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
+  chordBox: { width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:64, boxSizing:'border-box' },
+  deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #2a1a1a', borderRadius:5, color:'#a03030', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
+  kfCard: { margin:'12px', background:'linear-gradient(135deg,#111,#0d0d0d)', border:'1px solid #1a1a1a', borderRadius:16, padding:18, marginBottom:10 },
+  kfLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' },
+  kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
+  kfRowLabel: { fontSize:14, color:'#D0C8B8', fontFamily:'Inter, sans-serif' },
+  kfSelect: { padding:'8px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
+  kfResult: { margin:'10px 12px 0', background:'linear-gradient(160deg,#141410,#0e0e0a)', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:'28px 28px 24px', textAlign:'center' },
+  kfResultKey: { fontSize:80, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.05em', fontFamily:'Playfair Display, serif' },
+  kfResultSub: { fontSize:9, color:'#555', marginTop:10, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.15em' },
   kfAlts: { display:'flex', gap:8, justifyContent:'center', marginTop:14, flexWrap:'wrap' },
-  kfAlt: { padding:'5px 14px', border:`1px solid ${GOLD_DIM}`, borderRadius:20, color:GOLD, fontSize:13, background:GOLD_GLOW, fontFamily:'Inter, sans-serif' },
-  runBtn: { width:'calc(100% - 24px)', margin:'10px 12px', padding:15, background:GOLD, border:'none', borderRadius:8, color:'#000', fontSize:14, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' },
-  patchSection: { margin:'12px 12px 0' },
-  patchSectionLabel: { fontSize:9, color:'#666660', fontWeight:500, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:10, fontFamily:'Inter, sans-serif' },
+  kfAlt: { padding:'6px 16px', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:100, color:GOLD, fontSize:13, background:'rgba(201,168,76,0.06)', fontFamily:'Inter, sans-serif' },
+  runBtn: { width:'calc(100% - 24px)', margin:'12px 12px', padding:16, background:GOLD, border:'none', borderRadius:10, color:'#000', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase' },
+  patchSection: { margin:'14px 12px 0' },
+  patchSectionLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:10, fontFamily:'Inter, sans-serif' },
   patchGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:20 },
-  patchCard: { background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderLeft:'2px solid rgba(201,168,76,0.3)', borderRadius:12, padding:12 },
-  patchName: { fontSize:13, fontWeight:600, color:'#F5F0E8', marginBottom:3, fontFamily:'Inter, sans-serif' },
-  patchSrc: { fontSize:11, color:'#666660', marginBottom:6 },
-  patchWhen: { fontSize:11, color:'#555', lineHeight:1.5 },
-  empty: { textAlign:'center', padding:'60px 20px', color:'#555', fontSize:15 },
+  patchCard: { background:'#0f0f0f', border:'1px solid #1a1a1a', borderLeft:'2px solid rgba(201,168,76,0.25)', borderRadius:12, padding:13 },
+  patchName: { fontSize:13, fontWeight:600, color:'#E8E0D0', marginBottom:3, fontFamily:'Inter, sans-serif' },
+  patchSrc: { fontSize:11, color:'#555', marginBottom:6 },
+  patchWhen: { fontSize:11, color:'#484848', lineHeight:1.5 },
+  empty: { textAlign:'center', padding:'64px 24px', color:'#444', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:1.8 },
 }
 
 function GigMode({ songs, onExit, onSaveKey }) {
@@ -404,27 +406,27 @@ function GigMode({ songs, onExit, onSaveKey }) {
       style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', color:'#F5F0E8', userSelect:'none' }}
       onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
     >
-      {/* Top bar: transpose corners + progress */}
+      {/* Top bar: transpose corners + progress dots */}
       <div style={{ flexShrink:0, paddingTop:'env(safe-area-inset-top)' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px 6px' }}>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px 6px' }}>
           <button
             onClick={() => setOffset(o => o - 1)}
-            style={{ width:52, height:52, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:6, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
+            style={{ width:54, height:54, background:'transparent', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
           >
-            <span style={{ fontSize:22, lineHeight:1 }}>−</span>
-            <span style={{ fontSize:8, letterSpacing:'0.1em', opacity:0.65, fontFamily:'Inter, sans-serif' }}>SEMI</span>
+            <span style={{ fontSize:24, lineHeight:1 }}>−</span>
+            <span style={{ fontSize:7, letterSpacing:'0.12em', opacity:0.5, fontFamily:'Inter, sans-serif' }}>SEMI</span>
           </button>
 
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:1 }}>
-            <span style={{ color:'#555', fontSize:9, fontWeight:500, letterSpacing:'0.15em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, flex:1 }}>
+            <span style={{ color:'#444', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
               {idx + 1} / {songs.length}
             </span>
-            {songs.length <= 14 && (
-              <div style={{ display:'flex', gap:1 }}>
+            {songs.length <= 16 && (
+              <div style={{ display:'flex', gap:2, alignItems:'center' }}>
                 {songs.map((_, i) => (
                   <div key={i} onClick={() => setIdx(i)}
-                    style={{ padding:'8px 4px', cursor:'pointer' }}>
-                    <div style={{ width: i === idx ? 20 : 7, height:5, borderRadius:3, background: i === idx ? GOLD : '#3a3a3a', transition:'all 0.2s' }} />
+                    style={{ padding:'6px 3px', cursor:'pointer' }}>
+                    <div style={{ width: i === idx ? 22 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#2e2e2e', transition:'all 0.25s' }} />
                   </div>
                 ))}
               </div>
@@ -433,80 +435,83 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
           <button
             onClick={() => setOffset(o => o + 1)}
-            style={{ width:52, height:52, background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:6, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
+            style={{ width:54, height:54, background:'transparent', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
           >
-            <span style={{ fontSize:22, lineHeight:1 }}>+</span>
-            <span style={{ fontSize:8, letterSpacing:'0.1em', opacity:0.65, fontFamily:'Inter, sans-serif' }}>SEMI</span>
+            <span style={{ fontSize:24, lineHeight:1 }}>+</span>
+            <span style={{ fontSize:7, letterSpacing:'0.12em', opacity:0.5, fontFamily:'Inter, sans-serif' }}>SEMI</span>
           </button>
         </div>
 
-        {/* Second row: exit + key badge + save key */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 16px 12px', borderBottom:'1px solid #1c1c1c' }}>
-          <button onClick={onExit} style={{ background:'none', border:'none', color:'#555', fontSize:11, cursor:'pointer', padding:0, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>✕ Exit</button>
+        {/* Second row: exit + key display + save */}
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'2px 14px 12px', borderBottom:'1px solid #141414' }}>
+          <button onClick={onExit} style={{ background:'none', border:'none', color:'#3a3a3a', fontSize:11, cursor:'pointer', padding:'4px 0', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', flexShrink:0 }}>✕ Exit</button>
 
-          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-            <span style={{ background:GOLD_GLOW, color:GOLD, border:`1px solid ${GOLD_DIM}`, borderRadius:8, fontSize:28, fontWeight:800, padding:'4px 20px', fontFamily:'Playfair Display, serif', letterSpacing:'-0.02em' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <span style={{ background:'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.06))', color:GOLD, border:`1px solid rgba(201,168,76,0.22)`, borderRadius:10, fontSize:32, fontWeight:800, padding:'5px 22px', fontFamily:'Playfair Display, serif', letterSpacing:'-0.03em', lineHeight:1.2 }}>
               {displayKey || '—'}
             </span>
             {offset !== 0 && (
-              <span style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{offset > 0 ? `+${offset}` : offset} st</span>
+              <span style={{ color:'#555', fontSize:10, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>{offset > 0 ? `+${offset}` : offset}<span style={{ fontSize:8, opacity:0.7 }}>st</span></span>
             )}
           </div>
 
           <button
             onClick={saveKey}
             disabled={!displayKey || !offset}
-            style={{ background:'transparent', border:`1px solid ${keySaved ? '#2d4d2d' : (offset ? GOLD_DIM : '#1c1c1c')}`, borderRadius:4, color: keySaved ? '#5a9e5a' : (offset ? GOLD : '#444'), fontSize:11, fontWeight:600, padding:'6px 12px', cursor: offset ? 'pointer' : 'default', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+            style={{ background:'transparent', border:`1px solid ${keySaved ? '#2a4a2a' : (offset ? 'rgba(201,168,76,0.22)' : '#1a1a1a')}`, borderRadius:5, color: keySaved ? '#5a9e5a' : (offset ? GOLD : '#333'), fontSize:10, fontWeight:600, padding:'6px 12px', cursor: offset ? 'pointer' : 'default', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase', flexShrink:0 }}>
             {keySaved ? 'Saved ✓' : 'Save key'}
           </button>
         </div>
       </div>
 
-      {/* Scrollable content — key=song.id triggers transition animation on each navigation */}
-      <div key={song.id} style={{ flex:1, overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:'24px 24px 32px' }} className="gig-song">
-        <div style={{ fontFamily:'Playfair Display, serif', fontSize: song.name.length > 28 ? 32 : song.name.length > 18 ? 42 : 52, fontWeight:700, lineHeight:1.1, letterSpacing:'-0.02em', marginBottom: song.artist ? 6 : 20, color:'#F5F0E8' }}>{song.name}</div>
-        {song.artist && <div style={{ fontSize:14, color:'#666660', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>{song.artist}</div>}
+      {/* Scrollable content */}
+      <div key={song.id} style={{ flex:1, overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:'22px 22px 36px' }} className="gig-song">
+        <div style={{ fontFamily:'Playfair Display, serif', fontSize: song.name.length > 26 ? 30 : song.name.length > 16 ? 42 : 54, fontWeight:700, lineHeight:1.08, letterSpacing:'-0.02em', marginBottom: song.artist ? 6 : 22, color:'#F5F0E8' }}>{song.name}</div>
+        {song.artist && <div style={{ fontSize:13, color:'#5a5a5a', marginBottom:4, fontFamily:'Inter, sans-serif', letterSpacing:'0.01em' }}>{song.artist}</div>}
 
         {song.patch && (
-          <div style={{ fontSize:12, color:'#666660', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.03em' }}>{song.patch}</div>
+          <div style={{ fontSize:11, color:'#444', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>{song.patch}</div>
         )}
+        {!song.patch && (song.artist || song.name) && <div style={{ marginBottom:20 }} />}
 
         {displayChords
-          ? <div style={{ marginBottom:24 }} className="gig-chords">
+          ? <div style={{ marginBottom:28 }} className="gig-chords">
               <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
             </div>
-          : <div style={{ color:'#666660', fontSize:13, fontFamily:'Inter, sans-serif', marginBottom:24 }}>No chord chart — add chords from the Songs tab.</div>
+          : <div style={{ color:'#555', fontSize:13, fontFamily:'Inter, sans-serif', marginBottom:28, letterSpacing:'0.02em' }}>No chord chart — add chords from the Songs tab.</div>
         }
 
         {song.notes && (
-          <div style={{ color:'#888', fontSize:13, lineHeight:1.7, borderTop:'1px solid #1c1c1c', paddingTop:16, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
+          <div style={{ color:'#666660', fontSize:13, lineHeight:1.75, borderTop:'1px solid #141414', paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
         )}
       </div>
 
-      {/* Bottom nav: prev / tempo+font / next */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'10px 16px', borderTop:'1px solid #1c1c1c', flexShrink:0, paddingBottom:'calc(10px + env(safe-area-inset-bottom))' }}>
+      {/* Bottom bar: prev / tempo+font size / next */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 12px', borderTop:'1px solid #141414', flexShrink:0, paddingBottom:'calc(8px + env(safe-area-inset-bottom))' }}>
         <button
           onClick={prev} disabled={atStart}
-          style={{ background:'none', border:`1px solid ${atStart ? '#1c1c1c' : GOLD_DIM}`, borderRadius:6, color: atStart ? '#222' : GOLD, fontSize:32, padding:'10px 22px', cursor: atStart ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
+          style={{ background:'none', border:`1px solid ${atStart ? '#181818' : 'rgba(201,168,76,0.18)'}`, borderRadius:8, color: atStart ? '#1e1e1e' : GOLD, fontSize:34, padding:'10px 20px', cursor: atStart ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
         >‹</button>
 
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:5, flex:1, minWidth:0, padding:'0 8px' }}>
-          <div style={{ color:'#555', fontSize:10, letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
-            {song.tempo || ''}
-            {song.bpm && song.tempo && <span style={{ color:'#555', margin:'0 5px' }}>·</span>}
-            {song.bpm && <span style={{ color:'#555', textTransform:'none' }}>{song.bpm} bpm</span>}
-          </div>
-          <div style={{ display:'flex', gap:4, alignItems:'center' }}>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:1, minWidth:0, padding:'0 10px' }}>
+          {(song.tempo || song.bpm) && (
+            <div style={{ color:'#4a4a4a', fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
+              {song.tempo || ''}
+              {song.bpm && song.tempo && <span style={{ margin:'0 5px', opacity:0.5 }}>·</span>}
+              {song.bpm && <span style={{ textTransform:'none', letterSpacing:0 }}>{song.bpm} bpm</span>}
+            </div>
+          )}
+          <div style={{ display:'flex', gap:5, alignItems:'center' }}>
             <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
-              style={{ background:'none', border:'1px solid #222', borderRadius:4, color:'#666660', fontSize:12, padding:'5px 11px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1, minWidth:36 }}>A−</button>
+              style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
             <button onClick={() => setFontSize(f => Math.min(30, f + 2))}
-              style={{ background:'none', border:'1px solid #222', borderRadius:4, color:'#666660', fontSize:12, padding:'5px 11px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1, minWidth:36 }}>A+</button>
+              style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
           </div>
         </div>
 
         <button
           onClick={next} disabled={atEnd}
-          style={{ background:'none', border:`1px solid ${atEnd ? '#1c1c1c' : GOLD_DIM}`, borderRadius:6, color: atEnd ? '#222' : GOLD, fontSize:32, padding:'10px 22px', cursor: atEnd ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
+          style={{ background:'none', border:`1px solid ${atEnd ? '#181818' : 'rgba(201,168,76,0.18)'}`, borderRadius:8, color: atEnd ? '#1e1e1e' : GOLD, fontSize:34, padding:'10px 20px', cursor: atEnd ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
         >›</button>
       </div>
     </div>
@@ -706,32 +711,32 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 
   return (
     <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:150, display:'flex', flexDirection:'column' }}>
-      <div style={{ padding:'12px 14px 10px', paddingTop:'calc(env(safe-area-inset-top) + 12px)', borderBottom:'1px solid #1c1c1c', flexShrink:0 }}>
+      <div style={{ padding:'10px 14px 10px', paddingTop:'calc(env(safe-area-inset-top) + 10px)', borderBottom:'1px solid #141414', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
           <button onClick={() => { setActive(null); fetchSetlists() }}
-            style={{ background:'none', border:'none', color:GOLD, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>‹</button>
+            style={{ background:'none', border:'none', color:GOLD, fontSize:24, cursor:'pointer', padding:'2px 0', lineHeight:1 }}>‹</button>
           {editingSlName
             ? <input autoFocus defaultValue={active.name}
                 onBlur={e => renameSetlist(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setEditingSlName(false) }}
-                style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid ${GOLD_DIM}`, color:'#F5F0E8', fontSize:16, fontFamily:'Playfair Display, serif', fontWeight:500, padding:'0 0 2px', outline:'none', minWidth:0 }}
+                style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid rgba(201,168,76,0.22)`, color:'#F5F0E8', fontSize:17, fontFamily:'Playfair Display, serif', fontWeight:500, padding:'0 0 2px', outline:'none', minWidth:0 }}
               />
             : <div onClick={() => setEditingSlName(true)} title="Tap to rename"
-                style={{ flex:1, fontSize:16, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif', cursor:'text' }}>
+                style={{ flex:1, fontSize:17, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif', cursor:'text', letterSpacing:'-0.01em' }}>
                 {active.name}
               </div>
           }
           <button onClick={() => onPlay(slotSongs)} disabled={slotSongs.length === 0}
-            style={{ background: slotSongs.length ? GOLD : 'transparent', border:`1px solid ${slotSongs.length ? GOLD : '#1c1c1c'}`, borderRadius:4, color: slotSongs.length ? '#000' : '#444', fontSize:12, fontWeight:600, padding:'7px 14px', cursor: slotSongs.length ? 'pointer' : 'default', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
+            style={{ background: slotSongs.length ? GOLD : 'transparent', border:`1px solid ${slotSongs.length ? GOLD : '#1c1c1c'}`, borderRadius:6, color: slotSongs.length ? '#000' : '#3a3a3a', fontSize:12, fontWeight:700, padding:'7px 14px', cursor: slotSongs.length ? 'pointer' : 'default', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
             ▶ Play
           </button>
         </div>
-        <div style={{ display:'flex', gap:6, alignItems:'center', paddingLeft:32 }}>
+        <div style={{ display:'flex', gap:6, alignItems:'center', paddingLeft:34 }}>
           <span style={s.evPill(active.event_type)}>
             {active.event_type === 'sheva' ? 'SB' : active.event_type === 'kumzitz' ? 'KZ' : active.event_type === 'wedding' ? 'WD' : 'ALL'}
           </span>
-          {active.event_date && <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{fmtDate(active.event_date)}</span>}
-          <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{slots.length} songs</span>
+          {active.event_date && <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{fmtDate(active.event_date)}</span>}
+          <span style={{ color:'#444', fontSize:11, fontFamily:'Inter, sans-serif' }}>{slots.length} songs</span>
         </div>
       </div>
 
@@ -1396,23 +1401,23 @@ export default function App() {
   return (
     <div style={s.app}>
       <div style={s.header}>
-        <div style={{ paddingBottom:14 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:0 }}>
-            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
+        <div style={{ paddingBottom:16 }}>
+          <div style={{ display:'flex', alignItems:'center' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:9 }}>
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0, opacity:0.9 }}>
                 <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
                 <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
               </svg>
-              <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:26, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.01em', lineHeight:1 }}>Corda</span>
+              <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:28, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.015em', lineHeight:1 }}>Corda</span>
             </div>
-            <div style={{ flex:1, height:1, background:`linear-gradient(90deg, ${GOLD_DIM}, transparent)`, marginLeft:12, alignSelf:'center' }} />
+            <div style={{ flex:1, height:1, background:`linear-gradient(90deg, rgba(201,168,76,0.2), transparent)`, marginLeft:14, alignSelf:'center' }} />
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:10, marginTop:5 }}>
-            <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, fontWeight:500, textTransform:'uppercase', letterSpacing:'0.2em', color:GOLD }}>performance library</span>
-            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, color:'#555', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:7 }}>
+            <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.22em', color:'rgba(201,168,76,0.6)' }}>Performance Library</span>
+            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, color:'#3a3a3a', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
           </div>
         </div>
       </div>
@@ -1513,17 +1518,17 @@ export default function App() {
           })()}
 
           {loading
-            ? <div style={{ padding:'0 10px', marginTop:8 }}>
+            ? <div style={{ padding:'0 12px', marginTop:10 }}>
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="skeleton" style={{ margin:'0 0 7px', background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderLeft:`3px solid #2a2218`, borderRadius:14, padding:'14px 16px', opacity: 1 - i * 0.12 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <div key={i} className="skeleton" style={{ margin:'0 0 8px', background:'#111', border:'1px solid #171717', borderLeft:`3px solid rgba(201,168,76,0.1)`, borderRadius:16, padding:'15px 16px', opacity: 1 - i * 0.14 }}>
+                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                       <div style={{ flex:1 }}>
-                        <div style={{ height:14, width:`${55 + (i * 17) % 35}%`, background:'#222', borderRadius:4, marginBottom:8 }} />
-                        <div style={{ height:10, width:`${30 + (i * 13) % 25}%`, background:'#1a1a1a', borderRadius:4 }} />
+                        <div style={{ height:13, width:`${55 + (i * 17) % 35}%`, background:'#1e1e1e', borderRadius:4, marginBottom:9 }} />
+                        <div style={{ height:9, width:`${28 + (i * 13) % 25}%`, background:'#181818', borderRadius:4 }} />
                       </div>
                       <div style={{ display:'flex', gap:6 }}>
-                        <div style={{ width:28, height:20, background:'#1a1a1a', borderRadius:4 }} />
-                        <div style={{ width:24, height:20, background:'#1a1a1a', borderRadius:4 }} />
+                        <div style={{ width:30, height:20, background:'#181818', borderRadius:4 }} />
+                        <div style={{ width:20, height:20, background:'#181818', borderRadius:4 }} />
                       </div>
                     </div>
                   </div>
@@ -1531,13 +1536,13 @@ export default function App() {
               </div>
             : loadError
             ? <div style={s.empty}>
-                <div style={{ marginBottom:12 }}>Couldn't load songs.</div>
-                <button onClick={fetchSongs} style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:12, padding:'8px 20px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Retry</button>
+                <div style={{ marginBottom:16 }}>Couldn't load songs.</div>
+                <button onClick={fetchSongs} style={{ background:'transparent', border:`1px solid rgba(201,168,76,0.22)`, borderRadius:6, color:GOLD, fontSize:12, padding:'9px 22px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>Retry</button>
               </div>
             : filtered.length === 0 && songs.length === 0
             ? <div style={s.empty}>
-                <div style={{ marginBottom:12 }}>No songs yet.</div>
-                <button onClick={() => setTab('add')} style={{ background:GOLD, border:'none', borderRadius:4, color:'#000', fontSize:12, fontWeight:600, padding:'8px 20px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>+ Add your first song</button>
+                <div style={{ color:'#3a3a3a', marginBottom:20 }}>Your song library is empty.</div>
+                <button onClick={() => setTab('add')} style={{ background:GOLD, border:'none', borderRadius:8, color:'#000', fontSize:13, fontWeight:700, padding:'11px 24px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>+ Add your first song</button>
               </div>
             : filtered.length === 0
             ? <div style={s.empty}>No songs match your filters.</div>

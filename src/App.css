@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Inter:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -7,6 +7,7 @@ body {
   color: #F5F0E8;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
 }
 
@@ -18,80 +19,98 @@ input, select, textarea, button {
   appearance: none;
 }
 
-select option { background: #111111; color: #F5F0E8; }
+select option { background: #111; color: #F5F0E8; }
 
 ::-webkit-scrollbar { display: none; }
 html, body { overflow-x: hidden; width: 100%; }
 
+/* === Skeleton loader === */
 @keyframes shimmer {
-  0%   { opacity: 0.35; }
-  50%  { opacity: 0.6; }
-  100% { opacity: 0.35; }
+  0%   { opacity: 0.3; }
+  50%  { opacity: 0.55; }
+  100% { opacity: 0.3; }
 }
-.skeleton { animation: shimmer 1.4s ease-in-out infinite; }
+.skeleton { animation: shimmer 1.6s ease-in-out infinite; }
 
-/* Gig Mode chord chart — allow text to scale correctly */
+/* === Gig Mode chord chart === */
 .gig-chords { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-/* Smooth tab content transitions */
-.tab-fade { animation: tabFadeIn 0.15s ease-out; }
+/* === Tab transitions === */
+.tab-fade { animation: tabFadeIn 0.18s ease-out; }
 @keyframes tabFadeIn {
-  from { opacity: 0; transform: translateY(4px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* === Touch & interaction polish === */
+/* === Touch & tap === */
 button, a { -webkit-tap-highlight-color: transparent; }
 
-/* Song card: gold left border brightens on hover/touch */
-.song-card { transition: border-left-color 0.12s; }
-.song-card:hover  { border-left-color: rgba(201,168,76,0.8) !important; }
-.song-card:active { opacity: 0.92; }
+/* === Song card: hover/active states === */
+.song-card {
+  transition: box-shadow 0.2s, border-left-color 0.15s;
+}
+.song-card:hover {
+  box-shadow: 0 4px 28px rgba(0,0,0,0.8), 0 0 0 1px rgba(201,168,76,0.07) !important;
+  border-left-color: rgba(201,168,76,0.7) !important;
+}
+.song-card:active { opacity: 0.95; }
 
-/* Setlist card hover */
-.setlist-card { transition: border-left-color 0.12s; }
-.setlist-card:hover { border-left-color: rgba(201,168,76,0.8) !important; }
+/* === Setlist card hover === */
+.setlist-card { transition: border-left-color 0.15s, box-shadow 0.2s; }
+.setlist-card:hover {
+  border-left-color: rgba(201,168,76,0.7) !important;
+  box-shadow: 0 3px 20px rgba(0,0,0,0.6) !important;
+}
 
-/* Card detail section: slides in when expanded */
-.card-detail { animation: detailIn 0.18s ease-out; }
+/* === Expanded card detail: slides in === */
+.card-detail { animation: detailIn 0.2s ease-out; }
 @keyframes detailIn {
-  from { opacity: 0; transform: translateY(-8px); }
+  from { opacity: 0; transform: translateY(-6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Gold glow on all input/select/textarea focus */
+/* === Gold focus ring on all inputs === */
 input:focus, select:focus, textarea:focus,
 .focus-gold:focus {
-  border-color: rgba(201,168,76,0.45) !important;
-  box-shadow: 0 0 0 2px rgba(201,168,76,0.07) !important;
+  border-color: rgba(201,168,76,0.4) !important;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.06) !important;
   outline: none !important;
 }
 
-/* Gig Mode: new song content fades up on navigation */
-.gig-song { animation: gigIn 0.22s ease-out; }
+/* === Gig Mode: song transition === */
+.gig-song { animation: gigIn 0.24s cubic-bezier(0.22, 1, 0.36, 1); }
 @keyframes gigIn {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(14px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* Filter/tag pill press state */
-.pill:active { transform: scale(0.96); }
+/* === Filter/tag pill press === */
+.pill:active { transform: scale(0.95); }
 
-/* Filter row: fade right edge to show more pills are scrollable */
+/* === Filter row: right-edge fade === */
 .filter-row-wrap { position: relative; }
 .filter-row-wrap::after {
   content: '';
   position: absolute;
   right: 0; top: 0; bottom: 0;
-  width: 28px;
-  background: linear-gradient(to left, #080808 40%, transparent);
+  width: 32px;
+  background: linear-gradient(to left, #080808 30%, transparent);
   pointer-events: none;
 }
 
-/* Responsive: 320px — tighten padding */
+/* === Bottom nav active icon pulse === */
+@keyframes navPop {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+.nav-active-icon { animation: navPop 0.2s ease-out; }
+
+/* === Responsive: 320px — tighten margins === */
 @media (max-width: 340px) {
   .song-card { margin-left: 8px !important; margin-right: 8px !important; }
+  .gig-chords { font-size: 14px !important; }
 }
 
-/* Gig mode: prevent text selection during swipe */
+/* === Gig mode: disable text selection during swipe === */
 .gig-song * { user-select: none; -webkit-user-select: none; }
