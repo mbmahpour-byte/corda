@@ -236,7 +236,7 @@ const TABS = [
 const s = {
   app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
   header: { padding:'18px 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 18px)', background:'#080808', flexShrink:0 },
-  scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:90, overflowX:'hidden' },
+  scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(90px + env(safe-area-inset-bottom))', overflowX:'hidden' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
     background:'rgba(8,8,8,0.97)',
@@ -475,7 +475,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
           ? <div style={{ marginBottom:24 }} className="gig-chords">
               <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
             </div>
-          : <div style={{ color:'#555', fontSize:13, fontStyle:'italic', fontFamily:'Inter, sans-serif', marginBottom:24 }}>No chord chart — add chords from the Songs tab.</div>
+          : <div style={{ color:'#666660', fontSize:13, fontFamily:'Inter, sans-serif', marginBottom:24 }}>No chord chart — add chords from the Songs tab.</div>
         }
 
         {song.notes && (
@@ -494,7 +494,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
           <div style={{ color:'#555', fontSize:10, letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
             {song.tempo || ''}
             {song.bpm && song.tempo && <span style={{ color:'#555', margin:'0 5px' }}>·</span>}
-            {song.bpm && <span style={{ color:'#444', textTransform:'none' }}>{song.bpm} bpm</span>}
+            {song.bpm && <span style={{ color:'#555', textTransform:'none' }}>{song.bpm} bpm</span>}
           </div>
           <div style={{ display:'flex', gap:4, alignItems:'center' }}>
             <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
@@ -553,6 +553,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   async function openSetlist(sl) {
     setActive(sl)
     setLoadingSlots(true)
+    setSlots([])
     setSongSearch('')
     setEditingSlName(false)
     const { data } = await supabase.from('setlist_songs').select('*, songs(*)').eq('setlist_id', sl.id).order('position')
@@ -1450,12 +1451,14 @@ export default function App() {
           </div>
 
           {allTags.length > 0 && (
-            <div style={{ display:'flex', gap:6, padding:'0 16px 6px', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 }}>
-              {allTags.map(tag => (
-                <button key={tag} style={s.filterPill(tagFilter === tag)} onClick={() => setTagFilter(tagFilter === tag ? '' : tag)}>
-                  #{tag}
-                </button>
-              ))}
+            <div className="filter-row-wrap">
+              <div style={{ display:'flex', gap:6, padding:'0 16px 6px', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 }}>
+                {allTags.map(tag => (
+                  <button key={tag} className="pill" style={s.filterPill(tagFilter === tag)} onClick={() => setTagFilter(tagFilter === tag ? '' : tag)}>
+                    #{tag}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
