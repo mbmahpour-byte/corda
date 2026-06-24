@@ -39,3 +39,45 @@ html, body { overflow-x: hidden; width: 100%; }
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+/* === Touch & interaction polish === */
+button, a { -webkit-tap-highlight-color: transparent; }
+
+/* Song card: gold left border brightens on hover/touch */
+.song-card { transition: border-left-color 0.12s; }
+.song-card:hover  { border-left-color: rgba(201,168,76,0.8) !important; }
+.song-card:active { opacity: 0.92; }
+
+/* Setlist card hover */
+.setlist-card { transition: border-left-color 0.12s; }
+.setlist-card:hover { border-left-color: rgba(201,168,76,0.8) !important; }
+
+/* Card detail section: slides in when expanded */
+.card-detail { animation: detailIn 0.18s ease-out; }
+@keyframes detailIn {
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Gold glow on all input/select/textarea focus */
+input:focus, select:focus, textarea:focus,
+.focus-gold:focus {
+  border-color: rgba(201,168,76,0.45) !important;
+  box-shadow: 0 0 0 2px rgba(201,168,76,0.07) !important;
+  outline: none !important;
+}
+
+/* Gig Mode: new song content fades up on navigation */
+.gig-song { animation: gigIn 0.22s ease-out; }
+@keyframes gigIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Filter/tag pill press state */
+.pill:active { transform: scale(0.96); }
+
+/* Responsive: 320px — tighten padding */
+@media (max-width: 340px) {
+  .song-card { margin-left: 8px !important; margin-right: 8px !important; }
+}
