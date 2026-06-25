@@ -423,10 +423,10 @@ function GigMode({ songs, onExit, onSaveKey }) {
           </button>
 
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, flex:1 }}>
-            <span style={{ color:'#444', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
+            <span style={{ color:'#555', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
               {idx + 1} / {songs.length}
             </span>
-            {songs.length <= 16 && (
+            {songs.length <= 12 && (
               <div style={{ display:'flex', gap:2, alignItems:'center' }}>
                 {songs.map((_, i) => (
                   <div key={i} onClick={() => setIdx(i)}
