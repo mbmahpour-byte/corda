@@ -641,11 +641,11 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   const slotSongs = slots.map(sl => sl.songs).filter(Boolean)
 
   if (!active) return (
-    <div style={{ padding:'12px', paddingBottom:90 }}>
+    <div style={{ padding:'12px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-        <div style={{ fontSize:9, fontWeight:600, color:'#666660', textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Set Lists</div>
+        <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.18em', fontFamily:'Inter, sans-serif' }}>Set Lists</div>
         <button onClick={() => setCreating(true)}
-          style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:12, padding:'6px 14px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>+ New</button>
+          style={{ background:'transparent', border:`1px solid rgba(201,168,76,0.22)`, borderRadius:7, color:GOLD, fontSize:12, fontWeight:600, padding:'6px 14px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>+ New</button>
       </div>
 
       {creating && (
@@ -653,18 +653,18 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <input autoFocus placeholder="Set list name..." value={newName}
             onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createSetlist()}
             className="focus-gold"
-            style={{ width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'10px 12px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
             autoCorrect="off" autoCapitalize="words" spellCheck={false} />
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             <select value={newEvent} onChange={e => setNewEvent(e.target.value)}
-              style={{ padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
+              style={{ padding:'9px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
               <option value="wedding">Wedding</option>
               <option value="all">All events</option>
             </select>
             <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)}
-              style={{ padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', colorScheme:'dark', fontFamily:'Inter, sans-serif' }} />
+              style={{ padding:'9px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', colorScheme:'dark', fontFamily:'Inter, sans-serif' }} />
           </div>
           <div style={{ display:'flex', gap:8 }}>
             <button onClick={createSetlist} disabled={!newName.trim()}
@@ -696,12 +696,12 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
             {deleteConfirmSlId === sl.id
               ? <div style={{ display:'flex', gap:5, alignItems:'center', flexShrink:0 }} onClick={e => e.stopPropagation()}>
                   <button onClick={e => { deleteSetlist(sl.id, e); setDeleteConfirmSlId(null) }}
-                    style={{ background:'none', border:'1px solid #c04040', borderRadius:4, color:'#c04040', fontSize:11, padding:'4px 8px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Delete</button>
+                    style={{ background:'none', border:'1px solid #8a2020', borderRadius:5, color:'#c04040', fontSize:11, padding:'4px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Delete</button>
                   <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(null) }}
-                    style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#555', fontSize:11, padding:'4px 7px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>No</button>
+                    style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#555', fontSize:11, padding:'4px 8px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>No</button>
                 </div>
               : <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(sl.id) }}
-                  style={{ background:'none', border:'none', color:'#444', fontSize:22, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0 }}>×</button>
+                  style={{ background:'none', border:'none', color:'#3a3a3a', fontSize:22, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0 }}>×</button>
             }
           </div>
         </div>
@@ -745,17 +745,17 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <input placeholder="Search songs to add..." value={songSearch}
             onChange={e => setSongSearch(e.target.value)}
             className="focus-gold"
-            style={{ width:'100%', padding:'9px 12px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#0c0c0c', border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoCorrect="off" autoCapitalize="none" spellCheck={false} />
 
           {filteredSongs.length > 0 && (
-            <div style={{ background:'linear-gradient(135deg,#111111,#0d0d0d)', border:'1px solid #1c1c1c', borderRadius:8, overflow:'hidden', marginTop:4, marginBottom:12 }}>
+            <div style={{ background:'#111', border:'1px solid #1a1a1a', borderRadius:10, overflow:'hidden', marginTop:4, marginBottom:12 }}>
               {filteredSongs.map((song, i) => (
                 <div key={song.id} onClick={() => addSong(song)}
-                  style={{ padding:'11px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom: i < filteredSongs.length - 1 ? '1px solid #1c1c1c' : 'none', cursor:'pointer' }}>
+                  style={{ padding:'12px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom: i < filteredSongs.length - 1 ? '1px solid #181818' : 'none', cursor:'pointer' }}>
                   <div style={{ minWidth:0, flex:1 }}>
                     <div style={{ fontSize:14, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{song.name}</div>
-                    {song.artist && <div style={{ fontSize:11, color:'#666660', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
+                    {song.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                   </div>
                   <span style={{ color:GOLD, fontSize:20, lineHeight:1, flexShrink:0, marginLeft:8 }}>+</span>
                 </div>
@@ -766,15 +766,15 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           {loadingSlots && (
             <div style={{ padding:'4px 0' }}>
               {[1,2,3].map(i => (
-                <div key={i} className="skeleton" style={{ marginBottom:4, background:'linear-gradient(135deg,#131313,#0f0f0f)', border:'1px solid #1c1c1c', borderRadius:8, padding:'14px 10px', opacity: 1 - i * 0.2 }}>
-                  <div style={{ height:13, width:`${50 + i * 15}%`, background:'#222', borderRadius:4, marginBottom:7 }} />
-                  <div style={{ height:10, width:`${30 + i * 10}%`, background:'#1a1a1a', borderRadius:4 }} />
+                <div key={i} className="skeleton" style={{ marginBottom:6, background:'#111', border:'1px solid #181818', borderRadius:10, padding:'14px 12px', opacity: 1 - i * 0.22 }}>
+                  <div style={{ height:12, width:`${50 + i * 15}%`, background:'#1e1e1e', borderRadius:4, marginBottom:7 }} />
+                  <div style={{ height:9, width:`${28 + i * 10}%`, background:'#181818', borderRadius:4 }} />
                 </div>
               ))}
             </div>
           )}
           {!loadingSlots && slots.length === 0 && (
-            <div style={{ color:'#555', textAlign:'center', padding:'40px 0', fontSize:13, fontFamily:'Inter, sans-serif' }}>Search above to add songs.</div>
+            <div style={{ color:'#444', textAlign:'center', padding:'44px 0', fontSize:13, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>Search above to add songs.</div>
           )}
 
           <div onTouchMove={onListTouchMove} onTouchEnd={onListTouchEnd}>
@@ -791,12 +791,12 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
                   onDragEnd={() => { setDragIdx(null); setDragOverIdx(null) }}
                   style={{
                     display:'flex', alignItems:'center', gap:10,
-                    padding:'11px 10px', marginBottom:4,
-                    background: isOver ? GOLD_GLOW : 'linear-gradient(135deg,#131313,#0f0f0f)',
-                    border:`1px solid ${isOver ? GOLD_DIM : '#1c1c1c'}`,
-                    borderRadius:8,
-                    opacity: isDragging ? 0.35 : 1,
-                    transition:'background 0.1s, border-color 0.1s, opacity 0.1s',
+                    padding:'11px 10px', marginBottom:6,
+                    background: isOver ? 'rgba(201,168,76,0.06)' : '#111',
+                    border:`1px solid ${isOver ? 'rgba(201,168,76,0.2)' : '#1a1a1a'}`,
+                    borderRadius:10,
+                    opacity: isDragging ? 0.3 : 1,
+                    transition:'background 0.1s, border-color 0.1s, opacity 0.15s',
                   }}>
                   <span style={{ color:'#444', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:18, textAlign:'right', fontFamily:'Inter, sans-serif' }}>{i + 1}</span>
                   <span onTouchStart={e => onHandleTouchStart(e, i)}
@@ -822,7 +822,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 }
 
 function inp2(extra = {}) {
-  return { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif', outline:'none', ...extra }
+  return { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif', outline:'none', ...extra }
 }
 
 function AddSongTab({ onSaved }) {
@@ -1669,7 +1669,7 @@ export default function App() {
 
                       {/* Dropdown results */}
                       {kfSongDropdown && searchResults.length > 0 && (
-                        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#111', border:'1px solid #1c1c1c', borderRadius:6, marginTop:4, overflow:'hidden', zIndex:10 }}>
+                        <div style={{ position:'absolute', top:'100%', left:0, right:0, background:'#111', border:'1px solid #1e1e1e', borderRadius:10, marginTop:4, overflow:'hidden', zIndex:10 }}>
                           {searchResults.map(song => (
                             <div
                               key={song.id}
@@ -1790,7 +1790,7 @@ export default function App() {
         return (
           <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}
             onClick={() => setFillAllConfirm(false)}>
-            <div style={{ background:'#111', border:`1px solid ${GOLD_DIM}`, borderRadius:12, padding:24, maxWidth:320, width:'100%' }}
+            <div style={{ background:'#111', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:24, maxWidth:320, width:'100%' }}
               onClick={e => e.stopPropagation()}>
               <div style={{ fontSize:18, fontWeight:500, color:'#F5F0E8', marginBottom:8, fontFamily:'Playfair Display, serif' }}>Fill all missing chords?</div>
               <div style={{ fontSize:13, color:'#666660', lineHeight:1.7, marginBottom:20, fontFamily:'Inter, sans-serif' }}>
