@@ -248,7 +248,9 @@ const s = {
   },
   navBtn: (active) => ({
     flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative',
-    gap:3, padding:'10px 0', background:'none', border:'none', cursor:'pointer',
+    gap:3, padding:'10px 0',
+    background: active ? 'radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%)' : 'none',
+    border:'none', cursor:'pointer',
     color: active ? GOLD : '#4a4a4a', fontSize:9, fontWeight:600, letterSpacing:'0.08em',
     textTransform:'uppercase', transition:'color 0.15s', fontFamily:'Inter, sans-serif',
   }),
@@ -264,7 +266,7 @@ const s = {
   }),
   searchRow: { padding:'10px 12px', flexShrink:0, width:'100%' },
   searchInput: {
-    width:'100%', padding:'11px 16px', background:'#0c0c0c',
+    width:'100%', padding:'11px 16px', background:'#111',
     border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8',
     fontSize:15, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
@@ -272,7 +274,7 @@ const s = {
   alphaHeader: { padding:'18px 18px 6px', color:'#484848', fontSize:9, fontWeight:700, letterSpacing:'0.2em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
   card: (expanded, hasChords = true) => ({
     margin:'0 12px 8px',
-    background: expanded ? 'linear-gradient(160deg, #181818, #111)' : '#111',
+    background: expanded ? 'linear-gradient(160deg, #181818, #111)' : 'linear-gradient(160deg, #131311, #0f0f0e)',
     border: `1px solid ${expanded ? '#252525' : '#171717'}`,
     borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.18)'}`,
     borderRadius:16,
@@ -294,12 +296,12 @@ const s = {
   },
   starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:16, padding:'0 1px', lineHeight:1, color:GOLD, opacity:0.9 },
   chevron: (open) => ({
-    color:'#3a3a3a', fontSize:10, transition:'transform 0.2s',
+    color:'#444', fontSize:10, transition:'transform 0.2s',
     transform: open ? 'rotate(180deg)' : 'rotate(0deg)', display:'block',
   }),
   evPill: (ev) => {
     const c = EVENT_COLORS[ev] || EVENT_COLORS.all
-    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:4, fontSize:9, fontWeight:600, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
+    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:5, fontSize:9, fontWeight:600, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
   },
   detail: { borderTop:'1px solid #161616', padding:'18px 16px 16px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0a0a0a' },
   detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14, width:'100%', boxSizing:'border-box' },
@@ -313,7 +315,7 @@ const s = {
   kfLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' },
   kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
   kfRowLabel: { fontSize:14, color:'#D0C8B8', fontFamily:'Inter, sans-serif' },
-  kfSelect: { padding:'8px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
+  kfSelect: { padding:'8px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
   kfResult: { margin:'10px 12px 0', background:'linear-gradient(160deg,#141410,#0e0e0a)', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:'28px 28px 24px', textAlign:'center' },
   kfResultKey: { fontSize:80, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.05em', fontFamily:'Playfair Display, serif' },
   kfResultSub: { fontSize:9, color:'#555', marginTop:10, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.15em' },
@@ -447,7 +449,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
         {/* Second row: exit + key display + save */}
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'2px 14px 12px', borderBottom:'1px solid #141414' }}>
-          <button onClick={onExit} style={{ background:'none', border:'none', color:'#3a3a3a', fontSize:11, cursor:'pointer', padding:'4px 0', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', flexShrink:0 }}>✕ Exit</button>
+          <button onClick={onExit} style={{ background:'none', border:'none', color:'#4a4a4a', fontSize:11, cursor:'pointer', padding:'4px 0', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', flexShrink:0 }}>✕ Exit</button>
 
           <div style={{ display:'flex', alignItems:'center', gap:10 }}>
             <span style={{ background:'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.06))', color:GOLD, border:`1px solid rgba(201,168,76,0.22)`, borderRadius:10, fontSize:32, fontWeight:800, padding:'5px 22px', fontFamily:'Playfair Display, serif', letterSpacing:'-0.03em', lineHeight:1.2 }}>
@@ -656,11 +658,11 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <input autoFocus placeholder="Set list name..." value={newName}
             onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createSetlist()}
             className="focus-gold"
-            style={{ width:'100%', padding:'10px 12px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'10px 12px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
             autoCorrect="off" autoCapitalize="words" spellCheck={false} />
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             <select value={newEvent} onChange={e => setNewEvent(e.target.value)}
-              style={{ padding:'9px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
+              style={{ padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
               <option value="wedding">Wedding</option>
@@ -748,7 +750,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <input placeholder="Search songs to add..." value={songSearch}
             onChange={e => setSongSearch(e.target.value)}
             className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#0c0c0c', border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoCorrect="off" autoCapitalize="none" spellCheck={false} />
 
           {filteredSongs.length > 0 && (
@@ -1501,7 +1503,7 @@ export default function App() {
                   </div>
                   <button
                     onClick={() => { fillAllAbort.current = true }}
-                    style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:4, color:'#444', fontSize:11, padding:'5px 10px', cursor:'pointer', flexShrink:0, fontFamily:'Inter, sans-serif' }}>
+                    style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:5, color:'#444', fontSize:11, padding:'5px 10px', cursor:'pointer', flexShrink:0, fontFamily:'Inter, sans-serif' }}>
                     Cancel
                   </button>
                 </div>
@@ -1513,7 +1515,7 @@ export default function App() {
                 <span style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{missingCount} song{missingCount !== 1 ? 's' : ''} missing chords</span>
                 <button
                   onClick={() => setFillAllConfirm(true)}
-                  style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:11, fontWeight:600, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
+                  style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:5, color:GOLD, fontSize:11, fontWeight:600, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
                   ✦ Fill all missing
                 </button>
               </div>
@@ -1551,7 +1553,10 @@ export default function App() {
             ? <div style={s.empty}>No songs match your filters.</div>
             : alphaGroups.map(({ letter, songs: groupSongs }) => (
                 <div key={letter}>
-                  <div style={s.alphaHeader}>{letter}</div>
+                  <div style={{ padding:'16px 18px 4px', display:'flex', alignItems:'center', gap:10 }}>
+                    <span style={{ color:'#484848', fontSize:9, fontWeight:700, letterSpacing:'0.2em', fontFamily:'Inter, sans-serif', textTransform:'uppercase', flexShrink:0 }}>{letter}</span>
+                    <div style={{ flex:1, height:1, background:'#1a1a1a' }} />
+                  </div>
                   {groupSongs.map(song => renderSongCard(song))}
                 </div>
               ))
@@ -1801,11 +1806,11 @@ export default function App() {
               </div>
               <div style={{ display:'flex', gap:10 }}>
                 <button onClick={() => setFillAllConfirm(false)}
-                  style={{ flex:1, padding:'10px 0', background:'transparent', border:'1px solid #1c1c1c', borderRadius:4, color:'#444', fontSize:13, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>
+                  style={{ flex:1, padding:'10px 0', background:'transparent', border:'1px solid #1c1c1c', borderRadius:6, color:'#444', fontSize:13, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>
                   Cancel
                 </button>
                 <button onClick={fillAllMissing}
-                  style={{ flex:2, padding:'10px 0', background:GOLD, border:'none', borderRadius:4, color:'#000', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
+                  style={{ flex:2, padding:'10px 0', background:GOLD, border:'none', borderRadius:6, color:'#000', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
                   ✦ Fill {missingCount} songs
                 </button>
               </div>
