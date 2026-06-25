@@ -43,7 +43,7 @@ html, body { overflow-x: hidden; width: 100%; }
 }
 
 /* === Touch & tap === */
-button, a { -webkit-tap-highlight-color: transparent; }
+button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
 /* === Song card: hover/active states === */
 .song-card {

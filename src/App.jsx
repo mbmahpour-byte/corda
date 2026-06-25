@@ -162,7 +162,7 @@ function ChordLyricDisplay({ text, fontSize = 14, centerSections = false }) {
       {blocks.map((block, idx) => {
         if (block.type === 'gap') return <div key={idx} style={{ height:'0.75em' }} />
         if (block.type === 'section') return (
-          <div key={idx} style={{ color:'#666660', fontSize: fontSize * 0.8, marginTop: idx > 0 ? 16 : 0, marginBottom:5, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', fontWeight:500, textAlign: centerSections ? 'center' : 'left' }}>
+          <div key={idx} style={{ color:'#5a5a5a', fontSize: fontSize * 0.8, marginTop: idx > 0 ? 16 : 0, marginBottom:5, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif', fontWeight:500, textAlign: centerSections ? 'center' : 'left' }}>
             {block.text}
           </div>
         )
@@ -235,7 +235,7 @@ const TABS = [
 
 const s = {
   app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
-  header: { padding:'0 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 20px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #0f0f0f' },
+  header: { padding:'0 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 20px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #141414' },
   scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(90px + env(safe-area-inset-bottom))', overflowX:'hidden' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
@@ -311,7 +311,7 @@ const s = {
   fieldTextarea: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
   chordBox: { width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:64, boxSizing:'border-box' },
   deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #2a1a1a', borderRadius:5, color:'#a03030', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
-  kfCard: { margin:'12px', background:'linear-gradient(135deg,#111,#0d0d0d)', border:'1px solid #1a1a1a', borderRadius:16, padding:18, marginBottom:10 },
+  kfCard: { margin:'12px', background:'linear-gradient(135deg,#131311,#0e0e0c)', border:'1px solid #1a1a1a', borderRadius:16, padding:18, marginBottom:10 },
   kfLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' },
   kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
   kfRowLabel: { fontSize:14, color:'#D0C8B8', fontFamily:'Inter, sans-serif' },
@@ -487,7 +487,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
         }
 
         {song.notes && (
-          <div style={{ color:'#666660', fontSize:13, lineHeight:1.75, borderTop:'1px solid #141414', paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
+          <div style={{ color:'#5a5a5a', fontSize:13, lineHeight:1.75, borderTop:'1px solid #141414', paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
         )}
       </div>
 
@@ -500,7 +500,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:1, minWidth:0, padding:'0 10px' }}>
           {(song.tempo || song.bpm) && (
-            <div style={{ color:'#4a4a4a', fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
+            <div style={{ color:'#5a5a5a', fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
               {song.tempo || ''}
               {song.bpm && song.tempo && <span style={{ margin:'0 5px', opacity:0.5 }}>·</span>}
               {song.bpm && <span style={{ textTransform:'none', letterSpacing:0 }}>{song.bpm} bpm</span>}
@@ -808,7 +808,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
                     style={{ color:'#444', fontSize:16, cursor:'grab', touchAction:'none', userSelect:'none', paddingRight:2 }}>⠿</span>
                   <div style={{ flex:1, minWidth:0 }}>
                     <div style={{ fontSize:14, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{song?.name}</div>
-                    {song?.artist && <div style={{ fontSize:11, color:'#666660', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
+                    {song?.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                   </div>
                   {song?.key && <span style={s.keyBadge}>{song.key}</span>}
                   {song && !song.chords?.trim() && (
@@ -997,7 +997,7 @@ function AddSongTab({ onSaved }) {
           <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:10, lineHeight:1.5 }}>{addAiError}</div>
         )}
         <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Chords</label>
-        {chords && isChordLyricFormat(chords) && (
+        {chords && chords.trim() && (
           <div style={{ background:'#060606', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:7, padding:'10px 12px', marginBottom:8, overflowX:'auto' }}>
             <ChordLyricDisplay text={chords} fontSize={13} />
           </div>
@@ -1305,7 +1305,7 @@ export default function App() {
                     onClick={handleTranspose}
                     disabled={xKey === xChordsKey}
                     title="Transpose chords to selected key"
-                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:4, color: xKey !== xChordsKey ? GOLD : '#444', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
+                    style={{ padding:'0 10px', background:'transparent', border:`1px solid ${xKey !== xChordsKey ? GOLD_DIM : '#1c1c1c'}`, borderRadius:6, color: xKey !== xChordsKey ? GOLD : '#444', fontSize:11, fontWeight:600, cursor: xKey !== xChordsKey ? 'pointer' : 'default', whiteSpace:'nowrap', flexShrink:0, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', height:36 }}>
                     Transpose
                   </button>
                 </div>
@@ -1352,7 +1352,7 @@ export default function App() {
               {aiError && expandedId === song.id && (
                 <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:6, lineHeight:1.5 }}>{aiError}</div>
               )}
-              {xChords && isChordLyricFormat(xChords) && (
+              {xChords && xChords.trim() && (
                 <div style={{ background:'#060606', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:7, padding:'12px 14px', marginBottom:8, overflowX:'auto' }}>
                   <ChordLyricDisplay text={xChords} fontSize={13} />
                 </div>
@@ -1360,7 +1360,7 @@ export default function App() {
               <textarea
                 value={xChords}
                 onChange={e => { setXChords(e.target.value); setXSaved(false) }}
-                rows={isChordLyricFormat(xChords) ? 3 : 4}
+                rows={3}
                 placeholder="Chords will appear here..."
                 style={s.chordBox}
                 autoCorrect="off" autoCapitalize="none" spellCheck={false}
@@ -1422,7 +1422,7 @@ export default function App() {
           </div>
           <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:7 }}>
             <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.22em', color:'rgba(201,168,76,0.6)' }}>Performance Library</span>
-            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, color:'#3a3a3a', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
+            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, color:'#4a4a4a', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
           </div>
         </div>
       </div>
@@ -1492,7 +1492,7 @@ export default function App() {
             const missingCount = songs.filter(s => !s.chords?.trim()).length
             if (fillAllRunning) {
               return (
-                <div style={{ margin:'0 12px 8px', background:GOLD_GLOW, border:`1px solid ${GOLD_DIM}`, borderRadius:8, padding:'10px 14px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
+                <div style={{ margin:'0 12px 8px', background:GOLD_GLOW, border:`1px solid ${GOLD_DIM}`, borderRadius:10, padding:'10px 14px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
                   <div style={{ flex:1 }}>
                     <div style={{ color:GOLD, fontSize:12, fontWeight:600, marginBottom:5, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
                       Filling {fillAllProgress.done} of {fillAllProgress.total}...
@@ -1512,7 +1512,7 @@ export default function App() {
             if (missingCount === 0) return null
             return (
               <div style={{ margin:'0 12px 8px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-                <span style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{missingCount} song{missingCount !== 1 ? 's' : ''} missing chords</span>
+                <span style={{ color:'#5a5a5a', fontSize:11, fontFamily:'Inter, sans-serif' }}>{missingCount} song{missingCount !== 1 ? 's' : ''} missing chords</span>
                 <button
                   onClick={() => setFillAllConfirm(true)}
                   style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:5, color:GOLD, fontSize:11, fontWeight:600, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
@@ -1693,7 +1693,7 @@ export default function App() {
                             >
                               <div>
                                 <div style={{ color:'#F5F0E8', fontSize:13, fontFamily:'Playfair Display, serif' }}>{song.name}</div>
-                                {song.artist && <div style={{ color:'#666660', fontSize:11, marginTop:1, fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
+                                {song.artist && <div style={{ color:'#5a5a5a', fontSize:11, marginTop:1, fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                               </div>
                               {song.key && <span style={s.keyBadge}>{song.key}</span>}
                             </div>
@@ -1707,7 +1707,7 @@ export default function App() {
                       <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', background:'#080808', borderRadius:6, marginBottom:8 }}>
                         <div style={{ flex:1, minWidth:0 }}>
                           <div style={{ color:'#F5F0E8', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{selectedSong.name}</div>
-                          {selectedSong.artist && <div style={{ color:'#666660', fontSize:11, fontFamily:'Inter, sans-serif' }}>{selectedSong.artist}</div>}
+                          {selectedSong.artist && <div style={{ color:'#5a5a5a', fontSize:11, fontFamily:'Inter, sans-serif' }}>{selectedSong.artist}</div>}
                         </div>
                         <span style={{ color:'#444', fontSize:12, fontFamily:'Inter, sans-serif' }}>{selectedSong.key || '—'}</span>
                         <span style={{ color:'#444', fontSize:12 }}>→</span>
@@ -1721,7 +1721,7 @@ export default function App() {
                         await updateSong(kfApplySongId, 'key', kfResult.key)
                         setKfApplied(true)
                       }}
-                      style={{ width:'100%', padding:'11px 0', background: kfApplied ? 'transparent' : (!kfApplySongId ? 'transparent' : GOLD), border: kfApplied ? '1px solid #2d4d2d' : `1px solid ${!kfApplySongId ? '#1c1c1c' : GOLD}`, borderRadius:4, color: kfApplied ? '#5a9e5a' : (!kfApplySongId ? '#444' : '#000'), fontSize:13, fontWeight:600, cursor: kfApplySongId && !kfApplied ? 'pointer' : 'default', boxSizing:'border-box', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                      style={{ width:'100%', padding:'11px 0', background: kfApplied ? 'transparent' : (!kfApplySongId ? 'transparent' : GOLD), border: kfApplied ? '1px solid #2d4d2d' : `1px solid ${!kfApplySongId ? '#1c1c1c' : GOLD}`, borderRadius:6, color: kfApplied ? '#5a9e5a' : (!kfApplySongId ? '#444' : '#000'), fontSize:13, fontWeight:600, cursor: kfApplySongId && !kfApplied ? 'pointer' : 'default', boxSizing:'border-box', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                       {kfApplied ? `Applied ${kfResult.key} ✓` : 'Apply key'}
                     </button>
                   </div>
@@ -1784,7 +1784,7 @@ export default function App() {
           <button key={t.id} style={s.navBtn(tab === t.id)}
             onClick={() => { if (t.id === 'gig') { setGigSongs(null); setGigReturnTab('songs') } setTab(t.id) }}>
             {tab === t.id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:3, background:GOLD, borderRadius:2, boxShadow:`0 1px 6px rgba(201,168,76,0.4)` }} />}
-            <span style={s.navIcon}>{t.icon}</span>
+            <span style={s.navIcon} className={tab === t.id ? 'nav-active-icon' : ''}>{t.icon}</span>
             {t.label}
           </button>
         ))}
@@ -1801,7 +1801,7 @@ export default function App() {
             <div style={{ background:'#111', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:24, maxWidth:320, width:'100%' }}
               onClick={e => e.stopPropagation()}>
               <div style={{ fontSize:18, fontWeight:500, color:'#F5F0E8', marginBottom:8, fontFamily:'Playfair Display, serif' }}>Fill all missing chords?</div>
-              <div style={{ fontSize:13, color:'#666660', lineHeight:1.7, marginBottom:20, fontFamily:'Inter, sans-serif' }}>
+              <div style={{ fontSize:13, color:'#5a5a5a', lineHeight:1.7, marginBottom:20, fontFamily:'Inter, sans-serif' }}>
                 This will search for chords and lyrics for <strong style={{ color:'#F5F0E8' }}>{missingCount} song{missingCount !== 1 ? 's' : ''}</strong> using Gemini with web search. Requests are sent one at a time with a 1-second delay.
               </div>
               <div style={{ display:'flex', gap:10 }}>
