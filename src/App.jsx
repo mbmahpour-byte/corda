@@ -334,7 +334,10 @@ function GigMode({ songs, onExit, onSaveKey }) {
   const [idx, setIdx] = useState(0)
   const [offset, setOffset] = useState(0)
   const [keySaved, setKeySaved] = useState(false)
-  const [fontSize, setFontSize] = useState(17)
+  const [fontSize, setFontSize] = useState(() => {
+    const saved = parseInt(localStorage.getItem('corda_gig_fontsize'))
+    return saved >= 12 && saved <= 30 ? saved : 17
+  })
   const touchStart = useRef(null)
 
   // Wake lock — acquire on mount and re-acquire after visibility change
@@ -502,9 +505,9 @@ function GigMode({ songs, onExit, onSaveKey }) {
             </div>
           )}
           <div style={{ display:'flex', gap:5, alignItems:'center' }}>
-            <button onClick={() => setFontSize(f => Math.max(12, f - 2))}
+            <button onClick={() => setFontSize(f => { const n = Math.max(12, f - 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
               style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
-            <button onClick={() => setFontSize(f => Math.min(30, f + 2))}
+            <button onClick={() => setFontSize(f => { const n = Math.min(30, f + 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
               style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
           </div>
         </div>
@@ -918,8 +921,8 @@ function AddSongTab({ onSaved }) {
   const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(name + ' ' + artist + ' chords')}`
 
   return (
-    <div style={{ padding:'16px', paddingBottom:90 }}>
-      <div style={{ fontSize:9, fontWeight:600, color:'#666660', marginBottom:16, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Add Song</div>
+    <div style={{ padding:'16px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
+      <div style={{ fontSize:9, fontWeight:700, color:'#555', marginBottom:16, textTransform:'uppercase', letterSpacing:'0.18em', fontFamily:'Inter, sans-serif' }}>Add Song</div>
 
       <div style={{ background:'#111', border:'1px solid #1a1a1a', borderLeft:`3px solid ${GOLD}`, borderRadius:16, padding:16, marginBottom:12 }}>
         <div style={{ fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' }}>Song Info</div>
@@ -928,19 +931,19 @@ function AddSongTab({ onSaved }) {
           ['Artist', <input key="artist" value={artist} onChange={e=>setArtist(e.target.value)} placeholder="e.g. MBD, Traditional..." style={inp2()} autoCorrect="off" autoCapitalize="words" spellCheck={false} />],
         ].map(([label, input]) => (
           <div key={label} style={{ marginBottom:10 }}>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>{label}</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>{label}</label>
             {input}
           </div>
         ))}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
           <div>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Key</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Key</label>
             <select value={key} onChange={e=>setKey(e.target.value)} style={inp2()}>
               {KEYS.map(k=><option key={k}>{k}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Event</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Event</label>
             <select value={event} onChange={e=>setEvent(e.target.value)} style={inp2()}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
@@ -949,21 +952,21 @@ function AddSongTab({ onSaved }) {
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Patch</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Patch</label>
             <select value={patch} onChange={e=>setPatch(e.target.value)} style={inp2()}>
               {PATCHES.map(p=><option key={p}>{p}</option>)}
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Tempo</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Tempo</label>
             <input value={tempo} onChange={e=>setTempo(e.target.value)} placeholder="e.g. Slow, Upbeat..." style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>BPM</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>BPM</label>
             <input type="number" inputMode="numeric" value={bpm} onChange={e=>setBpm(e.target.value)} placeholder="e.g. 72" style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:4, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Tags</label>
+            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Tags</label>
             <input value={tags} onChange={e=>setTags(e.target.value)} placeholder="e.g. slow, niggun" style={inp2()} autoCorrect="off" autoCapitalize="none" />
           </div>
         </div>
@@ -991,7 +994,7 @@ function AddSongTab({ onSaved }) {
         {addAiError && (
           <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:10, lineHeight:1.5 }}>{addAiError}</div>
         )}
-        <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Chords</label>
+        <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Chords</label>
         {chords && isChordLyricFormat(chords) && (
           <div style={{ background:'#060606', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:7, padding:'10px 12px', marginBottom:8, overflowX:'auto' }}>
             <ChordLyricDisplay text={chords} fontSize={13} />
@@ -1001,15 +1004,15 @@ function AddSongTab({ onSaved }) {
           value={chords} onChange={e=>setChords(e.target.value)}
           placeholder={'Intro: Dm | Gm | A7 | Dm\nVerse: Dm | Gm | Dm | A7\nChorus: F | Bb | C | Dm'}
           rows={4}
-          style={{ width:'100%', padding:'10px 12px', background:'#080808', border:`1px solid ${GOLD_DIM}`, borderRadius:6, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', boxSizing:'border-box' }}
+          style={{ width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', boxSizing:'border-box' }}
           autoCorrect="off" autoCapitalize="none" spellCheck={false}
         />
-        <label style={{ fontSize:9, color:'#666660', display:'block', marginBottom:6, marginTop:10, textTransform:'uppercase', letterSpacing:'0.15em', fontFamily:'Inter, sans-serif' }}>Performance notes</label>
+        <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, marginTop:12, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Performance notes</label>
         <textarea
           value={notes} onChange={e=>setNotes(e.target.value)}
           placeholder="Tips, energy arc, watch-outs..."
           rows={2}
-          style={{ width:'100%', padding:'10px 12px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, resize:'vertical', boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}
+          style={{ width:'100%', padding:'10px 12px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, resize:'vertical', boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}
         />
       </div>
 
