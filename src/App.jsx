@@ -1671,7 +1671,7 @@ export default function App() {
                         onBlur={() => setTimeout(() => setKfSongDropdown(false), 150)}
                         placeholder="Search songs..."
                         className="focus-gold"
-                        style={{ width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1c1c1c', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+                        style={{ width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
                         autoCorrect="off" autoCapitalize="none" spellCheck={false}
                       />
 
