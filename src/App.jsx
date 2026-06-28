@@ -271,7 +271,6 @@ const s = {
     fontSize:15, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
   },
-  alphaHeader: { padding:'18px 18px 6px', color:'#484848', fontSize:9, fontWeight:700, letterSpacing:'0.2em', fontFamily:'Inter, sans-serif', textTransform:'uppercase' },
   card: (expanded, hasChords = true) => ({
     margin:'0 12px 8px',
     background: expanded ? 'linear-gradient(160deg, #181818, #111)' : 'linear-gradient(160deg, #131311, #0f0f0e)',
@@ -329,7 +328,7 @@ const s = {
   patchName: { fontSize:13, fontWeight:600, color:'#E8E0D0', marginBottom:3, fontFamily:'Inter, sans-serif' },
   patchSrc: { fontSize:11, color:'#555', marginBottom:6 },
   patchWhen: { fontSize:11, color:'#484848', lineHeight:1.5 },
-  empty: { textAlign:'center', padding:'64px 24px', color:'#444', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:1.8 },
+  empty: { textAlign:'center', padding:'64px 24px', color:'#4a4a4a', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:1.8 },
 }
 
 function GigMode({ songs, onExit, onSaveKey }) {
@@ -340,6 +339,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
     const saved = parseInt(localStorage.getItem('corda_gig_fontsize'))
     return saved >= 12 && saved <= 30 ? saved : 17
   })
+  const [showJump, setShowJump] = useState(false)
   const touchStart = useRef(null)
 
   // Wake lock — acquire on mount and re-acquire after visibility change
@@ -423,9 +423,14 @@ function GigMode({ songs, onExit, onSaveKey }) {
           </button>
 
           <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, flex:1 }}>
-            <span style={{ color:'#555', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
-              {idx + 1} / {songs.length}
-            </span>
+            {songs.length > 12
+              ? <button onClick={() => setShowJump(true)} style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 10px', borderRadius:5 }}>
+                  <span style={{ color:'#5a5a5a', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>{idx + 1} / {songs.length} &nbsp;≡</span>
+                </button>
+              : <span style={{ color:'#555', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
+                  {idx + 1} / {songs.length}
+                </span>
+            }
             {songs.length <= 12 && (
               <div style={{ display:'flex', gap:2, alignItems:'center' }}>
                 {songs.map((_, i) => (
@@ -475,7 +480,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
         {song.artist && <div style={{ fontSize:13, color:'#5a5a5a', marginBottom:4, fontFamily:'Inter, sans-serif', letterSpacing:'0.01em' }}>{song.artist}</div>}
 
         {song.patch && (
-          <div style={{ fontSize:11, color:'#444', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>{song.patch}</div>
+          <div style={{ fontSize:11, color:'#5a5a5a', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>{song.patch}</div>
         )}
         {!song.patch && (song.artist || song.name) && <div style={{ marginBottom:20 }} />}
 
@@ -490,6 +495,31 @@ function GigMode({ songs, onExit, onSaveKey }) {
           <div style={{ color:'#5a5a5a', fontSize:13, lineHeight:1.75, borderTop:'1px solid #141414', paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
         )}
       </div>
+
+      {/* Jump-to-song overlay (large sets) */}
+      {showJump && (
+        <div onClick={() => setShowJump(false)}
+          style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.94)', zIndex:10, display:'flex', flexDirection:'column', paddingTop:'env(safe-area-inset-top)' }}>
+          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 18px 10px', flexShrink:0, borderBottom:'1px solid #161616' }}>
+            <span style={{ color:'#5a5a5a', fontSize:9, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.2em', fontFamily:'Inter, sans-serif' }}>Song list</span>
+            <button onClick={() => setShowJump(false)} style={{ background:'none', border:'none', color:'#5a5a5a', fontSize:22, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>✕</button>
+          </div>
+          <div style={{ overflowY:'auto', flex:1, WebkitOverflowScrolling:'touch' }} onClick={e => e.stopPropagation()}>
+            {songs.map((sg, i) => (
+              <div key={sg.id}
+                onClick={() => { setIdx(i); setOffset(0); setShowJump(false) }}
+                style={{ display:'flex', alignItems:'center', gap:14, padding:'13px 18px', borderBottom:'1px solid #141414', background: i === idx ? 'rgba(201,168,76,0.06)' : 'transparent', cursor:'pointer' }}>
+                <span style={{ color:'#333', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:22, textAlign:'right', fontFamily:'Inter, sans-serif', flexShrink:0 }}>{i + 1}</span>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:16, color: i === idx ? GOLD : '#F5F0E8', fontFamily:'Playfair Display, serif', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontWeight: i === idx ? 600 : 400 }}>{sg.name}</div>
+                  {sg.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif', marginTop:2 }}>{sg.artist}</div>}
+                </div>
+                {sg.key && <span style={s.keyBadge}>{sg.key}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Bottom bar: prev / tempo+font size / next */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 12px', borderTop:'1px solid #141414', flexShrink:0, paddingBottom:'calc(8px + env(safe-area-inset-bottom))' }}>
@@ -1546,7 +1576,7 @@ export default function App() {
               </div>
             : filtered.length === 0 && songs.length === 0
             ? <div style={s.empty}>
-                <div style={{ color:'#3a3a3a', marginBottom:20 }}>Your song library is empty.</div>
+                <div style={{ color:'#5a5a5a', marginBottom:20 }}>Your song library is empty.</div>
                 <button onClick={() => setTab('add')} style={{ background:GOLD, border:'none', borderRadius:8, color:'#000', fontSize:13, fontWeight:700, padding:'11px 24px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>+ Add your first song</button>
               </div>
             : filtered.length === 0
@@ -1806,7 +1836,7 @@ export default function App() {
               </div>
               <div style={{ display:'flex', gap:10 }}>
                 <button onClick={() => setFillAllConfirm(false)}
-                  style={{ flex:1, padding:'10px 0', background:'transparent', border:'1px solid #1c1c1c', borderRadius:6, color:'#444', fontSize:13, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>
+                  style={{ flex:1, padding:'10px 0', background:'transparent', border:'1px solid #1c1c1c', borderRadius:6, color:'#555', fontSize:13, cursor:'pointer', fontFamily:'Inter, sans-serif' }}>
                   Cancel
                 </button>
                 <button onClick={fillAllMissing}
