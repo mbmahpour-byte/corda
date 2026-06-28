@@ -1060,6 +1060,88 @@ function AddSongTab({ onSaved }) {
   )
 }
 
+function AuthScreen() {
+  const [mode, setMode] = useState('signin')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+
+  async function submit() {
+    if (!email.trim() || !password.trim()) return
+    setLoading(true); setError(''); setSuccess('')
+    if (mode === 'signup') {
+      const { error } = await supabase.auth.signUp({ email: email.trim(), password })
+      if (error) setError(error.message)
+      else setSuccess('Check your email to confirm your account, then sign in.')
+    } else {
+      const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password })
+      if (error) setError(error.message === 'Invalid login credentials' ? 'Wrong email or password.' : error.message)
+    }
+    setLoading(false)
+  }
+
+  const ready = email.trim() && password.trim()
+
+  return (
+    <div style={{ minHeight:'100dvh', background:'#080808', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
+      <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
+        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
+          <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
+          <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
+          <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
+          <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
+          <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
+        </svg>
+        <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.015em' }}>Corda</span>
+      </div>
+
+      <div style={{ width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1e1e1e', borderRadius:20, padding:28 }}>
+        <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.2em', marginBottom:24, textAlign:'center' }}>
+          {mode === 'signin' ? 'Sign in to your library' : 'Create your library'}
+        </div>
+
+        <div style={{ marginBottom:12 }}>
+          <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.14em' }}>Email</label>
+          <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && submit()} placeholder="you@example.com"
+            className="focus-gold"
+            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F5F0E8', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            autoComplete="email" autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+        </div>
+
+        <div style={{ marginBottom: error || success ? 14 : 22 }}>
+          <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.14em' }}>Password</label>
+          <input type="password" value={password} onChange={e => setPassword(e.target.value)}
+            onKeyDown={e => e.key === 'Enter' && submit()}
+            placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
+            className="focus-gold"
+            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F5F0E8', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
+        </div>
+
+        {error && <div style={{ fontSize:12, color:'#c04040', marginBottom:14, lineHeight:1.5 }}>{error}</div>}
+        {success && <div style={{ fontSize:12, color:'#5a9e5a', marginBottom:14, lineHeight:1.6 }}>{success}</div>}
+
+        <button onClick={submit} disabled={loading || !ready}
+          style={{ width:'100%', padding:14, background: ready ? GOLD : '#181818', border:'none', borderRadius:10, color: ready ? '#000' : '#3a3a3a', fontSize:13, fontWeight:700, cursor: ready ? 'pointer' : 'default', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase', transition:'background 0.15s, color 0.15s' }}>
+          {loading ? '…' : mode === 'signin' ? 'Sign in' : 'Create account'}
+        </button>
+
+        <button onClick={() => { setMode(m => m === 'signin' ? 'signup' : 'signin'); setError(''); setSuccess('') }}
+          style={{ width:'100%', marginTop:16, background:'none', border:'none', color:'#5a5a5a', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, lineHeight:1.5 }}>
+          {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+        </button>
+      </div>
+
+      <div style={{ marginTop:24, fontSize:11, color:'#333', textAlign:'center', lineHeight:1.6 }}>
+        Performance chord book for live musicians
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [tab, setTab] = useState('songs')
   const [songs, setSongs] = useState([])
@@ -1110,7 +1192,21 @@ export default function App() {
   const [kfSongSearch, setKfSongSearch] = useState('')
   const [kfSongDropdown, setKfSongDropdown] = useState(false)
 
-  useEffect(() => { fetchSongs() }, [])
+  const [user, setUser] = useState(null)
+  const [authLoading, setAuthLoading] = useState(true)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => { if (user) fetchSongs() }, [user])
 
   // Sync expanded card state when a different song is expanded
   useEffect(() => {
@@ -1433,6 +1529,13 @@ export default function App() {
     )
   }
 
+  if (authLoading) return (
+    <div style={{ position:'fixed', inset:0, background:'#080808', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:28, fontWeight:700, color:'#2a2a2a', letterSpacing:'-0.015em' }}>Corda</span>
+    </div>
+  )
+  if (!user) return <AuthScreen />
+
   return (
     <div style={s.app}>
       <div style={s.header}>
@@ -1453,6 +1556,8 @@ export default function App() {
           <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:7 }}>
             <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.22em', color:'rgba(201,168,76,0.6)' }}>Performance Library</span>
             {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, color:'#4a4a4a', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
+            <div style={{ flex:1 }} />
+            <button onClick={() => supabase.auth.signOut()} style={{ background:'none', border:'none', color:'#2e2e2e', fontSize:9, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.1em', textTransform:'uppercase', padding:0, lineHeight:1 }}>Sign out</button>
           </div>
         </div>
       </div>
