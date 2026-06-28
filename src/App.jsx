@@ -603,8 +603,9 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 
   async function createSetlist() {
     if (!newName.trim()) return
+    const { data: { user } } = await supabase.auth.getUser()
     const { data, error } = await supabase.from('setlists')
-      .insert({ name: newName.trim(), event_type: newEvent, event_date: newDate || null })
+      .insert({ name: newName.trim(), event_type: newEvent, event_date: newDate || null, user_id: user?.id })
       .select().single()
     if (!error) {
       setCreating(false); setNewName(''); setNewDate('')
