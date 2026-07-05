@@ -235,100 +235,102 @@ const TABS = [
 
 const s = {
   app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
-  header: { padding:'0 16px 0', paddingTop:'calc(env(safe-area-inset-top) + 20px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #141414' },
-  scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(90px + env(safe-area-inset-bottom))', overflowX:'hidden' },
+  header: { padding:'0 18px 0', paddingTop:'calc(env(safe-area-inset-top) + 22px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #111' },
+  scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(96px + env(safe-area-inset-bottom))', overflowX:'hidden' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
-    background:'rgba(6,6,6,0.98)',
-    backdropFilter:'blur(24px)',
-    WebkitBackdropFilter:'blur(24px)',
-    borderTop:'1px solid #161616',
+    background:'rgba(5,5,5,0.97)',
+    backdropFilter:'blur(32px)',
+    WebkitBackdropFilter:'blur(32px)',
+    borderTop:'1px solid #141414',
     display:'flex', paddingBottom:'env(safe-area-inset-bottom)',
-    zIndex:100, height:64,
+    zIndex:100, height:68,
   },
   navBtn: (active) => ({
     flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative',
-    gap:3, padding:'10px 0',
-    background: active ? 'radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.08) 0%, transparent 70%)' : 'none',
+    gap:4, padding:'10px 0',
+    background: active ? 'radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 65%)' : 'none',
     border:'none', cursor:'pointer',
-    color: active ? GOLD : '#4a4a4a', fontSize:9, fontWeight:600, letterSpacing:'0.08em',
+    color: active ? GOLD : '#3a3a3a', fontSize:9, fontWeight:600, letterSpacing:'0.1em',
     textTransform:'uppercase', transition:'color 0.15s', fontFamily:'Inter, sans-serif',
   }),
-  navIcon: { fontSize:19, lineHeight:1 },
-  filterRow: { display:'flex', gap:6, padding:'14px 14px 0', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 },
+  navIcon: { fontSize:18, lineHeight:1 },
+  filterRow: { display:'flex', gap:6, padding:'14px 16px 0', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 },
   filterPill: (active) => ({
-    padding:'6px 16px', borderRadius:100,
-    border: active ? 'none' : '1px solid #222',
-    cursor:'pointer', fontSize:11, fontWeight:500, whiteSpace:'nowrap', transition:'all 0.15s',
+    padding:'7px 18px', borderRadius:100,
+    border: active ? 'none' : '1px solid #1e1e1e',
+    cursor:'pointer', fontSize:11, fontWeight:600, whiteSpace:'nowrap', transition:'all 0.18s',
     background: active ? GOLD : 'transparent',
-    color: active ? '#000' : '#5a5a5a',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.03em',
+    color: active ? '#000' : '#484848',
+    fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
   }),
-  searchRow: { padding:'10px 12px', flexShrink:0, width:'100%' },
+  searchRow: { padding:'10px 14px', flexShrink:0, width:'100%' },
   searchInput: {
-    width:'100%', padding:'11px 16px', background:'#111',
-    border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8',
+    width:'100%', padding:'12px 18px', background:'#0d0d0d',
+    border:'1px solid #191919', borderRadius:12, color:'#F5F0E8',
     fontSize:15, outline:'none', boxSizing:'border-box', display:'block',
     fontFamily:'Inter, sans-serif',
   },
   card: (expanded, hasChords = true) => ({
-    margin:'0 12px 8px',
-    background: expanded ? 'linear-gradient(160deg, #181818, #111)' : 'linear-gradient(160deg, #131311, #0f0f0e)',
-    border: `1px solid ${expanded ? '#252525' : '#171717'}`,
-    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.18)'}`,
-    borderRadius:16,
+    margin:'0 14px 7px',
+    background: expanded
+      ? 'linear-gradient(160deg, #1a1a18, #111110)'
+      : 'linear-gradient(160deg, #141412, #0f0f0e)',
+    border: `1px solid ${expanded ? '#282826' : '#181816'}`,
+    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.15)'}`,
+    borderRadius:18,
     overflow:'hidden',
-    transition:'box-shadow 0.2s, background 0.15s, border-color 0.15s',
+    transition:'box-shadow 0.25s, background 0.2s',
     boxShadow: expanded
-      ? `0 8px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(201,168,76,0.05)`
-      : '0 1px 4px rgba(0,0,0,0.6)',
+      ? `0 12px 56px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.06)`
+      : '0 2px 8px rgba(0,0,0,0.5)',
   }),
-  cardHeader: { padding:'15px 16px', display:'flex', alignItems:'center', gap:12, cursor:'pointer', minHeight:62 },
+  cardHeader: { padding:'16px 18px', display:'flex', alignItems:'center', gap:12, cursor:'pointer', minHeight:66 },
   cardLeft: { flex:1, minWidth:0 },
-  cardName: { fontSize:17, fontWeight:500, color:'#F5F0E8', marginBottom:3, lineHeight:1.25, fontFamily:'Playfair Display, serif', letterSpacing:'-0.01em' },
-  cardArtist: { fontSize:12, color:'#5a5a5a', fontFamily:'Inter, sans-serif' },
-  cardRight: { display:'flex', alignItems:'center', gap:7, flexShrink:0 },
+  cardName: { fontSize:18, fontWeight:500, color:'#F0EBE2', marginBottom:4, lineHeight:1.2, fontFamily:'Playfair Display, serif', letterSpacing:'-0.015em' },
+  cardArtist: { fontSize:12, color:'#484848', fontFamily:'Inter, sans-serif', letterSpacing:'0.01em' },
+  cardRight: { display:'flex', alignItems:'center', gap:8, flexShrink:0 },
   keyBadge: {
-    background:'rgba(201,168,76,0.08)', color:GOLD, border:`1px solid rgba(201,168,76,0.2)`,
-    borderRadius:6, fontSize:11, fontWeight:700, padding:'3px 9px',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
+    background:'rgba(201,168,76,0.07)', color:GOLD, border:`1px solid rgba(201,168,76,0.18)`,
+    borderRadius:7, fontSize:11, fontWeight:700, padding:'4px 10px',
+    fontFamily:'Inter, sans-serif', letterSpacing:'0.06em',
   },
-  starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:16, padding:'0 1px', lineHeight:1, color:GOLD, opacity:0.9 },
+  starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:17, padding:'0 2px', lineHeight:1, color:GOLD, opacity:0.85 },
   chevron: (open) => ({
-    color:'#444', fontSize:10, transition:'transform 0.2s',
+    color:'#383838', fontSize:10, transition:'transform 0.22s cubic-bezier(0.4,0,0.2,1)',
     transform: open ? 'rotate(180deg)' : 'rotate(0deg)', display:'block',
   }),
   evPill: (ev) => {
     const c = EVENT_COLORS[ev] || EVENT_COLORS.all
-    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:5, fontSize:9, fontWeight:600, padding:'2px 7px', letterSpacing:'0.08em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
+    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:6, fontSize:9, fontWeight:700, padding:'2px 8px', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
   },
-  detail: { borderTop:'1px solid #161616', padding:'18px 16px 16px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0a0a0a' },
-  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:14, width:'100%', boxSizing:'border-box' },
-  fieldLabel: { fontSize:9, color:'#555', display:'block', marginBottom:6, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' },
-  fieldSelect: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldInput: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldTextarea: { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
-  chordBox: { width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:64, boxSizing:'border-box' },
-  deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #2a1a1a', borderRadius:5, color:'#a03030', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
-  kfCard: { margin:'12px', background:'linear-gradient(135deg,#131311,#0e0e0c)', border:'1px solid #1a1a1a', borderRadius:16, padding:18, marginBottom:10 },
-  kfLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' },
+  detail: { borderTop:'1px solid #151513', padding:'20px 18px 18px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0b0b0a' },
+  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16, width:'100%', boxSizing:'border-box' },
+  fieldLabel: { fontSize:9, color:'#4a4a4a', display:'block', marginBottom:7, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', fontFamily:'Inter, sans-serif' },
+  fieldSelect: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldInput: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldTextarea: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
+  chordBox: { width:'100%', padding:'11px 13px', background:'#060605', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:64, boxSizing:'border-box' },
+  deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #251515', borderRadius:6, color:'#8a2828', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
+  kfCard: { margin:'12px', background:'linear-gradient(135deg,#141412,#0e0e0c)', border:'1px solid #1a1a18', borderRadius:18, padding:20, marginBottom:10 },
+  kfLabel: { fontSize:9, color:'#4a4a4a', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', marginBottom:14, fontFamily:'Inter, sans-serif' },
   kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
-  kfRowLabel: { fontSize:14, color:'#D0C8B8', fontFamily:'Inter, sans-serif' },
-  kfSelect: { padding:'8px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
-  kfResult: { margin:'10px 12px 0', background:'linear-gradient(160deg,#141410,#0e0e0a)', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:'28px 28px 24px', textAlign:'center' },
-  kfResultKey: { fontSize:80, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.05em', fontFamily:'Playfair Display, serif' },
-  kfResultSub: { fontSize:9, color:'#555', marginTop:10, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.15em' },
-  kfAlts: { display:'flex', gap:8, justifyContent:'center', marginTop:14, flexWrap:'wrap' },
-  kfAlt: { padding:'6px 16px', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:100, color:GOLD, fontSize:13, background:'rgba(201,168,76,0.06)', fontFamily:'Inter, sans-serif' },
-  runBtn: { width:'calc(100% - 24px)', margin:'12px 12px', padding:16, background:GOLD, border:'none', borderRadius:10, color:'#000', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase' },
-  patchSection: { margin:'14px 12px 0' },
-  patchSectionLabel: { fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:10, fontFamily:'Inter, sans-serif' },
+  kfRowLabel: { fontSize:14, color:'#C8C0B0', fontFamily:'Inter, sans-serif' },
+  kfSelect: { padding:'9px 11px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F0EBE2', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
+  kfResult: { margin:'10px 12px 0', background:'linear-gradient(160deg,#161612,#0e0e0a)', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:18, padding:'32px 28px 28px', textAlign:'center' },
+  kfResultKey: { fontSize:88, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.05em', fontFamily:'Playfair Display, serif' },
+  kfResultSub: { fontSize:9, color:'#4a4a4a', marginTop:12, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.18em' },
+  kfAlts: { display:'flex', gap:8, justifyContent:'center', marginTop:16, flexWrap:'wrap' },
+  kfAlt: { padding:'7px 18px', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:100, color:GOLD, fontSize:13, background:'rgba(201,168,76,0.05)', fontFamily:'Inter, sans-serif' },
+  runBtn: { width:'calc(100% - 24px)', margin:'12px 12px', padding:17, background:GOLD, border:'none', borderRadius:12, color:'#000', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase' },
+  patchSection: { margin:'16px 14px 0' },
+  patchSectionLabel: { fontSize:9, color:'#4a4a4a', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', marginBottom:10, fontFamily:'Inter, sans-serif' },
   patchGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:20 },
-  patchCard: { background:'#0f0f0f', border:'1px solid #1a1a1a', borderLeft:'2px solid rgba(201,168,76,0.25)', borderRadius:12, padding:13 },
-  patchName: { fontSize:13, fontWeight:600, color:'#E8E0D0', marginBottom:3, fontFamily:'Inter, sans-serif' },
-  patchSrc: { fontSize:11, color:'#555', marginBottom:6 },
-  patchWhen: { fontSize:11, color:'#484848', lineHeight:1.5 },
-  empty: { textAlign:'center', padding:'64px 24px', color:'#4a4a4a', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:1.8 },
+  patchCard: { background:'linear-gradient(160deg,#111110,#0d0d0c)', border:'1px solid #1a1a18', borderLeft:'2px solid rgba(201,168,76,0.22)', borderRadius:14, padding:14 },
+  patchName: { fontSize:13, fontWeight:600, color:'#E0D8C8', marginBottom:3, fontFamily:'Inter, sans-serif' },
+  patchSrc: { fontSize:11, color:'#4a4a4a', marginBottom:6 },
+  patchWhen: { fontSize:11, color:'#404040', lineHeight:1.5 },
+  empty: { textAlign:'center', padding:'72px 28px', color:'#3a3a3a', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:2 },
 }
 
 function GigMode({ songs, onExit, onSaveKey }) {
@@ -717,7 +719,7 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
       {setlists.map(sl => (
         <div key={sl.id} onClick={() => { setDeleteConfirmSlId(null); openSetlist(sl) }}
           className="setlist-card"
-          style={{ background:'#111', border:'1px solid #181818', borderLeft:`3px solid ${GOLD}`, borderRadius:16, padding:'14px 16px', marginBottom:8, cursor:'pointer', boxShadow:'0 1px 4px rgba(0,0,0,0.5)' }}>
+          style={{ background:'linear-gradient(160deg,#141412,#0f0f0e)', border:'1px solid #181816', borderLeft:`3px solid ${GOLD}`, borderRadius:18, padding:'16px 18px', marginBottom:8, cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.5)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div style={{ minWidth:0, flex:1 }}>
               <div style={{ fontSize:16, fontWeight:500, color:'#F5F0E8', marginBottom:4, fontFamily:'Playfair Display, serif' }}>{sl.name}</div>
@@ -1098,7 +1100,7 @@ function AuthScreen() {
         <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.015em' }}>Corda</span>
       </div>
 
-      <div style={{ width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1e1e1e', borderRadius:20, padding:28 }}>
+      <div className="auth-card" style={{ width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1c1c1a', borderRadius:22, padding:30 }}>
         <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.2em', marginBottom:20, textAlign:'center' }}>
           {mode === 'signin' ? 'Sign in to your library' : 'Create your library'}
         </div>
@@ -1560,25 +1562,28 @@ export default function App() {
   return (
     <div style={s.app}>
       <div style={s.header}>
-        <div style={{ paddingBottom:16 }}>
-          <div style={{ display:'flex', alignItems:'center' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-              <svg width="18" height="18" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0, opacity:0.9 }}>
+        <div style={{ paddingBottom:18 }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
                 <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
                 <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
                 <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
               </svg>
-              <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:28, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.015em', lineHeight:1 }}>Corda</span>
+              <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:30, fontWeight:700, color:'#F0EBE2', letterSpacing:'-0.02em', lineHeight:1 }}>Corda</span>
             </div>
-            <div style={{ flex:1, height:1, background:`linear-gradient(90deg, rgba(201,168,76,0.2), transparent)`, marginLeft:14, alignSelf:'center' }} />
+            <button onClick={() => supabase.auth.signOut()} style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:6, color:'#2e2e2e', fontSize:9, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.12em', textTransform:'uppercase', padding:'5px 10px', lineHeight:1 }}>Sign out</button>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:7 }}>
-            <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.22em', color:'rgba(201,168,76,0.6)' }}>Performance Library</span>
-            {songs.length > 0 && <span style={{ fontFamily:'Inter, sans-serif', fontSize:8, color:'#4a4a4a', letterSpacing:'0.06em' }}>· {songs.length} songs</span>}
-            <div style={{ flex:1 }} />
-            <button onClick={() => supabase.auth.signOut()} style={{ background:'none', border:'none', color:'#2e2e2e', fontSize:9, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.1em', textTransform:'uppercase', padding:0, lineHeight:1 }}>Sign out</button>
+          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:8 }}>
+            <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.24em', color:'rgba(201,168,76,0.5)' }}>Performance Library</span>
+            {songs.length > 0 && (
+              <>
+                <span style={{ color:'#252523', fontSize:9 }}>·</span>
+                <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, color:'#343432', letterSpacing:'0.06em' }}>{songs.length} songs</span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -1681,15 +1686,15 @@ export default function App() {
           {loading
             ? <div style={{ padding:'0 12px', marginTop:10 }}>
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="skeleton" style={{ margin:'0 0 8px', background:'#111', border:'1px solid #171717', borderLeft:`3px solid rgba(201,168,76,0.1)`, borderRadius:16, padding:'15px 16px', opacity: 1 - i * 0.14 }}>
+                  <div key={i} className="skeleton" style={{ margin:'0 14px 7px', background:'linear-gradient(160deg,#141412,#0f0f0e)', border:'1px solid #181816', borderLeft:`3px solid rgba(201,168,76,0.08)`, borderRadius:18, padding:'16px 18px', opacity: 1 - i * 0.14 }}>
                     <div style={{ display:'flex', alignItems:'center', gap:12 }}>
                       <div style={{ flex:1 }}>
-                        <div style={{ height:13, width:`${55 + (i * 17) % 35}%`, background:'#1e1e1e', borderRadius:4, marginBottom:9 }} />
-                        <div style={{ height:9, width:`${28 + (i * 13) % 25}%`, background:'#181818', borderRadius:4 }} />
+                        <div style={{ height:14, width:`${55 + (i * 17) % 35}%`, background:'#1c1c1a', borderRadius:5, marginBottom:10 }} />
+                        <div style={{ height:9, width:`${28 + (i * 13) % 25}%`, background:'#181816', borderRadius:4 }} />
                       </div>
                       <div style={{ display:'flex', gap:6 }}>
-                        <div style={{ width:30, height:20, background:'#181818', borderRadius:4 }} />
-                        <div style={{ width:20, height:20, background:'#181818', borderRadius:4 }} />
+                        <div style={{ width:32, height:22, background:'#181816', borderRadius:5 }} />
+                        <div style={{ width:20, height:22, background:'#181816', borderRadius:5 }} />
                       </div>
                     </div>
                   </div>
@@ -1709,9 +1714,9 @@ export default function App() {
             ? <div style={s.empty}>No songs match your filters.</div>
             : alphaGroups.map(({ letter, songs: groupSongs }) => (
                 <div key={letter}>
-                  <div style={{ padding:'16px 18px 4px', display:'flex', alignItems:'center', gap:10 }}>
-                    <span style={{ color:'#484848', fontSize:9, fontWeight:700, letterSpacing:'0.2em', fontFamily:'Inter, sans-serif', textTransform:'uppercase', flexShrink:0 }}>{letter}</span>
-                    <div style={{ flex:1, height:1, background:'#1a1a1a' }} />
+                  <div style={{ padding:'20px 18px 6px', display:'flex', alignItems:'center', gap:12 }}>
+                    <span style={{ color:'#C9A84C', fontSize:11, fontWeight:700, letterSpacing:'0.18em', fontFamily:'Playfair Display, serif', fontStyle:'italic', flexShrink:0 }}>{letter}</span>
+                    <div style={{ flex:1, height:1, background:'#161614' }} />
                   </div>
                   {groupSongs.map(song => renderSongCard(song))}
                 </div>
