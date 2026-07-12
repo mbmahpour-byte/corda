@@ -577,7 +577,9 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   useEffect(() => { fetchSetlists() }, [])
 
   async function fetchSetlists() {
-    const { data } = await supabase.from('setlists').select('*, setlist_songs(id)').order('created_at', { ascending: false })
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) { setSetlists([]); return }
+    const { data } = await supabase.from('setlists').select('*, setlist_songs(id)').eq('user_id', user.id).order('created_at', { ascending: false })
     setSetlists(data || [])
   }
 
@@ -1112,7 +1114,17 @@ function AuthScreen() {
 
         {/* Google OAuth */}
         <button
-          onClick={() => supabase.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin } })}
+          onClick={async () => {
+            setError('')
+            const { error } = await supabase.auth.signInWithOAuth({
+              provider: 'google',
+              options: {
+                redirectTo: window.location.origin,
+                queryParams: { prompt: 'select_account' },
+              },
+            })
+            if (error) setError(error.message)
+          }}
           style={{ width:'100%', padding:'11px 14px', background:'#fff', border:'none', borderRadius:10, color:'#1a1a1a', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:18, letterSpacing:'0.01em' }}>
           <svg width="18" height="18" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
@@ -1253,7 +1265,7 @@ export default function App() {
   async function fetchSongs() {
     setLoading(true)
     setLoadError(false)
-    const { data, error } = await supabase.from('songs').select('*').order('created_at', { ascending: true })
+    const { data, error } = await supabase.from('songs').select('*').eq('user_id', user.id).order('created_at', { ascending: true })
     if (error) { setLoadError(true) } else { setSongs(data || []) }
     setLoading(false)
   }
