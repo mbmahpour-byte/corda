@@ -31,6 +31,9 @@ const EVENT_COLORS = {
 const GOLD = '#C9A84C'
 const GOLD_DIM = 'rgba(201,168,76,0.25)'
 const GOLD_GLOW = 'rgba(201,168,76,0.12)'
+// Monospace used for all chord charts + chord editors (Gig Mode + cards).
+// Swap this one line to change the chord font everywhere (e.g. self-hosted Commit Mono).
+const MONO = "'Fragment Mono', ui-monospace, 'SFMono-Regular', monospace"
 
 const CHROMATIC = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B']
 const KEY_TO_CHROMA = {
@@ -158,7 +161,7 @@ function ChordLyricDisplay({ text, fontSize = 14, centerSections = false }) {
   }
 
   return (
-    <div style={{ fontFamily:'monospace', fontSize, overflowX:'auto' }}>
+    <div style={{ fontFamily:MONO, fontSize, overflowX:'auto' }}>
       {blocks.map((block, idx) => {
         if (block.type === 'gap') return <div key={idx} style={{ height:'0.75em' }} />
         if (block.type === 'section') return (
@@ -310,7 +313,7 @@ const s = {
   fieldSelect: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
   fieldInput: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
   fieldTextarea: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
-  chordBox: { width:'100%', padding:'11px 13px', background:'#060605', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', minHeight:64, boxSizing:'border-box' },
+  chordBox: { width:'100%', padding:'11px 13px', background:'#060605', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, fontSize:13, fontFamily:MONO, resize:'vertical', minHeight:64, boxSizing:'border-box' },
   deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #251515', borderRadius:6, color:'#8a2828', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
   kfCard: { margin:'12px', background:'linear-gradient(135deg,#141412,#0e0e0c)', border:'1px solid #1a1a18', borderRadius:18, padding:20, marginBottom:10 },
   kfLabel: { fontSize:9, color:'#4a4a4a', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', marginBottom:14, fontFamily:'Inter, sans-serif' },
@@ -940,10 +943,12 @@ function AddSongTab({ onSaved }) {
       setAiLoading(false)
     }
 
+    const { data: { user } } = await supabase.auth.getUser()
     const { error } = await supabase.from('songs').insert({
       name: name.trim(), artist: artist.trim(), key: finalKey, event_type: event,
       patch, chords: finalChords, notes: finalNotes, tempo: finalTempo,
-      tags: tags.trim() || null, bpm: bpm ? parseInt(bpm) : null
+      tags: tags.trim() || null, bpm: bpm ? parseInt(bpm) : null,
+      user_id: user?.id
     })
     if (!error) {
       setName(''); setArtist(''); setKey('D'); setChords('')
@@ -1039,7 +1044,7 @@ function AddSongTab({ onSaved }) {
           value={chords} onChange={e=>setChords(e.target.value)}
           placeholder={'Intro: Dm | Gm | A7 | Dm\nVerse: Dm | Gm | Dm | A7\nChorus: F | Bb | C | Dm'}
           rows={4}
-          style={{ width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:'monospace', resize:'vertical', boxSizing:'border-box' }}
+          style={{ width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:MONO, resize:'vertical', boxSizing:'border-box' }}
           autoCorrect="off" autoCapitalize="none" spellCheck={false}
         />
         <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, marginTop:12, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Performance notes</label>
