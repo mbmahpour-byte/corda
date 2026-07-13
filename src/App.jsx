@@ -888,7 +888,7 @@ function AddSongTab({ onSaved }) {
     setAiLoading(true)
     setAddAiError('')
     try {
-      const res = await fetch('/api/chords', {
+      const res = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ songName: name, artist, key })
@@ -928,7 +928,7 @@ function AddSongTab({ onSaved }) {
     if (!chords.trim()) {
       setAiLoading(true)
       try {
-        const res = await fetch('/api/chords', {
+        const res = await fetch('/api/claude', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ songName: name, artist, key })
@@ -1279,7 +1279,7 @@ export default function App() {
     setAiLoadingId(song.id)
     setAiError('')
     try {
-      const res = await fetch('/api/chords', {
+      const res = await fetch('/api/claude', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ songName: song.name, artist: song.artist, key: song.key })
@@ -1325,7 +1325,7 @@ export default function App() {
       if (fillAllAbort.current) break
       const song = missing[i]
       try {
-        const res = await fetch('/api/chords', {
+        const res = await fetch('/api/claude', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ songName: song.name, artist: song.artist, key: song.key })
