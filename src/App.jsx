@@ -183,26 +183,88 @@ function ChordLyricDisplay({ text, fontSize = 14, centerSections = false }) {
 }
 
 function parseChordResponse(text) {
-  if (!text) return {}
-  const t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
-  if (t === 'UNKNOWN') return { unknown: true }
+  if (!text) return { parseFailed: true }
+  let t = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim()
+  // Strip a code fence if the model wrapped the whole answer in one.
+  t = t.replace(/^```[a-zA-Z]*\n?/, '').replace(/\n?```$/, '').trim()
+  if (/^UNKNOWN[.!]?$/i.test(t)) return { unknown: true }
+
   const tempoMatch = t.match(/^TEMPO:\s*(.+)/im)
   const notesMatch = t.match(/^NOTES:\s*(.+)/im)
-  const keyMatch = t.match(/^KEY:\s*(.+)/im)
-  const chordsLyricsMatch = t.match(/^CHORDS_LYRICS:\s*\n([\s\S]+)/im)
-  const chordsMatch = t.match(/^CHORDS:\s*\n([\s\S]+)/im)
+  const keyMatch   = t.match(/^KEY:\s*(.+)/im)
+  // Accept the chart on the same line OR the next line after the label.
+  const chordsLyricsMatch = t.match(/^CHORDS_LYRICS:\s*([\s\S]+)/im)
+  const chordsMatch       = t.match(/^CHORDS:\s*([\s\S]+)/im)
+
   const result = {}
   if (tempoMatch) result.tempo = tempoMatch[1].trim()
   if (notesMatch) result.notes = notesMatch[1].trim()
-  if (keyMatch) result.key = keyMatch[1].trim()
-  if (chordsLyricsMatch) {
-    result.chords = chordsLyricsMatch[1].trim()
-  } else if (chordsMatch) {
-    result.chords = chordsMatch[1].trim()
-  } else if (!tempoMatch && !notesMatch && !keyMatch) {
-    result.chords = text.trim()
+  if (keyMatch)   result.key   = keyMatch[1].trim()
+  if (chordsLyricsMatch)      result.chords = chordsLyricsMatch[1].trim()
+  else if (chordsMatch)       result.chords = chordsMatch[1].trim()
+  else if (!tempoMatch && !notesMatch && !keyMatch) {
+    // No markers at all: only treat as a chart if it actually looks like one
+    // ([Am]-style tokens or multi-line) — never dump stray prose into chords.
+    if (/\[[A-G][#b]?/.test(t) || t.includes('\n')) result.chords = t
   }
+
+  if (!result.chords) result.parseFailed = true
   return result
+}
+
+// Human-readable reason for a failed/empty chord fill.
+function chordErrorMsg(reason, err) {
+  switch (reason) {
+    case 'quota':   return err || 'Web-search quota exceeded for today. Try again tomorrow.'
+    case 'rate':    return err || 'Claude is busy right now. Wait a moment and try again.'
+    case 'unknown': return "Claude doesn't know this exact song. Enter chords manually or try Google."
+    case 'parse':   return 'Got a reply but could not read the chords from it. Try again.'
+    case 'network': return 'Network error. Check your connection and try again.'
+    default:        return err || 'Chord fill failed. Try again.'
+  }
+}
+
+// Shared chord fetcher: Claude first (training knowledge, no quota), then an
+// optional Gemini web-search fallback. Returns { reason, chords?, tempo?, notes?,
+// key?, source?, error? }; reason === 'ok' on success.
+async function fetchChordData({ name, artist, key }, { allowWebFallback = true } = {}) {
+  const req = {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ songName: name, artist, key }),
+  }
+
+  // 1) Claude — knowledge-based, won't burn the Gemini quota.
+  let claudeUnknown = false
+  try {
+    const res = await fetch('/api/claude', req)
+    const data = await res.json()
+    if (res.ok) {
+      const parsed = parseChordResponse(data.text || '')
+      if (parsed.chords) return { ...parsed, reason: 'ok', source: 'claude' }
+      if (parsed.unknown) claudeUnknown = true
+    } else if (res.status === 429) {
+      return { reason: 'rate', error: data.error }
+    } else if (!allowWebFallback) {
+      return { reason: 'error', error: data.error }
+    }
+  } catch (e) {
+    if (!allowWebFallback) return { reason: 'network' }
+  }
+
+  // 2) Gemini web-search fallback — single fills only (costs quota).
+  if (!allowWebFallback) return { reason: claudeUnknown ? 'unknown' : 'parse' }
+  try {
+    const res = await fetch('/api/chords', req)
+    const data = await res.json()
+    if (!res.ok) return { reason: res.status === 429 ? 'quota' : 'error', error: data.error }
+    const parsed = parseChordResponse(data.text || '')
+    if (parsed.chords) return { ...parsed, reason: 'ok', source: 'gemini' }
+    if (parsed.unknown) return { reason: 'unknown' }
+    return { reason: 'parse' }
+  } catch (e) {
+    return { reason: 'network' }
+  }
 }
 
 // Alphabetical grouping helpers
@@ -888,27 +950,15 @@ function AddSongTab({ onSaved }) {
     setAiLoading(true)
     setAddAiError('')
     try {
-      const res = await fetch('/api/chords', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ songName: name, artist, key })
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setAddAiError(data.error || 'Chord search failed')
-        setAiLoading(false)
-        return
+      const r = await fetchChordData({ name, artist, key }, { allowWebFallback: true })
+      if (r.reason === 'ok') {
+        if (r.tempo) setTempo(r.tempo)
+        if (r.notes) setNotes(r.notes)
+        if (r.chords) setChords(r.chords)
+        if (r.key) setKey(r.key)
+      } else {
+        setAddAiError(chordErrorMsg(r.reason, r.error))
       }
-      const parsed = parseChordResponse(data.text || '')
-      if (parsed.unknown) {
-        setAddAiError('No chords found online for this song. Enter them manually or try Google.')
-        setAiLoading(false)
-        return
-      }
-      if (parsed.tempo) setTempo(parsed.tempo)
-      if (parsed.notes) setNotes(parsed.notes)
-      if (parsed.chords) setChords(parsed.chords)
-      if (parsed.key) setKey(parsed.key)
     } catch(e) {
       setAddAiError('Network error. Check your connection and try again.')
       console.error(e)
@@ -928,18 +978,12 @@ function AddSongTab({ onSaved }) {
     if (!chords.trim()) {
       setAiLoading(true)
       try {
-        const res = await fetch('/api/chords', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ songName: name, artist, key })
-        })
-        const data = await res.json()
-        const parsed = parseChordResponse(data.text || '')
-        if (!parsed.unknown) {
-          if (parsed.tempo) finalTempo = parsed.tempo
-          if (parsed.notes) finalNotes = parsed.notes
-          if (parsed.chords) finalChords = parsed.chords
-          if (parsed.key) finalKey = parsed.key
+        const r = await fetchChordData({ name, artist, key }, { allowWebFallback: true })
+        if (r.reason === 'ok') {
+          if (r.tempo) finalTempo = r.tempo
+          if (r.notes) finalNotes = r.notes
+          if (r.chords) finalChords = r.chords
+          if (r.key) finalKey = r.key
         }
       } catch(e) { console.error(e) }
       setAiLoading(false)
@@ -1202,6 +1246,7 @@ export default function App() {
   const [fillAllConfirm, setFillAllConfirm] = useState(false)
   const [fillAllRunning, setFillAllRunning] = useState(false)
   const [fillAllProgress, setFillAllProgress] = useState({ done: 0, total: 0 })
+  const [fillAllSummary, setFillAllSummary] = useState('')
   const fillAllAbort = useRef(false)
 
   // Expanded card local state for key/chords (supports transpose flow)
@@ -1275,42 +1320,33 @@ export default function App() {
     setSongs(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s))
   }
 
-  async function fillWithGemini(song) {
+  async function fillWithAI(song) {
     setAiLoadingId(song.id)
     setAiError('')
     try {
-      const res = await fetch('/api/chords', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ songName: song.name, artist: song.artist, key: song.key })
-      })
-      const data = await res.json()
-      if (!res.ok) {
-        setAiError(data.error || 'Chord search failed')
-        setAiLoadingId(null)
-        return
-      }
-      const text = data.text || ''
-      if (text.trim() === 'UNKNOWN') { setAiLoadingId(null); return }
-      const parsed = parseChordResponse(text)
-      const updates = {}
-      if (parsed.tempo) updates.tempo = parsed.tempo
-      if (parsed.notes) updates.notes = parsed.notes
-      if (parsed.chords) updates.chords = parsed.chords
-      if (parsed.key) updates.key = parsed.key
-      if (Object.keys(updates).length) {
-        await supabase.from('songs').update(updates).eq('id', song.id)
-        setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updates } : s))
-        if (expandedId === song.id) {
-          if (updates.chords !== undefined) setXChords(updates.chords)
-          if (updates.key !== undefined) {
-            setXKey(updates.key)
-            setXChordsKey(updates.key)
+      const r = await fetchChordData({ name: song.name, artist: song.artist, key: song.key }, { allowWebFallback: true })
+      if (r.reason === 'ok') {
+        const updates = {}
+        if (r.tempo) updates.tempo = r.tempo
+        if (r.notes) updates.notes = r.notes
+        if (r.chords) updates.chords = r.chords
+        if (r.key) updates.key = r.key
+        if (Object.keys(updates).length) {
+          await supabase.from('songs').update(updates).eq('id', song.id)
+          setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updates } : s))
+          if (expandedId === song.id) {
+            if (updates.chords !== undefined) setXChords(updates.chords)
+            if (updates.key !== undefined) {
+              setXKey(updates.key)
+              setXChordsKey(updates.key)
+            }
+            setXSaved(false)
           }
-          setXSaved(false)
         }
+      } else {
+        setAiError(chordErrorMsg(r.reason, r.error))
       }
-    } catch(e) { console.error(e) }
+    } catch(e) { console.error(e); setAiError('Network error. Try again.') }
     setAiLoadingId(null)
   }
 
@@ -1319,37 +1355,48 @@ export default function App() {
     if (!missing.length) return
     setFillAllConfirm(false)
     setFillAllRunning(true)
+    setFillAllSummary('')
     fillAllAbort.current = false
     setFillAllProgress({ done: 0, total: missing.length })
+
+    let filled = 0, unknown = 0, consecutiveFails = 0, stopped = ''
     for (let i = 0; i < missing.length; i++) {
-      if (fillAllAbort.current) break
+      if (fillAllAbort.current) { stopped = 'Cancelled.'; break }
       const song = missing[i]
-      try {
-        const res = await fetch('/api/chords', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ songName: song.name, artist: song.artist, key: song.key })
-        })
-        const data = await res.json()
-        const parsed = parseChordResponse(data.text || '')
-        if (!parsed.unknown) {
-          const updates = {}
-          if (parsed.tempo) updates.tempo = parsed.tempo
-          if (parsed.notes) updates.notes = parsed.notes
-          if (parsed.chords) updates.chords = parsed.chords
-          if (parsed.key) updates.key = parsed.key
-          if (Object.keys(updates).length) {
-            await supabase.from('songs').update(updates).eq('id', song.id)
-            setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updates } : s))
-          }
+      // Claude only in batch (no web fallback) so a big library can't drain the Gemini quota.
+      const r = await fetchChordData({ name: song.name, artist: song.artist, key: song.key }, { allowWebFallback: false })
+      if (r.reason === 'ok') {
+        const updates = {}
+        if (r.tempo) updates.tempo = r.tempo
+        if (r.notes) updates.notes = r.notes
+        if (r.chords) updates.chords = r.chords
+        if (r.key) updates.key = r.key
+        if (Object.keys(updates).length) {
+          await supabase.from('songs').update(updates).eq('id', song.id)
+          setSongs(prev => prev.map(s => s.id === song.id ? { ...s, ...updates } : s))
+          filled++
         }
-      } catch(e) { console.error('fill error:', song.name, e) }
+        consecutiveFails = 0
+      } else if (r.reason === 'rate' || r.reason === 'quota' || r.reason === 'error') {
+        // Service is refusing calls — stop, don't keep hammering it.
+        stopped = chordErrorMsg(r.reason, r.error)
+        break
+      } else {
+        if (r.reason === 'unknown') unknown++
+        consecutiveFails++
+        if (consecutiveFails >= 3) { stopped = 'Stopped after 3 songs in a row could not be filled.'; break }
+      }
       setFillAllProgress({ done: i + 1, total: missing.length })
       if (i < missing.length - 1 && !fillAllAbort.current) {
-        await new Promise(r => setTimeout(r, 1000))
+        await new Promise(res => setTimeout(res, 500))
       }
     }
+
     setFillAllRunning(false)
+    let summary = `Filled ${filled} of ${missing.length}.`
+    if (unknown) summary += ` ${unknown} not known by Claude.`
+    if (stopped) summary += ` ${stopped}`
+    setFillAllSummary(summary)
   }
 
   function handleTranspose() {
@@ -1510,7 +1557,7 @@ export default function App() {
             <div style={{marginBottom:10}}>
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                 <span style={{ ...s.fieldLabel, marginBottom:0, display:'inline' }}>Chords</span>
-                <button onClick={() => fillWithGemini(song)} disabled={aiLoadingId === song.id}
+                <button onClick={() => fillWithAI(song)} disabled={aiLoadingId === song.id}
                   style={{ background:'transparent', border:`1px solid ${aiLoadingId === song.id ? '#1e1e1e' : 'rgba(201,168,76,0.22)'}`, borderRadius:5, color: aiLoadingId === song.id ? '#444' : GOLD, fontSize:10, fontWeight:600, padding:'4px 9px', cursor: aiLoadingId === song.id ? 'default' : 'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                   {aiLoadingId === song.id ? 'Searching...' : '✦ Fill with Chords'}
                 </button>
@@ -1683,6 +1730,17 @@ export default function App() {
                     onClick={() => { fillAllAbort.current = true }}
                     style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:5, color:'#444', fontSize:11, padding:'5px 10px', cursor:'pointer', flexShrink:0, fontFamily:'Inter, sans-serif' }}>
                     Cancel
+                  </button>
+                </div>
+              )
+            }
+            if (fillAllSummary) {
+              return (
+                <div style={{ margin:'0 12px 8px', display:'flex', alignItems:'center', justifyContent:'space-between', gap:10 }}>
+                  <span style={{ color:'#5a5a5a', fontSize:11, fontFamily:'Inter, sans-serif', lineHeight:1.5 }}>{fillAllSummary}</span>
+                  <button onClick={() => setFillAllSummary('')}
+                    style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:5, color:'#444', fontSize:11, padding:'4px 10px', cursor:'pointer', flexShrink:0, fontFamily:'Inter, sans-serif' }}>
+                    Dismiss
                   </button>
                 </div>
               )
@@ -1980,7 +2038,7 @@ export default function App() {
               onClick={e => e.stopPropagation()}>
               <div style={{ fontSize:18, fontWeight:500, color:'#F5F0E8', marginBottom:8, fontFamily:'Playfair Display, serif' }}>Fill all missing chords?</div>
               <div style={{ fontSize:13, color:'#5a5a5a', lineHeight:1.7, marginBottom:20, fontFamily:'Inter, sans-serif' }}>
-                This will search for chords and lyrics for <strong style={{ color:'#F5F0E8' }}>{missingCount} song{missingCount !== 1 ? 's' : ''}</strong> using Gemini with web search. Requests are sent one at a time with a 1-second delay.
+                This will look up chords and lyrics for <strong style={{ color:'#F5F0E8' }}>{missingCount} song{missingCount !== 1 ? 's' : ''}</strong> using Claude. Songs Claude doesn't recognize are skipped, and it stops early after 3 misses in a row.
               </div>
               <div style={{ display:'flex', gap:10 }}>
                 <button onClick={() => setFillAllConfirm(false)}
