@@ -1,23 +1,33 @@
+import { applyCors, verifyUser, cleanField } from './_auth.js'
+
+// Only these models may be requested through this proxy.
+const ALLOWED_MODELS = ['claude-sonnet-5', 'claude-haiku-4-5-20251001']
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  applyCors(req, res)
 
   if (req.method === 'OPTIONS') return res.status(204).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+
+  // Gate: only signed-in Supabase users may spend our Anthropic quota.
+  const user = await verifyUser(req)
+  if (!user) return res.status(401).json({ error: 'Unauthorized' })
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set on the server.' })
   }
 
-  const { songName, artist, key, model, max_tokens, messages } = req.body || {}
+  const body = req.body || {}
+  const songName = cleanField(body.songName)
+  const artist = cleanField(body.artist)
+  const key = cleanField(body.key, 20)
 
-  // Build the request body: either a raw passthrough ({messages}) or chord-fill mode.
+  // Chord-fill only. Caller-controlled model/tokens are clamped to safe bounds.
+  const safeModel = ALLOWED_MODELS.includes(body.model) ? body.model : 'claude-sonnet-5'
+  const safeMaxTokens = Math.min(Math.max(parseInt(body.max_tokens, 10) || 1500, 256), 2000)
+
   let payload
-  if (messages) {
-    // Generic proxy passthrough (backward compatible).
-    payload = { model: model || 'claude-sonnet-5', max_tokens: max_tokens || 1024, messages }
-  } else {
+  {
     if (!songName) return res.status(400).json({ error: 'songName required' })
     const prompt = `You are an expert accompanist for Jewish and Israeli music — niggunim, Shabbos/Yom Tov zemiros, chassidic, and Israeli pop. Give the chords and lyrics for the song "${songName}"${artist ? ` by ${artist}` : ''}${key ? ` (often played in ${key})` : ''}.
 
@@ -49,8 +59,8 @@ Rules:
     // extraction, and adaptive thinking (the default when omitted) would spend the
     // token budget and can truncate the chart.
     payload = {
-      model: model || 'claude-sonnet-5',
-      max_tokens: max_tokens || 1500,
+      model: safeModel,
+      max_tokens: safeMaxTokens,
       thinking: { type: 'disabled' },
       messages: [{ role: 'user', content: prompt }],
     }
@@ -86,9 +96,6 @@ Rules:
         : msg,
     })
   }
-
-  // Passthrough callers want the raw Anthropic body; chord-fill callers want { text }.
-  if (messages) return res.status(200).json(data)
 
   const text = (data.content || []).map(b => b.text).filter(Boolean).join('\n').trim() || 'UNKNOWN'
   return res.status(200).json({ text })

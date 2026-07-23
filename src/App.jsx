@@ -253,9 +253,14 @@ function chordErrorMsg(reason, err) {
 // optional Gemini web-search fallback. Returns { reason, chords?, tempo?, notes?,
 // key?, source?, error? }; reason === 'ok' on success.
 async function fetchChordData({ name, artist, key }, { allowWebFallback = true } = {}) {
+  // The AI proxies require a valid Supabase session token (server-verified).
+  const { data: { session } } = await supabase.auth.getSession()
   const req = {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
+    },
     body: JSON.stringify({ songName: name, artist, key }),
   }
 

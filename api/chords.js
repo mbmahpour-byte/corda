@@ -1,12 +1,18 @@
+import { applyCors, verifyUser, cleanField } from './_auth.js'
+
 export default async function handler(req, res) {
-  res.setHeader('Access-Control-Allow-Origin', '*')
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS')
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type')
+  applyCors(req, res)
 
   if (req.method === 'OPTIONS') return res.status(204).end()
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { songName, artist, key } = req.body
+  // Gate: only signed-in Supabase users may spend our Gemini quota.
+  const user = await verifyUser(req)
+  if (!user) return res.status(401).json({ error: 'Unauthorized' })
+
+  const body = req.body || {}
+  const songName = cleanField(body.songName)
+  const artist = cleanField(body.artist)
   if (!songName) return res.status(400).json({ error: 'songName required' })
 
   const prompt = `Search the web and find the real chord chart AND lyrics for the Jewish/Israeli song "${songName}"${artist ? ` by ${artist}` : ''}. Look on sites like Chordify, Ultimate Guitar, Shironet, or any Jewish/Israeli music site.
@@ -48,8 +54,6 @@ UNKNOWN`
     )
 
     const data = await response.json()
-    console.log('[chords] status:', response.status)
-    console.log('[chords] raw response:', JSON.stringify(data, null, 2))
 
     if (!response.ok) {
       const msg = data.error?.message || 'Gemini API error'
@@ -61,7 +65,6 @@ UNKNOWN`
     }
 
     const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'UNKNOWN'
-    console.log('[chords] extracted text (first 300):', text?.slice(0, 300))
     return res.status(200).json({ text })
   } catch (e) {
     console.error('[chords] error:', e)
