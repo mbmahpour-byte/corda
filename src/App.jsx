@@ -564,9 +564,9 @@ function GigMode({ songs, onExit, onSaveKey }) {
         <div className="press" style={{ ...s.seamCell, padding:'12px 0', cursor: atStart ? 'default' : 'pointer' }} onClick={atStart ? undefined : prev}>
           <span style={{ color: atStart ? DISABLED : GOLD, fontSize:20, fontFamily:MONO }}>‹</span>
         </div>
-        <div style={{ ...s.seamCell, flex:2, flexDirection:'column', gap:4, padding:'8px 0', cursor:'default' }}>
+        <div style={{ ...s.seamCell, flex:2, flexDirection:'column', gap:4, padding:'8px 12px', cursor:'default' }}>
           {(song.tempo || song.bpm) && (
-            <span style={{ color:DIM, font:`400 9px ${MONO}`, letterSpacing:'0.1em', textTransform:'uppercase' }}>
+            <span style={{ color:DIM, font:`400 9px ${MONO}`, letterSpacing:'0.1em', textTransform:'uppercase', textAlign:'center', lineHeight:1.4 }}>
               {song.tempo || ''}{song.bpm && song.tempo ? ' · ' : ''}{song.bpm ? `${song.bpm}BPM` : ''}
             </span>
           )}
@@ -726,7 +726,11 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
       )}
 
       {setlists.length === 0 && !creating && (
-        <div style={{ textAlign:'center', padding:'60px 20px', color:DIM, fontSize:14, fontFamily:'Inter, sans-serif' }}>No set lists yet.</div>
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:12, padding:'120px 20px', textAlign:'center' }}>
+          <div style={{ width:10, height:10, background:SEAM }} />
+          <div style={{ color:TXT3, font:`700 11px ${MONO}`, letterSpacing:'0.16em', textTransform:'uppercase' }}>No setlists yet</div>
+          <div style={{ color:DIM, fontSize:13, fontFamily:'Inter, sans-serif' }}>Tap + NEW to build your first setlist.</div>
+        </div>
       )}
       {setlists.map(sl => (
         <div key={sl.id} onClick={() => { setDeleteConfirmSlId(null); openSetlist(sl) }}
@@ -1603,12 +1607,12 @@ export default function App() {
                 <div style={s.largeTitleSquare} />
                 <div style={s.largeTitleText}>Songs</div>
               </div>
-              <div style={s.seamStrip}>
-                <div className="press" style={{ ...s.seamCell, padding:'8px 12px' }} onClick={() => setShowSounds(true)}>
-                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.12em', color:TXT3 }}>◈ SOUNDS</span>
+              <div style={{ ...s.seamStrip, flexShrink:0 }}>
+                <div className="press" style={{ ...s.seamCell, padding:'9px 14px' }} onClick={() => setShowSounds(true)}>
+                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.1em', color:TXT3, whiteSpace:'nowrap' }}>◈&nbsp;SOUNDS</span>
                 </div>
-                <div className="press" style={{ ...s.seamCell, padding:'8px 12px' }} onClick={() => setShowAdd(true)}>
-                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.12em', color:GOLD }}>+ ADD</span>
+                <div className="press" style={{ ...s.seamCell, padding:'9px 14px' }} onClick={() => setShowAdd(true)}>
+                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.1em', color:GOLD, whiteSpace:'nowrap' }}>+&nbsp;ADD</span>
                 </div>
               </div>
             </div>
