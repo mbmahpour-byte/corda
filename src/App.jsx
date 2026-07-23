@@ -28,16 +28,41 @@ const EVENT_COLORS = {
   all:     { bg:'#111', text:'#555', border:'#1c1c1c' },
 }
 
-const GOLD = '#C9A84C'
-const GOLD_DIM = 'rgba(201,168,76,0.25)'
-const GOLD_GLOW = 'rgba(201,168,76,0.12)'
-// Monospace used for all chord charts + chord editors (Gig Mode + cards).
-// Swap this one line to change the chord font everywhere (e.g. self-hosted Commit Mono).
-const MONO = "'Fragment Mono', ui-monospace, 'SFMono-Regular', monospace"
+// === Design tokens — "instrument rack" redesign ===
+const GOLD = '#C7B27A'
+const GOLD_DIM = 'rgba(199,178,122,0.25)'
+const GOLD_GLOW = 'rgba(199,178,122,0.12)'
+// Surfaces
+const BG = '#0d0d0f'        // app background
+const PANEL = '#131215'     // cards / chord charts / inset panels
+const HAIR = '#1e1e22'      // row dividers (hairlines)
+const SEAM = '#232328'      // control seams (grouped transport strips)
+const DISABLED = '#2a2a30'  // disabled control glyphs
+const RED = '#8a4b4b'       // destructive (remove)
+// Text
+const TXT = '#EDEBE6'       // primary
+const TXT2 = '#c8c6cc'      // secondary
+const TXT3 = '#7a7982'      // tertiary / metadata
+const DIM = '#5c5b63'       // dim labels / inactive
+// Type — Space Grotesk (display/titles/lyrics), Space Mono (chords/keys/tick labels), Inter (chrome)
+const DISPLAY = "'Space Grotesk', sans-serif"
+// Monospace used for all chord charts, key/tempo readouts, tick labels.
+const MONO = "'Space Mono', ui-monospace, 'SFMono-Regular', monospace"
 
 const CHROMATIC = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B']
 const KEY_TO_CHROMA = {
   'C':0,'C#':1,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'Ab':8,'G#':8,'A':9,'Bb':10,'A#':10,'B':11
+}
+
+// CAGED capo math: shape base chroma; fret = (root - base) mod 12, keep frets 0–4.
+const CAGED_BASE = { C:0, A:9, G:7, E:4, D:2 }
+function capoShapes(rootChroma) {
+  return Object.entries(CAGED_BASE)
+    .map(([shape, base]) => ({ shape, fret: ((rootChroma - base) % 12 + 12) % 12 }))
+    .filter(o => o.fret <= 4)
+    .sort((a, b) => a.fret - b.fret)
+    .slice(0, 3)
+    .map(o => ({ shape: o.shape, fretLabel: o.fret === 0 ? 'Open (no capo)' : `Capo ${o.fret}` }))
 }
 
 function transposeKey(key, semitones) {
@@ -172,7 +197,7 @@ function ChordLyricDisplay({ text, fontSize = 14, centerSections = false }) {
         if (block.type === 'couplet') return (
           <div key={idx} style={{ marginBottom:14 }}>
             <div style={{ color:GOLD, whiteSpace:'pre-wrap', fontWeight:600, lineHeight:1.3, fontSize }}>{block.chordRow || '\u200B'}</div>
-            <div style={{ color:'#EDE8DF', whiteSpace:'pre-wrap', lineHeight:1.6, fontSize }}>{block.lyricRow || '\u200B'}</div>
+            <div style={{ color:'#e3e0da', whiteSpace:'pre-wrap', lineHeight:1.6, fontSize }}>{block.lyricRow || '\u200B'}</div>
           </div>
         )
         // lyric
@@ -291,111 +316,86 @@ function groupAlphabetically(songs) {
 
 const TABS = [
   { id:'songs',     icon:'♪', label:'Songs'   },
-  { id:'keyfinder', icon:'♭', label:'Keys'    },
-  { id:'patches',   icon:'◈', label:'Sounds'  },
-  { id:'add',       icon:'+', label:'Add'     },
   { id:'gig',       icon:'▶', label:'Gig'     },
-  { id:'setlist',   icon:'≡', label:'Sets'    },
+  { id:'keyfinder', icon:'♯', label:'Key'     },
+  { id:'setlist',   icon:'≡', label:'Setlist' },
 ]
 
+// Tick-mark label: mono, uppercase, wide tracking, dim — used for all section headers.
+const tick = (extra = {}) => ({
+  fontFamily:MONO, fontWeight:700, fontSize:9, color:DIM,
+  letterSpacing:'0.2em', textTransform:'uppercase', ...extra,
+})
+
 const s = {
-  app: { display:'flex', flexDirection:'column', height:'100dvh', background:'#080808', overflow:'hidden' },
-  header: { padding:'0 18px 0', paddingTop:'calc(env(safe-area-inset-top) + 22px)', background:'#080808', flexShrink:0, borderBottom:'1px solid #111' },
+  app: { display:'flex', flexDirection:'column', height:'100dvh', background:BG, overflow:'hidden' },
+  header: { padding:'0 22px 0', paddingTop:'calc(env(safe-area-inset-top) + 22px)', background:BG, flexShrink:0, borderBottom:`1px solid ${HAIR}` },
   scroll: { flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', paddingBottom:'calc(96px + env(safe-area-inset-bottom))', overflowX:'hidden' },
+  // Large-title (iOS-style) header block, uppercase, gold square tick.
+  largeTitle: { display:'flex', alignItems:'center', gap:8, marginBottom:18 },
+  largeTitleSquare: { width:9, height:9, background:GOLD, flexShrink:0 },
+  largeTitleText: { font:`700 34px ${DISPLAY}`, color:TXT, letterSpacing:'-0.01em', textTransform:'uppercase' },
   bottomNav: {
     position:'fixed', bottom:0, left:0, right:0,
-    background:'rgba(5,5,5,0.97)',
-    backdropFilter:'blur(32px)',
-    WebkitBackdropFilter:'blur(32px)',
-    borderTop:'1px solid #141414',
-    display:'flex', paddingBottom:'env(safe-area-inset-bottom)',
-    zIndex:100, height:68,
+    background:'rgba(13,13,15,0.82)',
+    backdropFilter:'blur(20px) saturate(160%)',
+    WebkitBackdropFilter:'blur(20px) saturate(160%)',
+    borderTop:'1px solid rgba(255,255,255,0.06)',
+    display:'flex', padding:'10px 12px', paddingBottom:'calc(8px + env(safe-area-inset-bottom))',
+    zIndex:100,
   },
-  navBtn: (active) => ({
-    flex:1, display:'flex', flexDirection:'column', alignItems:'center', position:'relative',
-    gap:4, padding:'10px 0',
-    background: active ? 'radial-gradient(ellipse at 50% 0%, rgba(201,168,76,0.1) 0%, transparent 65%)' : 'none',
-    border:'none', cursor:'pointer',
-    color: active ? GOLD : '#3a3a3a', fontSize:9, fontWeight:600, letterSpacing:'0.1em',
-    textTransform:'uppercase', transition:'color 0.15s', fontFamily:'Inter, sans-serif',
+  navBtn: () => ({
+    flex:1, display:'flex', flexDirection:'column', alignItems:'center',
+    gap:4, padding:0, background:'none', border:'none', cursor:'pointer',
   }),
-  navIcon: { fontSize:18, lineHeight:1 },
-  filterRow: { display:'flex', gap:6, padding:'14px 16px 0', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 },
-  filterPill: (active) => ({
-    padding:'7px 18px', borderRadius:100,
-    border: active ? 'none' : '1px solid #1e1e1e',
-    cursor:'pointer', fontSize:11, fontWeight:600, whiteSpace:'nowrap', transition:'all 0.18s',
-    background: active ? GOLD : 'transparent',
-    color: active ? '#000' : '#484848',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.04em',
-  }),
-  searchRow: { padding:'10px 14px', flexShrink:0, width:'100%' },
-  searchInput: {
-    width:'100%', padding:'12px 18px', background:'#0d0d0d',
-    border:'1px solid #191919', borderRadius:12, color:'#F5F0E8',
-    fontSize:15, outline:'none', boxSizing:'border-box', display:'block',
-    fontFamily:'Inter, sans-serif',
-  },
-  card: (expanded, hasChords = true) => ({
-    margin:'0 14px 7px',
-    background: expanded
-      ? 'linear-gradient(160deg, #1a1a18, #111110)'
-      : 'linear-gradient(160deg, #141412, #0f0f0e)',
-    border: `1px solid ${expanded ? '#282826' : '#181816'}`,
-    borderLeft: `3px solid ${expanded || hasChords ? GOLD : 'rgba(201,168,76,0.15)'}`,
-    borderRadius:18,
-    overflow:'hidden',
-    transition:'box-shadow 0.25s, background 0.2s',
-    boxShadow: expanded
-      ? `0 12px 56px rgba(0,0,0,0.75), 0 0 0 1px rgba(201,168,76,0.06)`
-      : '0 2px 8px rgba(0,0,0,0.5)',
-  }),
-  cardHeader: { padding:'16px 18px', display:'flex', alignItems:'center', gap:12, cursor:'pointer', minHeight:66 },
-  cardLeft: { flex:1, minWidth:0 },
-  cardName: { fontSize:18, fontWeight:500, color:'#F0EBE2', marginBottom:4, lineHeight:1.2, fontFamily:'Playfair Display, serif', letterSpacing:'-0.015em' },
-  cardArtist: { fontSize:12, color:'#484848', fontFamily:'Inter, sans-serif', letterSpacing:'0.01em' },
-  cardRight: { display:'flex', alignItems:'center', gap:8, flexShrink:0 },
-  keyBadge: {
-    background:'rgba(201,168,76,0.07)', color:GOLD, border:`1px solid rgba(201,168,76,0.18)`,
-    borderRadius:7, fontSize:11, fontWeight:700, padding:'4px 10px',
-    fontFamily:'Inter, sans-serif', letterSpacing:'0.06em',
-  },
-  starBtn: { background:'none', border:'none', cursor:'pointer', fontSize:17, padding:'0 2px', lineHeight:1, color:GOLD, opacity:0.85 },
-  chevron: (open) => ({
-    color:'#383838', fontSize:10, transition:'transform 0.22s cubic-bezier(0.4,0,0.2,1)',
-    transform: open ? 'rotate(180deg)' : 'rotate(0deg)', display:'block',
-  }),
+  navIcon: (active) => ({ fontSize:19, lineHeight:1, color: active ? GOLD : DIM }),
+  navLabel: (active) => ({ font:`600 9px ${MONO}`, letterSpacing:'0.1em', color: active ? GOLD : DIM }),
+  // Search field — one of the few rounded elements (rack chrome).
+  searchWrap: { background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.06)', borderRadius:12, padding:'12px 16px', marginBottom:16 },
+  searchInput: { width:'100%', background:'transparent', border:'none', outline:'none', color:TXT, fontSize:13, fontFamily:'Inter, sans-serif', display:'block' },
+  // Two-way segmented filter with sliding highlight pill.
+  segTrack: { position:'relative', display:'flex', background:'rgba(255,255,255,0.04)', borderRadius:10, padding:3 },
+  segPill: (shift) => ({ position:'absolute', top:3, bottom:3, left:3, width:'calc(50% - 3px)', background:'#1c1c20', border:`1px solid ${GOLD_DIM}`, borderRadius:7, transition:'transform 0.4s cubic-bezier(0.34,1.56,0.64,1)', transform:`translateX(${shift})` }),
+  segOpt: (active) => ({ flex:1, position:'relative', zIndex:1, textAlign:'center', padding:'9px 0', cursor:'pointer', font:`600 12px ${MONO}`, letterSpacing:'0.08em', color: active ? TXT : DIM }),
+  // Hairline song row + expandable detail (grid-rows animation).
+  row: { borderTop:`1px solid ${HAIR}` },
+  rowHead: { display:'flex', alignItems:'center', justifyContent:'space-between', padding:'16px 2px', cursor:'pointer' },
+  rowDot: (has) => ({ width:6, height:6, background: has ? GOLD : 'rgba(255,255,255,0.15)', flexShrink:0 }),
+  rowName: { font:`500 18px ${DISPLAY}`, color:TXT, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' },
+  rowArtist: { font:`400 12px 'Inter',sans-serif`, color:TXT3, marginTop:2 },
+  rowKey: { color:GOLD, font:`700 13px ${MONO}` },
+  star: (fav) => ({ color: fav ? GOLD : 'rgba(255,255,255,0.12)', fontSize:15, background:'none', border:'none', cursor:'pointer', padding:0, lineHeight:1 }),
+  expandWrap: (open) => ({ display:'grid', gridTemplateRows: open ? '1fr' : '0fr', transition:'grid-template-rows 0.45s cubic-bezier(0.34,1.56,0.64,1)' }),
+  groupLetter: { font:`700 11px ${MONO}`, color:DIM, letterSpacing:'0.2em', margin:'18px 0 6px' },
+  keyBadge: { background:'rgba(199,178,122,0.07)', color:GOLD, border:`1px solid rgba(199,178,122,0.18)`, borderRadius:0, fontSize:11, fontWeight:700, padding:'4px 10px', fontFamily:MONO, letterSpacing:'0.06em' },
   evPill: (ev) => {
     const c = EVENT_COLORS[ev] || EVENT_COLORS.all
-    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:6, fontSize:9, fontWeight:700, padding:'2px 8px', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }
+    return { background:c.bg, color:c.text, border:`1px solid ${c.border}`, borderRadius:0, fontSize:9, fontWeight:700, padding:'2px 8px', letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:MONO }
   },
-  detail: { borderTop:'1px solid #151513', padding:'20px 18px 18px', boxSizing:'border-box', width:'100%', overflow:'hidden', background:'#0b0b0a' },
-  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:16, width:'100%', boxSizing:'border-box' },
-  fieldLabel: { fontSize:9, color:'#4a4a4a', display:'block', marginBottom:7, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', fontFamily:'Inter, sans-serif' },
-  fieldSelect: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldInput: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
-  fieldTextarea: { width:'100%', padding:'10px 11px', background:'#0f0f0e', border:'1px solid #1e1e1c', borderRadius:8, color:'#F0EBE2', fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
-  chordBox: { width:'100%', padding:'11px 13px', background:'#060605', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, fontSize:13, fontFamily:MONO, resize:'vertical', minHeight:64, boxSizing:'border-box' },
-  deleteBtn: { padding:'7px 14px', background:'none', border:'1px solid #251515', borderRadius:6, color:'#8a2828', fontSize:11, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' },
-  kfCard: { margin:'12px', background:'linear-gradient(135deg,#141412,#0e0e0c)', border:'1px solid #1a1a18', borderRadius:18, padding:20, marginBottom:10 },
-  kfLabel: { fontSize:9, color:'#4a4a4a', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', marginBottom:14, fontFamily:'Inter, sans-serif' },
+  // Inset chord-chart / detail panel.
+  panel: { background:PANEL, borderRadius:8, padding:'12px 14px' },
+  detailGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:14, marginBottom:14, width:'100%', boxSizing:'border-box' },
+  fieldLabel: tick({ display:'block', marginBottom:7, letterSpacing:'0.18em' }),
+  fieldSelect: { width:'100%', padding:'10px 11px', background:'#0f0f11', border:`1px solid ${HAIR}`, borderRadius:0, color:TXT, fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldInput: { width:'100%', padding:'10px 11px', background:'#0f0f11', border:`1px solid ${HAIR}`, borderRadius:0, color:TXT, fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' },
+  fieldTextarea: { width:'100%', padding:'10px 11px', background:'#0f0f11', border:`1px solid ${HAIR}`, borderRadius:0, color:TXT, fontSize:13, resize:'vertical', fontFamily:'inherit', boxSizing:'border-box' },
+  chordBox: { width:'100%', padding:'11px 13px', background:'#0a0a0c', border:`1px solid ${GOLD_DIM}`, borderRadius:0, color:GOLD, fontSize:13, fontFamily:MONO, resize:'vertical', minHeight:64, boxSizing:'border-box' },
+  deleteBtn: { padding:'7px 14px', background:'none', border:`1px solid ${RED}`, borderRadius:0, color:RED, fontSize:11, cursor:'pointer', fontFamily:MONO, letterSpacing:'0.04em', textTransform:'uppercase' },
+  kfCard: { margin:'0 0 24px', background:PANEL, border:`1px solid ${HAIR}`, borderRadius:8, padding:20 },
+  kfLabel: tick({ marginBottom:14, letterSpacing:'0.18em' }),
   kfRow: { display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:12 },
-  kfRowLabel: { fontSize:14, color:'#C8C0B0', fontFamily:'Inter, sans-serif' },
-  kfSelect: { padding:'9px 11px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F0EBE2', fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
-  kfResult: { margin:'10px 12px 0', background:'linear-gradient(160deg,#161612,#0e0e0a)', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:18, padding:'32px 28px 28px', textAlign:'center' },
-  kfResultKey: { fontSize:88, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.05em', fontFamily:'Playfair Display, serif' },
-  kfResultSub: { fontSize:9, color:'#4a4a4a', marginTop:12, fontFamily:'Inter, sans-serif', textTransform:'uppercase', letterSpacing:'0.18em' },
-  kfAlts: { display:'flex', gap:8, justifyContent:'center', marginTop:16, flexWrap:'wrap' },
-  kfAlt: { padding:'7px 18px', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:100, color:GOLD, fontSize:13, background:'rgba(201,168,76,0.05)', fontFamily:'Inter, sans-serif' },
-  runBtn: { width:'calc(100% - 24px)', margin:'12px 12px', padding:17, background:GOLD, border:'none', borderRadius:12, color:'#000', fontSize:14, fontWeight:700, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase' },
-  patchSection: { margin:'16px 14px 0' },
-  patchSectionLabel: { fontSize:9, color:'#4a4a4a', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.16em', marginBottom:10, fontFamily:'Inter, sans-serif' },
-  patchGrid: { display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:20 },
-  patchCard: { background:'linear-gradient(160deg,#111110,#0d0d0c)', border:'1px solid #1a1a18', borderLeft:'2px solid rgba(201,168,76,0.22)', borderRadius:14, padding:14 },
-  patchName: { fontSize:13, fontWeight:600, color:'#E0D8C8', marginBottom:3, fontFamily:'Inter, sans-serif' },
-  patchSrc: { fontSize:11, color:'#4a4a4a', marginBottom:6 },
-  patchWhen: { fontSize:11, color:'#404040', lineHeight:1.5 },
-  empty: { textAlign:'center', padding:'72px 28px', color:'#3a3a3a', fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:2 },
+  kfRowLabel: { fontSize:14, color:TXT2, fontFamily:'Inter, sans-serif' },
+  kfSelect: { padding:'9px 11px', background:'#0f0f11', border:`1px solid ${HAIR}`, borderRadius:0, color:TXT, fontSize:13, maxWidth:180, fontFamily:'Inter, sans-serif' },
+  kfResult: { background:PANEL, border:`1px solid ${GOLD_DIM}`, borderRadius:8, padding:'32px 28px 28px', textAlign:'center', marginBottom:24 },
+  kfResultKey: { fontSize:88, fontWeight:700, color:GOLD, lineHeight:1, letterSpacing:'-0.03em', fontFamily:DISPLAY },
+  kfResultSub: tick({ marginTop:12, letterSpacing:'0.18em' }),
+  kfAlts: { display:'flex', gap:1, justifyContent:'center', marginTop:16, flexWrap:'wrap' },
+  kfAlt: { padding:'7px 18px', border:`1px solid ${GOLD_DIM}`, color:GOLD, fontSize:13, background:'rgba(199,178,122,0.05)', fontFamily:MONO },
+  runBtn: { width:'100%', margin:'0 0 24px', padding:16, background:GOLD, border:'none', borderRadius:0, color:'#000', fontSize:13, fontWeight:700, cursor:'pointer', fontFamily:MONO, letterSpacing:'0.1em', textTransform:'uppercase' },
+  // Grouped (seamed) transport control: 1px-gap grid on SEAM background.
+  seamStrip: { display:'flex', alignItems:'stretch', gap:1, background:SEAM, padding:1, borderRadius:10, overflow:'hidden' },
+  seamCell: { flex:1, background:BG, display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer' },
+  empty: { textAlign:'center', padding:'72px 28px', color:DIM, fontSize:14, fontFamily:'Inter, sans-serif', lineHeight:2 },
 }
 
 function GigMode({ songs, onExit, onSaveKey }) {
@@ -437,7 +437,7 @@ function GigMode({ songs, onExit, onSaveKey }) {
   }, [songs.length, onExit])
 
   if (!songs.length) return (
-    <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
+    <div style={{ position:'fixed', inset:0, background:'#0d0d0f', zIndex:200, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center' }}>
       <div style={{ fontSize:15, marginBottom:24, fontFamily:'Inter, sans-serif', color:'#555' }}>No songs to show</div>
       <button onClick={onExit} style={{ background:'none', border:`1px solid ${GOLD_DIM}`, borderRadius:4, color:GOLD, fontSize:14, padding:'10px 24px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Exit</button>
     </div>
@@ -475,91 +475,62 @@ function GigMode({ songs, onExit, onSaveKey }) {
 
   return (
     <div
-      style={{ position:'fixed', inset:0, background:'#080808', zIndex:200, display:'flex', flexDirection:'column', color:'#F5F0E8', userSelect:'none' }}
+      style={{ position:'fixed', inset:0, background:'#0d0d0f', zIndex:200, display:'flex', flexDirection:'column', color:'#EDEBE6', userSelect:'none' }}
       onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}
     >
-      {/* Top bar: transpose corners + progress dots */}
-      <div style={{ flexShrink:0, paddingTop:'env(safe-area-inset-top)' }}>
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 10px 6px' }}>
-          <button
-            onClick={() => setOffset(o => o - 1)}
-            style={{ width:54, height:54, background:'transparent', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
-          >
-            <span style={{ fontSize:24, lineHeight:1 }}>−</span>
-            <span style={{ fontSize:7, letterSpacing:'0.12em', opacity:0.5, fontFamily:'Inter, sans-serif' }}>SEMI</span>
+      {/* Top: track readout + seamed transpose strip */}
+      <div style={{ flexShrink:0, padding:'0 20px', paddingTop:'calc(env(safe-area-inset-top) + 12px)' }}>
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
+          <button onClick={() => setShowJump(true)} style={{ background:'none', border:'none', cursor:'pointer', padding:0 }}>
+            <span style={{ color:TXT3, font:`400 10px ${MONO}`, letterSpacing:'0.16em' }}>TRK {idx + 1}/{songs.length}{songs.length > 1 ? '  ≡' : ''}</span>
           </button>
-
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:7, flex:1 }}>
-            {songs.length > 12
-              ? <button onClick={() => setShowJump(true)} style={{ background:'none', border:'none', cursor:'pointer', padding:'4px 10px', borderRadius:5 }}>
-                  <span style={{ color:'#5a5a5a', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>{idx + 1} / {songs.length} &nbsp;≡</span>
-                </button>
-              : <span style={{ color:'#555', fontSize:9, fontWeight:600, letterSpacing:'0.18em', textTransform:'uppercase', fontFamily:'Inter, sans-serif' }}>
-                  {idx + 1} / {songs.length}
-                </span>
-            }
-            {songs.length <= 12 && (
-              <div style={{ display:'flex', gap:2, alignItems:'center' }}>
-                {songs.map((_, i) => (
-                  <div key={i} onClick={() => setIdx(i)}
-                    style={{ padding:'6px 3px', cursor:'pointer' }}>
-                    <div style={{ width: i === idx ? 22 : 6, height:4, borderRadius:2, background: i === idx ? GOLD : '#2e2e2e', transition:'all 0.25s' }} />
-                  </div>
-                ))}
-              </div>
-            )}
+          <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+            <span style={{ color:DIM, font:`400 10px ${MONO}`, letterSpacing:'0.16em' }}>GIG MODE</span>
+            <button onClick={onExit} style={{ background:'none', border:'none', color:DIM, fontSize:14, cursor:'pointer', padding:0, lineHeight:1 }}>✕</button>
           </div>
-
-          <button
-            onClick={() => setOffset(o => o + 1)}
-            style={{ width:54, height:54, background:'transparent', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:8, color:GOLD, cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', flexShrink:0, gap:1 }}
-          >
-            <span style={{ fontSize:24, lineHeight:1 }}>+</span>
-            <span style={{ fontSize:7, letterSpacing:'0.12em', opacity:0.5, fontFamily:'Inter, sans-serif' }}>SEMI</span>
-          </button>
         </div>
 
-        {/* Second row: exit + key display + save */}
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'2px 14px 12px', borderBottom:'1px solid #141414' }}>
-          <button onClick={onExit} style={{ background:'none', border:'none', color:'#4a4a4a', fontSize:11, cursor:'pointer', padding:'4px 0', letterSpacing:'0.12em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', flexShrink:0 }}>✕ Exit</button>
-
-          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-            <span style={{ background:'linear-gradient(135deg, rgba(201,168,76,0.1), rgba(201,168,76,0.06))', color:GOLD, border:`1px solid rgba(201,168,76,0.22)`, borderRadius:10, fontSize:32, fontWeight:800, padding:'5px 22px', fontFamily:'Playfair Display, serif', letterSpacing:'-0.03em', lineHeight:1.2 }}>
-              {displayKey || '—'}
-            </span>
-            {offset !== 0 && (
-              <span style={{ color:'#555', fontSize:10, fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>{offset > 0 ? `+${offset}` : offset}<span style={{ fontSize:8, opacity:0.7 }}>st</span></span>
-            )}
+        <div style={s.seamStrip}>
+          <div className="press" style={{ ...s.seamCell, padding:'14px 0' }} onClick={() => setOffset(o => o - 1)}>
+            <span style={{ color:GOLD, fontSize:20, fontFamily:MONO }}>−</span>
           </div>
+          <div style={{ ...s.seamCell, flex:2, flexDirection:'column', padding:'10px 0', cursor:'default' }}>
+            <span style={{ color:DIM, font:`400 8px ${MONO}`, letterSpacing:'0.22em', marginBottom:3 }}>KEY</span>
+            <span key={offset} style={{ color:GOLD, fontSize:30, fontWeight:700, fontFamily:DISPLAY, letterSpacing:'-0.01em', animation:'keyPop 0.32s cubic-bezier(0.34,1.56,0.64,1)' }}>{displayKey || '—'}</span>
+          </div>
+          <div className="press" style={{ ...s.seamCell, padding:'14px 0' }} onClick={() => setOffset(o => o + 1)}>
+            <span style={{ color:GOLD, fontSize:20, fontFamily:MONO }}>+</span>
+          </div>
+        </div>
 
-          <button
-            onClick={saveKey}
-            disabled={!displayKey || !offset}
-            style={{ background:'transparent', border:`1px solid ${keySaved ? '#2a4a2a' : (offset ? 'rgba(201,168,76,0.22)' : '#1a1a1a')}`, borderRadius:5, color: keySaved ? '#5a9e5a' : (offset ? GOLD : '#333'), fontSize:10, fontWeight:600, padding:'6px 12px', cursor: offset ? 'pointer' : 'default', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase', flexShrink:0 }}>
-            {keySaved ? 'Saved ✓' : 'Save key'}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', minHeight:26, marginTop:8 }}>
+          <span style={{ color:DIM, font:`400 10px ${MONO}`, letterSpacing:'0.06em' }}>{offset !== 0 ? `${offset > 0 ? '+' : ''}${offset} ST` : ''}</span>
+          <button onClick={saveKey} disabled={!displayKey || !offset}
+            style={{ background:'none', border:`1px solid ${keySaved ? '#3a5a3a' : (offset ? GOLD_DIM : HAIR)}`, borderRadius:0, color: keySaved ? '#7aa87a' : (offset ? GOLD : DISABLED), font:`700 9px ${MONO}`, letterSpacing:'0.1em', padding:'5px 12px', cursor: offset ? 'pointer' : 'default', textTransform:'uppercase' }}>
+            {keySaved ? 'Saved ✓' : 'Save Key'}
           </button>
         </div>
       </div>
 
       {/* Scrollable content */}
-      <div key={song.id} style={{ flex:1, overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:'22px 22px 36px' }} className="gig-song">
-        <div style={{ fontFamily:'Playfair Display, serif', fontSize: song.name.length > 26 ? 30 : song.name.length > 16 ? 42 : 54, fontWeight:700, lineHeight:1.08, letterSpacing:'-0.02em', marginBottom: song.artist ? 6 : 22, color:'#F5F0E8' }}>{song.name}</div>
-        {song.artist && <div style={{ fontSize:13, color:'#5a5a5a', marginBottom:4, fontFamily:'Inter, sans-serif', letterSpacing:'0.01em' }}>{song.artist}</div>}
-
-        {song.patch && (
-          <div style={{ fontSize:11, color:'#5a5a5a', marginBottom:20, fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>{song.patch}</div>
-        )}
-        {!song.patch && (song.artist || song.name) && <div style={{ marginBottom:20 }} />}
+      <div key={song.id} style={{ flex:1, overflowY:'auto', overflowX:'hidden', WebkitOverflowScrolling:'touch', padding:'26px 24px 36px' }} className="gig-song">
+        <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:6 }}>
+          <div style={{ width:8, height:8, background:GOLD, flexShrink:0 }} />
+          <div style={{ font:`700 ${song.name.length > 22 ? '24px' : '30px'}/1.1 ${DISPLAY}`, color:TXT, letterSpacing:'-0.01em', textTransform:'uppercase' }}>{song.name}</div>
+        </div>
+        <div style={{ font:`400 11px ${MONO}`, color:TXT3, letterSpacing:'0.05em', marginBottom:22, paddingLeft:16, textTransform:'uppercase' }}>
+          {[song.artist, song.patch].filter(Boolean).join(' — ') || ' '}
+        </div>
 
         {displayChords
-          ? <div style={{ marginBottom:28 }} className="gig-chords">
-              <ChordLyricDisplay text={displayChords} fontSize={fontSize} centerSections={true} />
+          ? <div style={{ marginBottom:28, borderTop:`1px solid ${SEAM}`, paddingTop:14 }} className="gig-chords">
+              <ChordLyricDisplay text={displayChords} fontSize={fontSize} />
             </div>
-          : <div style={{ color:'#555', fontSize:13, fontFamily:'Inter, sans-serif', marginBottom:28, letterSpacing:'0.02em' }}>No chord chart — add chords from the Songs tab.</div>
+          : <div style={{ color:DIM, fontSize:14, fontFamily:'Inter, sans-serif', marginBottom:28, borderTop:`1px solid ${SEAM}`, paddingTop:16 }}>No chord chart — add chords from the Songs tab.</div>
         }
 
         {song.notes && (
-          <div style={{ color:'#5a5a5a', fontSize:13, lineHeight:1.75, borderTop:'1px solid #141414', paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
+          <div style={{ color:TXT3, fontSize:13, lineHeight:1.75, borderTop:`1px solid ${SEAM}`, paddingTop:18, fontFamily:'Inter, sans-serif' }}>{song.notes}</div>
         )}
       </div>
 
@@ -575,10 +546,10 @@ function GigMode({ songs, onExit, onSaveKey }) {
             {songs.map((sg, i) => (
               <div key={sg.id}
                 onClick={() => { setIdx(i); setOffset(0); setShowJump(false) }}
-                style={{ display:'flex', alignItems:'center', gap:14, padding:'13px 18px', borderBottom:'1px solid #141414', background: i === idx ? 'rgba(201,168,76,0.06)' : 'transparent', cursor:'pointer' }}>
+                style={{ display:'flex', alignItems:'center', gap:14, padding:'13px 18px', borderBottom:'1px solid #141414', background: i === idx ? 'rgba(199,178,122,0.06)' : 'transparent', cursor:'pointer' }}>
                 <span style={{ color:'#333', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:22, textAlign:'right', fontFamily:'Inter, sans-serif', flexShrink:0 }}>{i + 1}</span>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:16, color: i === idx ? GOLD : '#F5F0E8', fontFamily:'Playfair Display, serif', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontWeight: i === idx ? 600 : 400 }}>{sg.name}</div>
+                  <div style={{ fontSize:16, color: i === idx ? GOLD : '#EDEBE6', fontFamily:'Space Grotesk, sans-serif', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontWeight: i === idx ? 600 : 400 }}>{sg.name}</div>
                   {sg.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif', marginTop:2 }}>{sg.artist}</div>}
                 </div>
                 {sg.key && <span style={s.keyBadge}>{sg.key}</span>}
@@ -588,33 +559,27 @@ function GigMode({ songs, onExit, onSaveKey }) {
         </div>
       )}
 
-      {/* Bottom bar: prev / tempo+font size / next */}
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'8px 12px', borderTop:'1px solid #141414', flexShrink:0, paddingBottom:'calc(8px + env(safe-area-inset-bottom))' }}>
-        <button
-          onClick={prev} disabled={atStart}
-          style={{ background:'none', border:`1px solid ${atStart ? '#181818' : 'rgba(201,168,76,0.18)'}`, borderRadius:8, color: atStart ? '#1e1e1e' : GOLD, fontSize:34, padding:'10px 20px', cursor: atStart ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
-        >‹</button>
-
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:6, flex:1, minWidth:0, padding:'0 10px' }}>
+      {/* Bottom: seamed prev / tempo+font-size / next strip */}
+      <div style={{ flexShrink:0, ...s.seamStrip, margin:'0 20px', marginBottom:'calc(18px + env(safe-area-inset-bottom))' }}>
+        <div className="press" style={{ ...s.seamCell, padding:'12px 0', cursor: atStart ? 'default' : 'pointer' }} onClick={atStart ? undefined : prev}>
+          <span style={{ color: atStart ? DISABLED : GOLD, fontSize:20, fontFamily:MONO }}>‹</span>
+        </div>
+        <div style={{ ...s.seamCell, flex:2, flexDirection:'column', gap:4, padding:'8px 0', cursor:'default' }}>
           {(song.tempo || song.bpm) && (
-            <div style={{ color:'#5a5a5a', fontSize:10, letterSpacing:'0.1em', textTransform:'uppercase', fontFamily:'Inter, sans-serif', textAlign:'center', lineHeight:1.3 }}>
-              {song.tempo || ''}
-              {song.bpm && song.tempo && <span style={{ margin:'0 5px', opacity:0.5 }}>·</span>}
-              {song.bpm && <span style={{ textTransform:'none', letterSpacing:0 }}>{song.bpm} bpm</span>}
-            </div>
+            <span style={{ color:DIM, font:`400 9px ${MONO}`, letterSpacing:'0.1em', textTransform:'uppercase' }}>
+              {song.tempo || ''}{song.bpm && song.tempo ? ' · ' : ''}{song.bpm ? `${song.bpm}BPM` : ''}
+            </span>
           )}
-          <div style={{ display:'flex', gap:5, alignItems:'center' }}>
-            <button onClick={() => setFontSize(f => { const n = Math.max(12, f - 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
-              style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A−</button>
-            <button onClick={() => setFontSize(f => { const n = Math.min(30, f + 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
-              style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#4a4a4a', fontSize:12, padding:'5px 12px', cursor:'pointer', fontFamily:'Inter, sans-serif', lineHeight:1 }}>A+</button>
+          <div style={{ display:'flex', gap:16 }}>
+            <span onClick={() => setFontSize(f => { const n = Math.max(12, f - 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
+              style={{ color:DIM, fontSize:13, fontFamily:MONO, cursor:'pointer' }}>A−</span>
+            <span onClick={() => setFontSize(f => { const n = Math.min(30, f + 2); localStorage.setItem('corda_gig_fontsize', n); return n })}
+              style={{ color:DIM, fontSize:13, fontFamily:MONO, cursor:'pointer' }}>A+</span>
           </div>
         </div>
-
-        <button
-          onClick={next} disabled={atEnd}
-          style={{ background:'none', border:`1px solid ${atEnd ? '#181818' : 'rgba(201,168,76,0.18)'}`, borderRadius:8, color: atEnd ? '#1e1e1e' : GOLD, fontSize:34, padding:'10px 20px', cursor: atEnd ? 'default' : 'pointer', lineHeight:1, transition:'all 0.15s', flexShrink:0 }}
-        >›</button>
+        <div className="press" style={{ ...s.seamCell, padding:'12px 0', cursor: atEnd ? 'default' : 'pointer' }} onClick={atEnd ? undefined : next}>
+          <span style={{ color: atEnd ? DISABLED : GOLD, fontSize:20, fontFamily:MONO }}>›</span>
+        </div>
       </div>
     </div>
   )
@@ -630,11 +595,8 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   const [newEvent, setNewEvent] = useState('kumzitz')
   const [newDate, setNewDate] = useState('')
   const [songSearch, setSongSearch] = useState('')
-  const [dragIdx, setDragIdx] = useState(null)
-  const [dragOverIdx, setDragOverIdx] = useState(null)
   const [deleteConfirmSlId, setDeleteConfirmSlId] = useState(null)
   const [editingSlName, setEditingSlName] = useState(false)
-  const dragState = useRef(null)
 
   useEffect(() => { fetchSetlists() }, [])
 
@@ -704,34 +666,14 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
     await Promise.all(next.map((s, i) => supabase.from('setlist_songs').update({ position: i }).eq('id', s.id)))
   }
 
+  // Reorder via explicit up/down controls (no drag lib) — simplest cross-platform port.
   async function reorder(fromIdx, toIdx) {
-    if (fromIdx === toIdx || toIdx == null) return
+    if (fromIdx === toIdx || toIdx == null || toIdx < 0 || toIdx >= slots.length) return
     const next = [...slots]
     const [moved] = next.splice(fromIdx, 1)
     next.splice(toIdx, 0, moved)
     setSlots(next)
-    setDragIdx(null); setDragOverIdx(null)
     await Promise.all(next.map((s, i) => supabase.from('setlist_songs').update({ position: i }).eq('id', s.id)))
-  }
-
-  function onHandleTouchStart(e, idx) {
-    e.preventDefault()
-    dragState.current = { idx }
-    setDragIdx(idx)
-  }
-
-  function onListTouchMove(e) {
-    if (!dragState.current) return
-    const touch = e.touches[0]
-    const el = document.elementFromPoint(touch.clientX, touch.clientY)
-    const row = el?.closest('[data-slot-idx]')
-    if (row) setDragOverIdx(parseInt(row.dataset.slotIdx))
-  }
-
-  function onListTouchEnd() {
-    if (!dragState.current) return
-    reorder(dragState.current.idx, dragOverIdx)
-    dragState.current = null
   }
 
   const alreadyInSet = new Set(slots.map(sl => sl.song_id))
@@ -746,11 +688,14 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
   const slotSongs = slots.map(sl => sl.songs).filter(Boolean)
 
   if (!active) return (
-    <div style={{ padding:'12px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
-      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:14 }}>
-        <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.18em', fontFamily:'Inter, sans-serif' }}>Set Lists</div>
+    <div style={{ padding:'6px 22px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', ...s.largeTitle }}>
+        <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+          <div style={s.largeTitleSquare} />
+          <div style={s.largeTitleText}>Setlist</div>
+        </div>
         <button onClick={() => setCreating(true)}
-          style={{ background:'transparent', border:`1px solid rgba(201,168,76,0.22)`, borderRadius:7, color:GOLD, fontSize:12, fontWeight:600, padding:'6px 14px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>+ New</button>
+          style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:0, color:GOLD, font:`700 10px ${MONO}`, padding:'7px 14px', cursor:'pointer', letterSpacing:'0.12em' }}>+ NEW</button>
       </div>
 
       {creating && (
@@ -758,18 +703,18 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           <input autoFocus placeholder="Set list name..." value={newName}
             onChange={e => setNewName(e.target.value)} onKeyDown={e => e.key === 'Enter' && createSetlist()}
             className="focus-gold"
-            style={{ width:'100%', padding:'10px 12px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'10px 12px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#EDEBE6', fontSize:14, boxSizing:'border-box', marginBottom:10, outline:'none', fontFamily:'Inter, sans-serif' }}
             autoCorrect="off" autoCapitalize="words" spellCheck={false} />
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8, marginBottom:10 }}>
             <select value={newEvent} onChange={e => setNewEvent(e.target.value)}
-              style={{ padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
+              style={{ padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:7, color:'#EDEBE6', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
               <option value="wedding">Wedding</option>
               <option value="all">All events</option>
             </select>
             <input type="date" value={newDate} onChange={e => setNewDate(e.target.value)}
-              style={{ padding:'9px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', colorScheme:'dark', fontFamily:'Inter, sans-serif' }} />
+              style={{ padding:'9px 10px', background:'#0d0d0d', border:'1px solid #1e1e1e', borderRadius:7, color:'#EDEBE6', fontSize:13, boxSizing:'border-box', colorScheme:'dark', fontFamily:'Inter, sans-serif' }} />
           </div>
           <div style={{ display:'flex', gap:8 }}>
             <button onClick={createSetlist} disabled={!newName.trim()}
@@ -781,41 +726,42 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
       )}
 
       {setlists.length === 0 && !creating && (
-        <div style={{ textAlign:'center', padding:'60px 20px', color:'#555', fontSize:14, fontFamily:'Inter, sans-serif' }}>No set lists yet.</div>
+        <div style={{ textAlign:'center', padding:'60px 20px', color:DIM, fontSize:14, fontFamily:'Inter, sans-serif' }}>No set lists yet.</div>
       )}
       {setlists.map(sl => (
         <div key={sl.id} onClick={() => { setDeleteConfirmSlId(null); openSetlist(sl) }}
-          className="setlist-card"
-          style={{ background:'linear-gradient(160deg,#141412,#0f0f0e)', border:'1px solid #181816', borderLeft:`3px solid ${GOLD}`, borderRadius:18, padding:'16px 18px', marginBottom:8, cursor:'pointer', boxShadow:'0 2px 8px rgba(0,0,0,0.5)' }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-            <div style={{ minWidth:0, flex:1 }}>
-              <div style={{ fontSize:16, fontWeight:500, color:'#F5F0E8', marginBottom:4, fontFamily:'Playfair Display, serif' }}>{sl.name}</div>
-              <div style={{ display:'flex', gap:6, alignItems:'center', flexWrap:'wrap' }}>
+          className="press"
+          style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'16px 2px', borderTop:`1px solid ${HAIR}`, cursor:'pointer' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0, flex:1 }}>
+            <div style={{ width:6, height:6, background:GOLD, flexShrink:0 }} />
+            <div style={{ minWidth:0 }}>
+              <div style={{ font:`500 16px ${DISPLAY}`, color:TXT, marginBottom:3, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{sl.name}</div>
+              <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
                 <span style={s.evPill(sl.event_type)}>
                   {sl.event_type === 'sheva' ? 'SB' : sl.event_type === 'kumzitz' ? 'KZ' : sl.event_type === 'wedding' ? 'WD' : 'ALL'}
                 </span>
-                {sl.event_date && <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{fmtDate(sl.event_date)}</span>}
-                <span style={{ color:'#555', fontSize:11, fontFamily:'Inter, sans-serif' }}>{sl.setlist_songs?.length || 0} songs</span>
+                {sl.event_date && <span style={{ font:`400 11px ${MONO}`, color:TXT3 }}>{fmtDate(sl.event_date)}</span>}
+                <span style={{ font:`400 11px ${MONO}`, color:TXT3 }}>{sl.setlist_songs?.length || 0} TRK</span>
               </div>
             </div>
-            {deleteConfirmSlId === sl.id
-              ? <div style={{ display:'flex', gap:5, alignItems:'center', flexShrink:0 }} onClick={e => e.stopPropagation()}>
-                  <button onClick={e => { deleteSetlist(sl.id, e); setDeleteConfirmSlId(null) }}
-                    style={{ background:'none', border:'1px solid #8a2020', borderRadius:5, color:'#c04040', fontSize:11, padding:'4px 9px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>Delete</button>
-                  <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(null) }}
-                    style={{ background:'none', border:'1px solid #1e1e1e', borderRadius:5, color:'#555', fontSize:11, padding:'4px 8px', cursor:'pointer', fontFamily:'Inter, sans-serif' }}>No</button>
-                </div>
-              : <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(sl.id) }}
-                  style={{ background:'none', border:'none', color:'#3a3a3a', fontSize:22, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0 }}>×</button>
-            }
           </div>
+          {deleteConfirmSlId === sl.id
+            ? <div style={{ display:'flex', gap:5, alignItems:'center', flexShrink:0 }} onClick={e => e.stopPropagation()}>
+                <button onClick={e => { deleteSetlist(sl.id, e); setDeleteConfirmSlId(null) }}
+                  style={{ background:'none', border:`1px solid ${RED}`, borderRadius:0, color:RED, font:`700 10px ${MONO}`, padding:'4px 9px', cursor:'pointer', letterSpacing:'0.08em' }}>DELETE</button>
+                <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(null) }}
+                  style={{ background:'none', border:`1px solid ${HAIR}`, borderRadius:0, color:DIM, font:`700 10px ${MONO}`, padding:'4px 8px', cursor:'pointer' }}>NO</button>
+              </div>
+            : <button onClick={e => { e.stopPropagation(); setDeleteConfirmSlId(sl.id) }}
+                style={{ background:'none', border:'none', color:DIM, fontSize:16, cursor:'pointer', padding:'0 4px', lineHeight:1, flexShrink:0, fontFamily:MONO }}>✕</button>
+          }
         </div>
       ))}
     </div>
   )
 
   return (
-    <div style={{ position:'fixed', inset:0, background:'#080808', zIndex:150, display:'flex', flexDirection:'column' }}>
+    <div style={{ position:'fixed', inset:0, background:'#0d0d0f', zIndex:150, display:'flex', flexDirection:'column' }}>
       <div style={{ padding:'10px 14px 10px', paddingTop:'calc(env(safe-area-inset-top) + 10px)', borderBottom:'1px solid #141414', flexShrink:0 }}>
         <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:6 }}>
           <button onClick={() => { setActive(null); fetchSetlists() }}
@@ -824,10 +770,10 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
             ? <input autoFocus defaultValue={active.name}
                 onBlur={e => renameSetlist(e.target.value)}
                 onKeyDown={e => { if (e.key === 'Enter') e.target.blur(); if (e.key === 'Escape') setEditingSlName(false) }}
-                style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid rgba(201,168,76,0.22)`, color:'#F5F0E8', fontSize:17, fontFamily:'Playfair Display, serif', fontWeight:500, padding:'0 0 2px', outline:'none', minWidth:0 }}
+                style={{ flex:1, background:'transparent', border:'none', borderBottom:`1px solid rgba(199,178,122,0.22)`, color:'#EDEBE6', fontSize:17, fontFamily:'Space Grotesk, sans-serif', fontWeight:500, padding:'0 0 2px', outline:'none', minWidth:0 }}
               />
             : <div onClick={() => setEditingSlName(true)} title="Tap to rename"
-                style={{ flex:1, fontSize:17, fontWeight:500, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif', cursor:'text', letterSpacing:'-0.01em' }}>
+                style={{ flex:1, fontSize:17, fontWeight:500, color:'#EDEBE6', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Space Grotesk, sans-serif', cursor:'text', letterSpacing:'-0.01em' }}>
                 {active.name}
               </div>
           }
@@ -846,23 +792,25 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
       </div>
 
       <div style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch' }}>
-        <div style={{ padding:'12px', paddingBottom:32 }}>
-          <input placeholder="Search songs to add..." value={songSearch}
-            onChange={e => setSongSearch(e.target.value)}
-            className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1a1a1a', borderRadius:10, color:'#F5F0E8', fontSize:14, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
-            autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+        <div style={{ padding:'12px 22px 32px' }}>
+          <div style={tick({ margin:'0 0 10px' })}>ADD TO SETLIST</div>
+          <div style={{ ...s.searchWrap, marginBottom: filteredSongs.length ? 0 : 16 }}>
+            <input placeholder="Search songs to add…" value={songSearch}
+              onChange={e => setSongSearch(e.target.value)}
+              style={s.searchInput}
+              autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+          </div>
 
           {filteredSongs.length > 0 && (
-            <div style={{ background:'#111', border:'1px solid #1a1a1a', borderRadius:10, overflow:'hidden', marginTop:4, marginBottom:12 }}>
-              {filteredSongs.map((song, i) => (
-                <div key={song.id} onClick={() => addSong(song)}
-                  style={{ padding:'12px 14px', display:'flex', justifyContent:'space-between', alignItems:'center', borderBottom: i < filteredSongs.length - 1 ? '1px solid #181818' : 'none', cursor:'pointer' }}>
+            <div style={{ marginBottom:16 }}>
+              {filteredSongs.map(song => (
+                <div key={song.id} onClick={() => addSong(song)} className="press"
+                  style={{ padding:'12px 2px', display:'flex', justifyContent:'space-between', alignItems:'center', borderTop:`1px solid ${HAIR}`, cursor:'pointer' }}>
                   <div style={{ minWidth:0, flex:1 }}>
-                    <div style={{ fontSize:14, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{song.name}</div>
-                    {song.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
+                    <div style={{ font:`500 14px ${DISPLAY}`, color:TXT2, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{song.name}</div>
+                    {song.artist && <div style={{ font:`400 11px 'Inter',sans-serif`, color:TXT3 }}>{song.artist}</div>}
                   </div>
-                  <span style={{ color:GOLD, fontSize:20, lineHeight:1, flexShrink:0, marginLeft:8 }}>+</span>
+                  <span style={{ color:GOLD, fontSize:15, lineHeight:1, flexShrink:0, marginLeft:8 }}>+</span>
                 </div>
               ))}
             </div>
@@ -871,51 +819,39 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
           {loadingSlots && (
             <div style={{ padding:'4px 0' }}>
               {[1,2,3].map(i => (
-                <div key={i} className="skeleton" style={{ marginBottom:6, background:'#111', border:'1px solid #181818', borderRadius:10, padding:'14px 12px', opacity: 1 - i * 0.22 }}>
-                  <div style={{ height:12, width:`${50 + i * 15}%`, background:'#1e1e1e', borderRadius:4, marginBottom:7 }} />
-                  <div style={{ height:9, width:`${28 + i * 10}%`, background:'#181818', borderRadius:4 }} />
+                <div key={i} className="skeleton" style={{ padding:'14px 2px', borderTop:`1px solid ${HAIR}`, opacity: 1 - i * 0.22 }}>
+                  <div style={{ height:12, width:`${50 + i * 15}%`, background:'#26262b', marginBottom:7 }} />
+                  <div style={{ height:9, width:`${28 + i * 10}%`, background:'#1c1c20' }} />
                 </div>
               ))}
             </div>
           )}
           {!loadingSlots && slots.length === 0 && (
-            <div style={{ color:'#444', textAlign:'center', padding:'44px 0', fontSize:13, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>Search above to add songs.</div>
+            <div style={{ color:DIM, textAlign:'center', padding:'44px 0', fontSize:13, fontFamily:'Inter, sans-serif', letterSpacing:'0.02em' }}>Search above to add songs.</div>
           )}
+          {slots.length > 0 && <div style={tick({ margin:'8px 0 0' })}>TRACKS</div>}
 
-          <div onTouchMove={onListTouchMove} onTouchEnd={onListTouchEnd}>
+          <div>
             {slots.map((slot, i) => {
               const song = slot.songs
-              const isDragging = dragIdx === i
-              const isOver = dragOverIdx === i && dragIdx !== null && dragIdx !== i
+              const atTop = i === 0
+              const atBottom = i === slots.length - 1
               return (
-                <div key={slot.id} data-slot-idx={i}
-                  draggable
-                  onDragStart={() => { setDragIdx(i); setDragOverIdx(null) }}
-                  onDragOver={e => { e.preventDefault(); setDragOverIdx(i) }}
-                  onDrop={() => reorder(dragIdx, i)}
-                  onDragEnd={() => { setDragIdx(null); setDragOverIdx(null) }}
-                  style={{
-                    display:'flex', alignItems:'center', gap:10,
-                    padding:'11px 10px', marginBottom:6,
-                    background: isOver ? 'rgba(201,168,76,0.06)' : '#111',
-                    border:`1px solid ${isOver ? 'rgba(201,168,76,0.2)' : '#1a1a1a'}`,
-                    borderRadius:10,
-                    opacity: isDragging ? 0.3 : 1,
-                    transition:'background 0.1s, border-color 0.1s, opacity 0.15s',
-                  }}>
-                  <span style={{ color:'#444', fontSize:11, fontVariantNumeric:'tabular-nums', minWidth:18, textAlign:'right', fontFamily:'Inter, sans-serif' }}>{i + 1}</span>
-                  <span onTouchStart={e => onHandleTouchStart(e, i)}
-                    style={{ color:'#444', fontSize:16, cursor:'grab', touchAction:'none', userSelect:'none', paddingRight:2 }}>⠿</span>
+                <div key={slot.id}
+                  style={{ display:'flex', alignItems:'center', gap:12, padding:'14px 2px', borderTop:`1px solid ${HAIR}` }}>
+                  <span style={{ font:`700 12px ${MONO}`, color:DIM, width:18, flexShrink:0 }}>{i + 1}</span>
                   <div style={{ flex:1, minWidth:0 }}>
-                    <div style={{ fontSize:14, color:'#F5F0E8', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{song?.name}</div>
-                    {song?.artist && <div style={{ fontSize:11, color:'#5a5a5a', fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
+                    <div style={{ font:`500 16px ${DISPLAY}`, color:TXT, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap' }}>{song?.name}</div>
+                    <div style={{ font:`400 12px ${MONO}`, color:TXT3, marginTop:2 }}>
+                      {[song?.key, song?.tempo].filter(Boolean).join(' · ') || (song?.artist || '')}
+                      {song && !song.chords?.trim() && <span style={{ color:RED, marginLeft:6 }}>· NO CHART</span>}
+                    </div>
                   </div>
-                  {song?.key && <span style={s.keyBadge}>{song.key}</span>}
-                  {song && !song.chords?.trim() && (
-                    <span title="No chord chart" style={{ color:'#c04040', fontSize:11, fontFamily:'Inter, sans-serif', flexShrink:0 }}>!</span>
-                  )}
-                  <button onClick={() => removeSong(slot.id)}
-                    style={{ background:'none', border:'none', color:'#444', fontSize:22, cursor:'pointer', padding:'0 2px', lineHeight:1, flexShrink:0 }}>×</button>
+                  <div style={{ display:'flex', gap:1, background:SEAM, overflow:'hidden', flexShrink:0 }}>
+                    <div className="press" onClick={() => { if (!atTop) reorder(i, i - 1) }} style={{ background:BG, padding:'6px 9px', cursor: atTop ? 'default' : 'pointer' }}><span style={{ color: atTop ? DISABLED : GOLD, fontSize:12, fontFamily:MONO }}>▲</span></div>
+                    <div className="press" onClick={() => { if (!atBottom) reorder(i, i + 1) }} style={{ background:BG, padding:'6px 9px', cursor: atBottom ? 'default' : 'pointer' }}><span style={{ color: atBottom ? DISABLED : GOLD, fontSize:12, fontFamily:MONO }}>▼</span></div>
+                    <div className="press" onClick={() => removeSong(slot.id)} style={{ background:BG, padding:'6px 9px', cursor:'pointer' }}><span style={{ color:RED, fontSize:12, fontFamily:MONO }}>✕</span></div>
+                  </div>
                 </div>
               )
             })}
@@ -927,8 +863,10 @@ function SetListBuilder({ songs: allSongs, onPlay }) {
 }
 
 function inp2(extra = {}) {
-  return { width:'100%', padding:'9px 10px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif', outline:'none', ...extra }
+  return { width:'100%', padding:'9px 10px', background:'#0f0f11', border:`1px solid ${HAIR}`, borderRadius:0, color:TXT, fontSize:13, boxSizing:'border-box', fontFamily:'Inter, sans-serif', outline:'none', ...extra }
 }
+// Uppercase mono field label used across the Add form.
+const addLabel = { font:`700 9px 'Space Mono',monospace`, color:DIM, display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.16em' }
 
 function AddSongTab({ onSaved }) {
   const [name, setName] = useState('')
@@ -1007,29 +945,27 @@ function AddSongTab({ onSaved }) {
   const googleUrl = `https://www.google.com/search?q=${encodeURIComponent(name + ' ' + artist + ' chords')}`
 
   return (
-    <div style={{ padding:'16px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
-      <div style={{ fontSize:9, fontWeight:700, color:'#555', marginBottom:16, textTransform:'uppercase', letterSpacing:'0.18em', fontFamily:'Inter, sans-serif' }}>Add Song</div>
-
-      <div style={{ background:'#111', border:'1px solid #1a1a1a', borderLeft:`3px solid ${GOLD}`, borderRadius:16, padding:16, marginBottom:12 }}>
-        <div style={{ fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' }}>Song Info</div>
+    <div style={{ padding:'16px 22px', paddingBottom:'calc(90px + env(safe-area-inset-bottom))' }}>
+      <div style={{ background:'#131215', border:'1px solid #1e1e22', borderRadius:8, padding:16, marginBottom:12 }}>
+        <div style={addLabel}>Song Info</div>
         {[
           ['Song name', <input key="name" value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Od Yishama" style={inp2()} autoFocus autoCorrect="off" autoCapitalize="words" spellCheck={false} />],
           ['Artist', <input key="artist" value={artist} onChange={e=>setArtist(e.target.value)} placeholder="e.g. MBD, Traditional..." style={inp2()} autoCorrect="off" autoCapitalize="words" spellCheck={false} />],
         ].map(([label, input]) => (
           <div key={label} style={{ marginBottom:10 }}>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>{label}</label>
+            <label style={addLabel}>{label}</label>
             {input}
           </div>
         ))}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10 }}>
           <div>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Key</label>
+            <label style={addLabel}>Key</label>
             <select value={key} onChange={e=>setKey(e.target.value)} style={inp2()}>
               {KEYS.map(k=><option key={k}>{k}</option>)}
             </select>
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Event</label>
+            <label style={addLabel}>Event</label>
             <select value={event} onChange={e=>setEvent(e.target.value)} style={inp2()}>
               <option value="kumzitz">Kumzitz</option>
               <option value="sheva">Sheva Brachos</option>
@@ -1038,32 +974,32 @@ function AddSongTab({ onSaved }) {
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Patch</label>
+            <label style={addLabel}>Patch</label>
             <select value={patch} onChange={e=>setPatch(e.target.value)} style={inp2()}>
               {PATCHES.map(p=><option key={p}>{p}</option>)}
             </select>
           </div>
           <div style={{ gridColumn:'1/-1' }}>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Tempo</label>
+            <label style={addLabel}>Tempo</label>
             <input value={tempo} onChange={e=>setTempo(e.target.value)} placeholder="e.g. Slow, Upbeat..." style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>BPM</label>
+            <label style={addLabel}>BPM</label>
             <input type="number" inputMode="numeric" value={bpm} onChange={e=>setBpm(e.target.value)} placeholder="e.g. 72" style={inp2()} />
           </div>
           <div>
-            <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Tags</label>
+            <label style={addLabel}>Tags</label>
             <input value={tags} onChange={e=>setTags(e.target.value)} placeholder="e.g. slow, niggun" style={inp2()} autoCorrect="off" autoCapitalize="none" />
           </div>
         </div>
       </div>
 
-      <div style={{ background:'#111', border:'1px solid #1a1a1a', borderLeft:`3px solid ${GOLD}`, borderRadius:16, padding:16, marginBottom:12 }}>
-        <div style={{ fontSize:9, color:'#555', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.15em', marginBottom:14, fontFamily:'Inter, sans-serif' }}>Find Chords</div>
+      <div style={{ background:'#131215', border:'1px solid #1e1e22', borderRadius:8, padding:16, marginBottom:12 }}>
+        <div style={addLabel}>Find Chords</div>
         <div style={{ display:'flex', gap:8, marginBottom: addAiError ? 8 : 12 }}>
           <button onClick={searchChords} disabled={aiLoading || !name.trim()} style={{
             flex:1, padding:'11px 0', background:'transparent',
-            border:`1px solid ${aiLoading || !name.trim() ? '#1e1e1e' : 'rgba(201,168,76,0.22)'}`, borderRadius:7,
+            border:`1px solid ${aiLoading || !name.trim() ? '#1e1e1e' : 'rgba(199,178,122,0.22)'}`, borderRadius:7,
             color: aiLoading || !name.trim() ? '#3a3a3a' : GOLD,
             fontSize:12, fontWeight:600, cursor: name.trim() ? 'pointer' : 'not-allowed',
             fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase',
@@ -1080,9 +1016,9 @@ function AddSongTab({ onSaved }) {
         {addAiError && (
           <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:10, lineHeight:1.5 }}>{addAiError}</div>
         )}
-        <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Chords</label>
+        <label style={addLabel}>Chords</label>
         {chords && chords.trim() && (
-          <div style={{ background:'#060606', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:7, padding:'10px 12px', marginBottom:8, overflowX:'auto' }}>
+          <div style={{ ...s.panel, marginBottom:8, overflowX:'auto' }}>
             <ChordLyricDisplay text={chords} fontSize={13} />
           </div>
         )}
@@ -1090,23 +1026,23 @@ function AddSongTab({ onSaved }) {
           value={chords} onChange={e=>setChords(e.target.value)}
           placeholder={'Intro: Dm | Gm | A7 | Dm\nVerse: Dm | Gm | Dm | A7\nChorus: F | Bb | C | Dm'}
           rows={4}
-          style={{ width:'100%', padding:'10px 12px', background:'#070707', border:`1px solid rgba(201,168,76,0.2)`, borderRadius:7, color:GOLD, fontSize:13, fontFamily:MONO, resize:'vertical', boxSizing:'border-box' }}
+          style={s.chordBox}
           autoCorrect="off" autoCapitalize="none" spellCheck={false}
         />
-        <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:5, marginTop:12, textTransform:'uppercase', letterSpacing:'0.14em', fontFamily:'Inter, sans-serif' }}>Performance notes</label>
+        <label style={{ ...addLabel, marginTop:12 }}>Performance notes</label>
         <textarea
           value={notes} onChange={e=>setNotes(e.target.value)}
           placeholder="Tips, energy arc, watch-outs..."
           rows={2}
-          style={{ width:'100%', padding:'10px 12px', background:'#0f0f0f', border:'1px solid #1e1e1e', borderRadius:7, color:'#F5F0E8', fontSize:13, resize:'vertical', boxSizing:'border-box', fontFamily:'Inter, sans-serif' }}
+          style={s.fieldTextarea}
         />
       </div>
 
       <button onClick={save} disabled={saving || aiLoading || !name.trim()} style={{
-        width:'100%', padding:16, background: name.trim() && !saving && !aiLoading ? GOLD : '#111',
-        border:'none', borderRadius:10, color: name.trim() && !saving && !aiLoading ? '#000' : '#3a3a3a',
-        fontSize:14, fontWeight:700, cursor: name.trim() && !saving && !aiLoading ? 'pointer' : 'not-allowed',
-        fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase',
+        width:'100%', padding:16, background: name.trim() && !saving && !aiLoading ? GOLD : '#131215',
+        border:'none', borderRadius:0, color: name.trim() && !saving && !aiLoading ? '#000' : DISABLED,
+        font:`700 13px ${MONO}`, cursor: name.trim() && !saving && !aiLoading ? 'pointer' : 'not-allowed',
+        letterSpacing:'0.1em', textTransform:'uppercase',
       }}>
         {saving || aiLoading ? 'Saving...' : 'Save song'}
       </button>
@@ -1139,7 +1075,7 @@ function AuthScreen() {
   const ready = email.trim() && password.trim()
 
   return (
-    <div style={{ minHeight:'100dvh', background:'#080808', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
+    <div style={{ minHeight:'100dvh', background:'#0d0d0f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
       <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
         <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
           <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
@@ -1148,7 +1084,7 @@ function AuthScreen() {
           <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
           <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
         </svg>
-        <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#F5F0E8', letterSpacing:'-0.015em' }}>Corda</span>
+        <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.015em' }}>Corda</span>
       </div>
 
       <div className="auth-card" style={{ width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1c1c1a', borderRadius:22, padding:30 }}>
@@ -1191,7 +1127,7 @@ function AuthScreen() {
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()} placeholder="you@example.com"
             className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F5F0E8', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoComplete="email" autoCorrect="off" autoCapitalize="none" spellCheck={false} />
         </div>
 
@@ -1201,7 +1137,7 @@ function AuthScreen() {
             onKeyDown={e => e.key === 'Enter' && submit()}
             placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
             className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#F5F0E8', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
         </div>
 
@@ -1228,6 +1164,9 @@ function AuthScreen() {
 
 export default function App() {
   const [tab, setTab] = useState('songs')
+  const [showAdd, setShowAdd] = useState(false)      // Add-song overlay (folded in from Songs)
+  const [showSounds, setShowSounds] = useState(false) // Sounds/patches reference overlay
+  const [kfRoot, setKfRoot] = useState(7)            // capo tool root (chromatic index, default G)
   const [songs, setSongs] = useState([])
   const [loading, setLoading] = useState(true)
   const [loadError, setLoadError] = useState(false)
@@ -1241,6 +1180,7 @@ export default function App() {
   const [aiError, setAiError] = useState('')
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [tagFilter, setTagFilter] = useState('')
+  const [scrollY, setScrollY] = useState(0)  // drives Songs large-title collapse
 
   // Fill-all state
   const [fillAllConfirm, setFillAllConfirm] = useState(false)
@@ -1470,35 +1410,26 @@ export default function App() {
 
   function renderSongCard(song) {
     const isExpanded = expandedId === song.id
+    const hasChords = !!song.chords?.trim()
     return (
-      <div key={song.id} style={s.card(isExpanded, !!song.chords?.trim())} className="song-card">
-        <div style={s.cardHeader} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
-          <div style={s.cardLeft}>
-            <div style={s.cardName}>{song.name}</div>
-            <div style={{ display:'flex', alignItems:'center', gap:6, flexWrap:'wrap' }}>
-              <div style={s.cardArtist}>{song.artist || <span style={{color:'#555'}}>—</span>}</div>
-              {!isExpanded && song.tags && (
-                <div style={{ display:'flex', gap:4, flexWrap:'wrap' }}>
-                  {(song.tags).split(',').map(t=>t.trim()).filter(Boolean).slice(0,3).map(tag => (
-                    <span key={tag} style={{ fontSize:9, color:'#555', background:'#161616', border:'1px solid #222', borderRadius:10, padding:'1px 6px', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>#{tag}</span>
-                  ))}
-                </div>
-              )}
+      <div key={song.id} style={s.row}>
+        <div className="press" style={s.rowHead} onClick={() => { setExpandedId(isExpanded ? null : song.id); setDeleteConfirmId(null) }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0 }}>
+            <div style={s.rowDot(hasChords)} />
+            <div style={{ minWidth:0 }}>
+              <div style={s.rowName}>{song.name}</div>
+              <div style={s.rowArtist}>{song.artist || '—'}</div>
             </div>
           </div>
-          <div style={s.cardRight}>
-            <span style={s.evPill(song.event_type)}>
-              {song.event_type === 'sheva' ? 'SB' : song.event_type === 'kumzitz' ? 'KZ' : song.event_type === 'wedding' ? 'WD' : 'ALL'}
-            </span>
-            {song.key && <span style={s.keyBadge}>{song.key}</span>}
-            <button style={s.starBtn} onClick={e => { e.stopPropagation(); updateSong(song.id, 'is_favorite', !song.is_favorite) }}>
-              {song.is_favorite ? '★' : '☆'}
-            </button>
-            <span style={s.chevron(isExpanded)}>▼</span>
+          <div style={{ display:'flex', alignItems:'center', gap:12, flexShrink:0 }}>
+            <button style={s.star(song.is_favorite)} onClick={e => { e.stopPropagation(); updateSong(song.id, 'is_favorite', !song.is_favorite) }}>★</button>
+            {song.key && <span style={s.rowKey}>{song.key}</span>}
           </div>
         </div>
-        {isExpanded && (
-          <div style={s.detail} className="card-detail">
+        <div style={s.expandWrap(isExpanded)}>
+          <div style={{ overflow:'hidden', minHeight:0 }}>
+          {isExpanded && (
+          <div style={{ padding:'2px 2px 20px 16px' }} className="card-detail">
             <div style={s.detailGrid}>
               <div style={{gridColumn:'1/-1'}}>
                 <label style={s.fieldLabel}>Song name</label>
@@ -1558,7 +1489,7 @@ export default function App() {
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:6 }}>
                 <span style={{ ...s.fieldLabel, marginBottom:0, display:'inline' }}>Chords</span>
                 <button onClick={() => fillWithAI(song)} disabled={aiLoadingId === song.id}
-                  style={{ background:'transparent', border:`1px solid ${aiLoadingId === song.id ? '#1e1e1e' : 'rgba(201,168,76,0.22)'}`, borderRadius:5, color: aiLoadingId === song.id ? '#444' : GOLD, fontSize:10, fontWeight:600, padding:'4px 9px', cursor: aiLoadingId === song.id ? 'default' : 'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
+                  style={{ background:'transparent', border:`1px solid ${aiLoadingId === song.id ? '#1e1e1e' : 'rgba(199,178,122,0.22)'}`, borderRadius:5, color: aiLoadingId === song.id ? '#444' : GOLD, fontSize:10, fontWeight:600, padding:'4px 9px', cursor: aiLoadingId === song.id ? 'default' : 'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em', textTransform:'uppercase' }}>
                   {aiLoadingId === song.id ? 'Searching...' : '✦ Fill with Chords'}
                 </button>
               </div>
@@ -1566,7 +1497,7 @@ export default function App() {
                 <div style={{ fontSize:11, color:'#c04040', fontFamily:'Inter, sans-serif', marginBottom:6, lineHeight:1.5 }}>{aiError}</div>
               )}
               {xChords && xChords.trim() && (
-                <div style={{ background:'#060606', border:`1px solid rgba(201,168,76,0.15)`, borderRadius:7, padding:'12px 14px', marginBottom:8, overflowX:'auto' }}>
+                <div style={{ background:'#060606', border:`1px solid rgba(199,178,122,0.15)`, borderRadius:7, padding:'12px 14px', marginBottom:8, overflowX:'auto' }}>
                   <ChordLyricDisplay text={xChords} fontSize={13} />
                 </div>
               )}
@@ -1591,7 +1522,7 @@ export default function App() {
               <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
                 <button
                   onClick={() => { setGigSongs([song]); setGigReturnTab('songs'); setTab('gig') }}
-                  style={{ padding:'8px 13px', background:'transparent', border:`1px solid rgba(201,168,76,0.22)`, borderRadius:6, color:GOLD, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
+                  style={{ padding:'8px 13px', background:'transparent', border:`1px solid rgba(199,178,122,0.22)`, borderRadius:6, color:GOLD, fontSize:12, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.04em' }}>
                   ▶ Play
                 </button>
                 {deleteConfirmId === song.id
@@ -1611,106 +1542,132 @@ export default function App() {
               </button>
             </div>
           </div>
-        )}
+          )}
+          </div>
+        </div>
       </div>
     )
   }
 
   if (authLoading) return (
-    <div style={{ position:'fixed', inset:0, background:'#080808', display:'flex', alignItems:'center', justifyContent:'center' }}>
-      <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:28, fontWeight:700, color:'#2a2a2a', letterSpacing:'-0.015em' }}>Corda</span>
+    <div style={{ position:'fixed', inset:0, background:'#0d0d0f', display:'flex', alignItems:'center', justifyContent:'center' }}>
+      <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:28, fontWeight:700, color:'#2a2a2a', letterSpacing:'-0.015em' }}>Corda</span>
     </div>
   )
   if (!user) return <AuthScreen />
 
   return (
     <div style={s.app}>
+      {/* Slim utility bar — brand mark + sign out. Screen identity lives in each tab's large title. */}
       <div style={s.header}>
-        <div style={{ paddingBottom:18 }}>
-          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
-            <div style={{ display:'flex', alignItems:'center', gap:10 }}>
-              <svg width="20" height="20" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
-                <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
-                <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
-                <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
-                <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
-                <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
-              </svg>
-              <span style={{ fontFamily:'Playfair Display, serif', fontStyle:'italic', fontSize:30, fontWeight:700, color:'#F0EBE2', letterSpacing:'-0.02em', lineHeight:1 }}>Corda</span>
-            </div>
-            <button onClick={() => supabase.auth.signOut()} style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:6, color:'#2e2e2e', fontSize:9, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.12em', textTransform:'uppercase', padding:'5px 10px', lineHeight:1 }}>Sign out</button>
+        <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:13 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:9 }}>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
+              <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
+              <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
+              <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
+              <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
+              <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
+            </svg>
+            <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:19, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.02em', lineHeight:1 }}>Corda</span>
           </div>
-          <div style={{ display:'flex', alignItems:'center', gap:8, marginTop:8 }}>
-            <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.24em', color:'rgba(201,168,76,0.5)' }}>Performance Library</span>
-            {songs.length > 0 && (
-              <>
-                <span style={{ color:'#252523', fontSize:9 }}>·</span>
-                <span style={{ fontFamily:'Inter, sans-serif', fontSize:9, color:'#343432', letterSpacing:'0.06em' }}>{songs.length} songs</span>
-              </>
-            )}
-          </div>
+          <button onClick={() => supabase.auth.signOut()} style={{ background:'none', border:'1px solid #1c1c1c', borderRadius:6, color:'#2e2e2e', fontSize:9, cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.12em', textTransform:'uppercase', padding:'5px 10px', lineHeight:1 }}>Sign out</button>
         </div>
       </div>
 
-      <div style={s.scroll}>
+      {/* iOS-style pinned compact header: fades/blurs in over the first 50px of Songs scroll. */}
+      {tab === 'songs' && (() => {
+        const t = Math.min(1, scrollY / 50)
+        if (t <= 0) return null
+        return (
+          <div aria-hidden style={{ position:'fixed', top:0, left:0, right:0, zIndex:120,
+            paddingTop:'calc(env(safe-area-inset-top) + 15px)',
+            background:`rgba(13,13,15,${(0.88 * t).toFixed(3)})`,
+            backdropFilter:'blur(20px) saturate(160%)', WebkitBackdropFilter:'blur(20px) saturate(160%)',
+            borderBottom:`1px solid ${t > 0.6 ? HAIR : 'transparent'}`, opacity:t, pointerEvents:'none' }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8, padding:'0 22px 13px' }}>
+              <div style={{ width:7, height:7, background:GOLD, flexShrink:0 }} />
+              <span style={{ font:`700 15px ${DISPLAY}`, color:TXT, letterSpacing:'0.01em', textTransform:'uppercase' }}>Songs</span>
+            </div>
+          </div>
+        )
+      })()}
+
+      <div style={s.scroll} onScroll={e => setScrollY(e.currentTarget.scrollTop)}>
 
         {tab === 'songs' && <div className="tab-fade">
-          <div className="filter-row-wrap">
-            <div style={s.filterRow}>
-              {['all','kumzitz','sheva','wedding'].map(ev => (
-                <button key={ev} className="pill" style={s.filterPill(eventFilter === ev)} onClick={() => setEventFilter(ev)}>
-                  {ev === 'all' ? 'All' : ev === 'sheva' ? 'Sheva Brachos' : ev.charAt(0).toUpperCase() + ev.slice(1)}
-                </button>
-              ))}
-              <button className="pill" style={s.filterPill(favFilter)} onClick={() => setFavFilter(f => !f)}>★ Faves</button>
-            </div>
-          </div>
-          <div style={{ ...s.searchRow, display:'flex', gap:8, alignItems:'center' }}>
-            <div style={{ position:'relative', flex:1 }}>
-              <input value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Search songs or artist..." style={{ ...s.searchInput, width:'100%', paddingRight: search ? 36 : 14 }}
-                className="focus-gold"
-                autoCorrect="off" autoCapitalize="none" spellCheck={false} />
-              {search && (
-                <button onClick={() => setSearch('')}
-                  style={{ position:'absolute', right:10, top:'50%', transform:'translateY(-50%)', background:'none', border:'none', color:'#555', fontSize:18, cursor:'pointer', padding:'0 2px', lineHeight:1 }}>×</button>
-              )}
-            </div>
-            <button
-              onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }}
-              disabled={filtered.length === 0}
-              title="Open filtered songs in Gig Mode"
-              style={{ flexShrink:0, padding:'9px 14px', background:'transparent', border:`1px solid ${filtered.length ? 'rgba(201,168,76,0.22)' : '#1a1a1a'}`, borderRadius:10, color: filtered.length ? GOLD : '#3a3a3a', fontSize:14, cursor: filtered.length ? 'pointer' : 'default', lineHeight:1 }}>
-              ▶
-            </button>
-          </div>
-
-          {allTags.length > 0 && (
-            <div className="filter-row-wrap">
-              <div style={{ display:'flex', gap:6, padding:'0 14px 6px', overflowX:'auto', scrollbarWidth:'none', flexShrink:0 }}>
-                {allTags.map(tag => (
-                  <button key={tag} className="pill" style={s.filterPill(tagFilter === tag)} onClick={() => setTagFilter(tagFilter === tag ? '' : tag)}>
-                    #{tag}
-                  </button>
-                ))}
+          <div style={{ padding:'6px 22px 0' }}>
+            {/* Large title + fold-in actions (Add / Sounds) — title fades as compact header takes over */}
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', ...s.largeTitle }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, opacity: Math.max(0, 1 - scrollY / 42), transform:`translateY(${(-Math.min(1, scrollY / 50) * 6).toFixed(1)}px)` }}>
+                <div style={s.largeTitleSquare} />
+                <div style={s.largeTitleText}>Songs</div>
+              </div>
+              <div style={s.seamStrip}>
+                <div className="press" style={{ ...s.seamCell, padding:'8px 12px' }} onClick={() => setShowSounds(true)}>
+                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.12em', color:TXT3 }}>◈ SOUNDS</span>
+                </div>
+                <div className="press" style={{ ...s.seamCell, padding:'8px 12px' }} onClick={() => setShowAdd(true)}>
+                  <span style={{ font:`700 10px ${MONO}`, letterSpacing:'0.12em', color:GOLD }}>+ ADD</span>
+                </div>
               </div>
             </div>
-          )}
 
-          {/* Filtered count — show when any filter is active */}
-          {!loading && (search || eventFilter !== 'all' || favFilter || tagFilter) && (
-            <div style={{ padding:'4px 16px 2px', display:'flex', alignItems:'center', gap:8 }}>
-              <span style={{ fontSize:10, color:'#444', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
-                {filtered.length} song{filtered.length !== 1 ? 's' : ''}
-              </span>
-              {(search || eventFilter !== 'all' || favFilter || tagFilter) && (
-                <button onClick={() => { setSearch(''); setEventFilter('all'); setFavFilter(false); setTagFilter('') }}
-                  style={{ background:'none', border:'none', color:'#444', fontSize:10, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, textDecoration:'underline', textUnderlineOffset:2 }}>
-                  Clear filters
-                </button>
-              )}
+            {/* Search */}
+            <div style={{ ...s.searchWrap, display:'flex', alignItems:'center', gap:10 }}>
+              <input value={search} onChange={e => setSearch(e.target.value)}
+                placeholder="Search songs…" style={{ ...s.searchInput, flex:1 }}
+                autoCorrect="off" autoCapitalize="none" spellCheck={false} />
+              {search
+                ? <button onClick={() => setSearch('')} style={{ background:'none', border:'none', color:DIM, fontSize:16, cursor:'pointer', padding:0, lineHeight:1 }}>×</button>
+                : <button onClick={() => { setGigSongs(filtered); setGigReturnTab('songs'); setTab('gig') }} disabled={!filtered.length}
+                    title="Play filtered songs in Gig Mode"
+                    style={{ background:'none', border:'none', color: filtered.length ? GOLD : DISABLED, fontSize:13, cursor: filtered.length ? 'pointer' : 'default', padding:0, lineHeight:1 }}>▶</button>
+              }
             </div>
-          )}
+
+            {/* Two-way segmented filter */}
+            <div style={s.segTrack}>
+              <div style={s.segPill(favFilter ? '100%' : '0%')} />
+              <div style={s.segOpt(!favFilter)} onClick={() => setFavFilter(false)}>ALL</div>
+              <div style={s.segOpt(favFilter)} onClick={() => setFavFilter(true)}>★ FAVORITES</div>
+            </div>
+
+            {/* Event filter — square mono seam pills */}
+            <div style={{ display:'flex', gap:1, marginTop:8, background:SEAM, padding:1, overflow:'hidden' }}>
+              {['all','kumzitz','sheva','wedding'].map(ev => {
+                const on = eventFilter === ev
+                return (
+                  <div key={ev} className="press" onClick={() => setEventFilter(ev)}
+                    style={{ flex:1, textAlign:'center', padding:'7px 4px', cursor:'pointer', background: on ? '#1c1c20' : BG, font:`700 9px ${MONO}`, letterSpacing:'0.08em', color: on ? GOLD : DIM, textTransform:'uppercase', whiteSpace:'nowrap' }}>
+                    {ev === 'all' ? 'ALL' : ev === 'sheva' ? 'SB' : ev === 'kumzitz' ? 'KZ' : 'WD'}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Tag filter */}
+            {allTags.length > 0 && (
+              <div style={{ display:'flex', gap:6, marginTop:8, overflowX:'auto', scrollbarWidth:'none' }}>
+                {allTags.map(tag => {
+                  const on = tagFilter === tag
+                  return (
+                    <button key={tag} className="press" onClick={() => setTagFilter(on ? '' : tag)}
+                      style={{ background: on ? GOLD : 'transparent', border:`1px solid ${on ? GOLD : HAIR}`, color: on ? '#000' : DIM, font:`600 10px ${MONO}`, letterSpacing:'0.04em', padding:'5px 10px', cursor:'pointer', whiteSpace:'nowrap' }}>#{tag}</button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Filtered count */}
+            {!loading && (search || eventFilter !== 'all' || favFilter || tagFilter) && (
+              <div style={{ padding:'8px 0 2px', display:'flex', alignItems:'center', gap:8 }}>
+                <span style={{ font:`400 10px ${MONO}`, color:DIM, letterSpacing:'0.06em' }}>{filtered.length} SONG{filtered.length !== 1 ? 'S' : ''}</span>
+                <button onClick={() => { setSearch(''); setEventFilter('all'); setFavFilter(false); setTagFilter('') }}
+                  style={{ background:'none', border:'none', color:DIM, fontSize:10, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, textDecoration:'underline', textUnderlineOffset:2 }}>Clear filters</button>
+              </div>
+            )}
+          </div>
 
           {/* Fill all missing chords bar */}
           {!loading && (() => {
@@ -1758,48 +1715,48 @@ export default function App() {
             )
           })()}
 
+          <div style={{ padding:'0 22px 40px' }}>
           {loading
-            ? <div style={{ padding:'0 12px', marginTop:10 }}>
+            ? <div style={{ marginTop:10 }}>
                 {[1,2,3,4,5].map(i => (
-                  <div key={i} className="skeleton" style={{ margin:'0 14px 7px', background:'linear-gradient(160deg,#141412,#0f0f0e)', border:'1px solid #181816', borderLeft:`3px solid rgba(201,168,76,0.08)`, borderRadius:18, padding:'16px 18px', opacity: 1 - i * 0.14 }}>
-                    <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-                      <div style={{ flex:1 }}>
-                        <div style={{ height:14, width:`${55 + (i * 17) % 35}%`, background:'#1c1c1a', borderRadius:5, marginBottom:10 }} />
-                        <div style={{ height:9, width:`${28 + (i * 13) % 25}%`, background:'#181816', borderRadius:4 }} />
-                      </div>
-                      <div style={{ display:'flex', gap:6 }}>
-                        <div style={{ width:32, height:22, background:'#181816', borderRadius:5 }} />
-                        <div style={{ width:20, height:22, background:'#181816', borderRadius:5 }} />
-                      </div>
+                  <div key={i} className="skeleton" style={{ borderTop:`1px solid ${HAIR}`, padding:'16px 2px', opacity: 1 - i * 0.14, display:'flex', alignItems:'center', gap:10 }}>
+                    <div style={{ width:6, height:6, background:'#26262b', flexShrink:0 }} />
+                    <div style={{ flex:1 }}>
+                      <div style={{ height:14, width:`${55 + (i * 17) % 35}%`, background:'#26262b', marginBottom:8 }} />
+                      <div style={{ height:9, width:`${28 + (i * 13) % 25}%`, background:'#1c1c20' }} />
                     </div>
+                    <div style={{ width:20, height:14, background:'#1c1c20' }} />
                   </div>
                 ))}
               </div>
             : loadError
             ? <div style={s.empty}>
                 <div style={{ marginBottom:16 }}>Couldn't load songs.</div>
-                <button onClick={fetchSongs} style={{ background:'transparent', border:`1px solid rgba(201,168,76,0.22)`, borderRadius:6, color:GOLD, fontSize:12, padding:'9px 22px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>Retry</button>
+                <button onClick={fetchSongs} style={{ background:'transparent', border:`1px solid ${GOLD_DIM}`, borderRadius:0, color:GOLD, font:`700 11px ${MONO}`, padding:'9px 22px', cursor:'pointer', letterSpacing:'0.1em', textTransform:'uppercase' }}>Retry</button>
               </div>
             : filtered.length === 0 && songs.length === 0
             ? <div style={s.empty}>
-                <div style={{ color:'#5a5a5a', marginBottom:20 }}>Your song library is empty.</div>
-                <button onClick={() => setTab('add')} style={{ background:GOLD, border:'none', borderRadius:8, color:'#000', fontSize:13, fontWeight:700, padding:'11px 24px', cursor:'pointer', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>+ Add your first song</button>
+                <div style={{ color:TXT3, marginBottom:20 }}>Your song library is empty.</div>
+                <button onClick={() => setShowAdd(true)} style={{ background:GOLD, border:'none', borderRadius:0, color:'#000', font:`700 12px ${MONO}`, padding:'12px 24px', cursor:'pointer', letterSpacing:'0.08em', textTransform:'uppercase' }}>+ Add your first song</button>
               </div>
             : filtered.length === 0
             ? <div style={s.empty}>No songs match your filters.</div>
             : alphaGroups.map(({ letter, songs: groupSongs }) => (
                 <div key={letter}>
-                  <div style={{ padding:'20px 18px 6px', display:'flex', alignItems:'center', gap:12 }}>
-                    <span style={{ color:'#C9A84C', fontSize:11, fontWeight:700, letterSpacing:'0.18em', fontFamily:'Playfair Display, serif', fontStyle:'italic', flexShrink:0 }}>{letter}</span>
-                    <div style={{ flex:1, height:1, background:'#161614' }} />
-                  </div>
+                  <div style={s.groupLetter}>{letter}</div>
                   {groupSongs.map(song => renderSongCard(song))}
                 </div>
               ))
           }
+          </div>
         </div>}
 
-        {tab === 'keyfinder' && <div className="tab-fade">
+        {tab === 'keyfinder' && <div className="tab-fade" style={{ padding:'6px 22px 40px' }}>
+          <div style={s.largeTitle}>
+            <div style={s.largeTitleSquare} />
+            <div style={s.largeTitleText}>Key Finder</div>
+          </div>
+          <div style={tick({ marginBottom:10 })}>BEST KEY FOR CROWD</div>
           <div style={s.kfCard}>
             <div style={s.kfLabel}>Crowd</div>
             {[
@@ -1854,7 +1811,7 @@ export default function App() {
                     setKfProfileSaved(true)
                     setTimeout(() => setKfProfileSaved(false), 2000)
                   }}
-                  style={{ flex:1, padding:'8px 0', background:'transparent', border:`1px solid ${kfProfileSaved ? '#2a4a2a' : 'rgba(201,168,76,0.22)'}`, borderRadius:6, color: kfProfileSaved ? '#5a9e5a' : GOLD, fontSize:11, fontWeight:600, cursor:'pointer', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
+                  style={{ flex:1, padding:'8px 0', background:'transparent', border:`1px solid ${kfProfileSaved ? '#2a4a2a' : 'rgba(199,178,122,0.22)'}`, borderRadius:6, color: kfProfileSaved ? '#5a9e5a' : GOLD, fontSize:11, fontWeight:600, cursor:'pointer', transition:'all 0.2s', fontFamily:'Inter, sans-serif', letterSpacing:'0.06em' }}>
                   {kfProfileSaved ? 'Saved ✓' : 'Save singer profile'}
                 </button>
                 <button
@@ -1890,7 +1847,7 @@ export default function App() {
                     ).slice(0, 8)
                   : []
                 return (
-                  <div style={{ margin:'8px 12px 0', background:'#111', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:16 }}>
+                  <div style={{ marginBottom:24, background:PANEL, border:`1px solid ${GOLD_DIM}`, borderRadius:8, padding:16 }}>
                     <div style={s.kfLabel}>Apply to song</div>
 
                     {/* Search input */}
@@ -1907,7 +1864,7 @@ export default function App() {
                         onBlur={() => setTimeout(() => setKfSongDropdown(false), 150)}
                         placeholder="Search songs..."
                         className="focus-gold"
-                        style={{ width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:6, color:'#F5F0E8', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+                        style={{ width:'100%', padding:'9px 10px', background:'#111', border:'1px solid #1e1e1e', borderRadius:6, color:'#EDEBE6', fontSize:13, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
                         autoCorrect="off" autoCapitalize="none" spellCheck={false}
                       />
 
@@ -1928,7 +1885,7 @@ export default function App() {
                               onMouseLeave={e => e.currentTarget.style.background='transparent'}
                             >
                               <div>
-                                <div style={{ color:'#F5F0E8', fontSize:13, fontFamily:'Playfair Display, serif' }}>{song.name}</div>
+                                <div style={{ color:'#EDEBE6', fontSize:13, fontFamily:'Space Grotesk, sans-serif' }}>{song.name}</div>
                                 {song.artist && <div style={{ color:'#5a5a5a', fontSize:11, marginTop:1, fontFamily:'Inter, sans-serif' }}>{song.artist}</div>}
                               </div>
                               {song.key && <span style={s.keyBadge}>{song.key}</span>}
@@ -1940,9 +1897,9 @@ export default function App() {
 
                     {/* Selected song confirmation row */}
                     {selectedSong && (
-                      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', background:'#080808', borderRadius:6, marginBottom:8 }}>
+                      <div style={{ display:'flex', alignItems:'center', gap:8, padding:'8px 10px', background:'#0d0d0f', borderRadius:6, marginBottom:8 }}>
                         <div style={{ flex:1, minWidth:0 }}>
-                          <div style={{ color:'#F5F0E8', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Playfair Display, serif' }}>{selectedSong.name}</div>
+                          <div style={{ color:'#EDEBE6', fontSize:13, overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', fontFamily:'Space Grotesk, sans-serif' }}>{selectedSong.name}</div>
                           {selectedSong.artist && <div style={{ color:'#5a5a5a', fontSize:11, fontFamily:'Inter, sans-serif' }}>{selectedSong.artist}</div>}
                         </div>
                         <span style={{ color:'#444', fontSize:12, fontFamily:'Inter, sans-serif' }}>{selectedSong.key || '—'}</span>
@@ -1965,44 +1922,48 @@ export default function App() {
               })()}
             </>
           )}
-        </div>}
 
-        {tab === 'patches' && <div className="tab-fade">
-          {[
-            { label:'Piano', items:[
-              {name:'Warm Grand Piano',src:'Grand Piano Pack → Sampler',when:'Primary for any event'},
-              {name:'Upright Piano',src:'Upright Piano by Spitfire',when:'Intimate kumzitz'},
-              {name:'Felt Piano',src:'Spitfire LABS (free)',when:'Slow, introspective niggunim'},
-              {name:'The Gentleman',src:'Komplete Start',when:'Dark, moody upright'},
-            ]},
-            { label:'Pads & Atmosphere', items:[
-              {name:'Strings',src:'String Quartet — Spitfire',when:'Kumzitz & sheva brachos'},
-              {name:'Choir Pad',src:'Analog Lab Pro V (Mellotron)',when:'Vocal texture layer'},
-              {name:'Analog Pad',src:'Drift / Wavetable',when:'Warm background wash'},
-              {name:'Orchestral Strings',src:'Orchestral Strings Pack',when:'Wedding processionals'},
-            ]},
-            { label:'Lead & Color', items:[
-              {name:'Rhodes',src:'Electric Keyboards Pack',when:'Soulful melody lines'},
-              {name:'Organ (B-3)',src:'Analog Lab Pro V',when:'High-energy endings'},
-              {name:'Vital Synth',src:'Vital Audio (free)',when:'Modern pads & leads'},
-            ]},
-          ].map(sec => (
-            <div key={sec.label} style={s.patchSection}>
-              <div style={s.patchSectionLabel}>{sec.label}</div>
-              <div style={s.patchGrid}>
-                {sec.items.map(p => (
-                  <div key={p.name} style={s.patchCard}>
-                    <div style={s.patchName}>{p.name}</div>
-                    <div style={s.patchSrc}>{p.src}</div>
-                    <div style={s.patchWhen}>{p.when}</div>
-                  </div>
-                ))}
+          {/* === Capo / CAGED shapes === */}
+          {(() => {
+            const rootLabel = CHROMATIC[kfRoot]
+            const shapes = capoShapes(kfRoot)
+            const inKey = songs.filter(sg => KEY_TO_CHROMA[(sg.key || '').replace(/m$/, '')] === kfRoot)
+            return (
+              <div style={{ marginTop:30 }}>
+                <div style={tick({ marginBottom:10 })}>SELECT ROOT</div>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:1, background:SEAM, borderRadius:10, overflow:'hidden', marginBottom:24 }}>
+                  {CHROMATIC.map((label, i) => (
+                    <div key={label} className="press" onClick={() => setKfRoot(i)}
+                      style={{ background: i === kfRoot ? '#1c1c20' : BG, padding:'18px 0', textAlign:'center', cursor:'pointer' }}>
+                      <span style={{ font:`700 16px ${MONO}`, color: i === kfRoot ? GOLD : TXT2 }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={tick({ marginBottom:10 })}>CAPO SHAPES FOR {rootLabel}</div>
+                <div style={{ ...s.panel, padding:0, marginBottom:24 }}>
+                  {shapes.map((c, i) => (
+                    <div key={c.shape} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'12px 16px', borderTop: i > 0 ? `1px solid ${HAIR}` : 'none' }}>
+                      <span style={{ font:`400 13px 'Inter',sans-serif`, color:TXT2 }}>{c.fretLabel}</span>
+                      <span style={{ font:`700 13px ${MONO}`, color:GOLD }}>Shape {c.shape}</span>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={tick({ marginBottom:10 })}>SONGS IN {rootLabel}</div>
+                {inKey.length
+                  ? inKey.map(sg => (
+                      <div key={sg.id} style={{ display:'flex', justifyContent:'space-between', alignItems:'center', padding:'14px 2px', borderTop:`1px solid ${HAIR}` }}>
+                        <span style={{ font:`500 15px ${DISPLAY}`, color:TXT }}>{sg.name}</span>
+                        <span style={{ font:`400 12px 'Inter',sans-serif`, color:TXT3 }}>{sg.artist || '—'}</span>
+                      </div>
+                    ))
+                  : <div style={{ color:DIM, fontSize:12, fontFamily:'Inter, sans-serif', padding:'14px 2px' }}>No songs in this key yet.</div>
+                }
               </div>
-            </div>
-          ))}
+            )
+          })()}
         </div>}
-
-        {tab === 'add' && <div className="tab-fade"><AddSongTab onSaved={async () => { await fetchSongs(); setTab('songs') }} /></div>}
 
         {tab === 'setlist' && (
           <div className="tab-fade">
@@ -2016,17 +1977,80 @@ export default function App() {
       </div>
 
       <div style={s.bottomNav}>
-        {TABS.map(t => (
-          <button key={t.id} style={s.navBtn(tab === t.id)}
-            onClick={() => { if (t.id === 'gig') { setGigSongs(null); setGigReturnTab('songs') } setTab(t.id) }}>
-            {tab === t.id && <div style={{ position:'absolute', top:0, left:'50%', transform:'translateX(-50%)', width:24, height:3, background:GOLD, borderRadius:2, boxShadow:`0 1px 6px rgba(201,168,76,0.4)` }} />}
-            <span style={s.navIcon} className={tab === t.id ? 'nav-active-icon' : ''}>{t.icon}</span>
-            {t.label}
-          </button>
-        ))}
+        {TABS.map(t => {
+          const active = tab === t.id
+          return (
+            <button key={t.id} style={s.navBtn()}
+              onClick={() => { if (t.id === 'gig') { setGigSongs(null); setGigReturnTab('songs') } setScrollY(0); setTab(t.id) }}>
+              <span key={active ? 'on' : 'off'} style={s.navIcon(active)} className={active ? 'nav-active-icon' : ''}>{t.icon}</span>
+              <span style={s.navLabel(active)}>{t.label.toUpperCase()}</span>
+            </button>
+          )
+        })}
       </div>
 
       {tab === 'gig' && <GigMode songs={gigSongs || songs} onExit={() => { setGigSongs(null); setTab(gigReturnTab) }} onSaveKey={(id, key) => updateSong(id, 'key', key)} />}
+
+      {/* Add-song overlay (folded in from Songs header) */}
+      {showAdd && (
+        <div style={{ position:'fixed', inset:0, background:BG, zIndex:180, display:'flex', flexDirection:'column' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 22px', paddingTop:'calc(env(safe-area-inset-top) + 12px)', borderBottom:`1px solid ${HAIR}`, flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <div style={s.largeTitleSquare} />
+              <div style={{ font:`700 15px ${DISPLAY}`, color:TXT, letterSpacing:'0.02em', textTransform:'uppercase' }}>Add Song</div>
+            </div>
+            <button onClick={() => setShowAdd(false)} style={{ background:'none', border:'none', color:DIM, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>✕</button>
+          </div>
+          <div style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch' }}>
+            <AddSongTab onSaved={async () => { await fetchSongs(); setShowAdd(false); setTab('songs') }} />
+          </div>
+        </div>
+      )}
+
+      {/* Sounds / patches reference overlay */}
+      {showSounds && (
+        <div style={{ position:'fixed', inset:0, background:BG, zIndex:180, display:'flex', flexDirection:'column' }}>
+          <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 22px', paddingTop:'calc(env(safe-area-inset-top) + 12px)', borderBottom:`1px solid ${HAIR}`, flexShrink:0 }}>
+            <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+              <div style={s.largeTitleSquare} />
+              <div style={{ font:`700 15px ${DISPLAY}`, color:TXT, letterSpacing:'0.02em', textTransform:'uppercase' }}>Sounds</div>
+            </div>
+            <button onClick={() => setShowSounds(false)} style={{ background:'none', border:'none', color:DIM, fontSize:22, cursor:'pointer', padding:0, lineHeight:1 }}>✕</button>
+          </div>
+          <div style={{ flex:1, overflowY:'auto', WebkitOverflowScrolling:'touch', padding:'6px 22px 40px' }}>
+            {[
+              { label:'Piano', items:[
+                {name:'Warm Grand Piano',src:'Grand Piano Pack → Sampler',when:'Primary for any event'},
+                {name:'Upright Piano',src:'Upright Piano by Spitfire',when:'Intimate kumzitz'},
+                {name:'Felt Piano',src:'Spitfire LABS (free)',when:'Slow, introspective niggunim'},
+                {name:'The Gentleman',src:'Komplete Start',when:'Dark, moody upright'},
+              ]},
+              { label:'Pads & Atmosphere', items:[
+                {name:'Strings',src:'String Quartet — Spitfire',when:'Kumzitz & sheva brachos'},
+                {name:'Choir Pad',src:'Analog Lab Pro V (Mellotron)',when:'Vocal texture layer'},
+                {name:'Analog Pad',src:'Drift / Wavetable',when:'Warm background wash'},
+                {name:'Orchestral Strings',src:'Orchestral Strings Pack',when:'Wedding processionals'},
+              ]},
+              { label:'Lead & Color', items:[
+                {name:'Rhodes',src:'Electric Keyboards Pack',when:'Soulful melody lines'},
+                {name:'Organ (B-3)',src:'Analog Lab Pro V',when:'High-energy endings'},
+                {name:'Vital Synth',src:'Vital Audio (free)',when:'Modern pads & leads'},
+              ]},
+            ].map(sec => (
+              <div key={sec.label} style={{ marginBottom:24 }}>
+                <div style={tick({ marginBottom:10 })}>{sec.label}</div>
+                {sec.items.map(p => (
+                  <div key={p.name} style={{ padding:'12px 2px', borderTop:`1px solid ${HAIR}` }}>
+                    <div style={{ font:`500 15px ${DISPLAY}`, color:TXT, marginBottom:3 }}>{p.name}</div>
+                    <div style={{ font:`400 12px 'Inter',sans-serif`, color:TXT3, marginBottom:4 }}>{p.src}</div>
+                    <div style={{ font:`400 12px 'Inter',sans-serif`, color:DIM, lineHeight:1.5 }}>{p.when}</div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Fill-all confirmation dialog */}
       {fillAllConfirm && (() => {
@@ -2034,11 +2058,11 @@ export default function App() {
         return (
           <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:300, display:'flex', alignItems:'center', justifyContent:'center', padding:24 }}
             onClick={() => setFillAllConfirm(false)}>
-            <div style={{ background:'#111', border:`1px solid rgba(201,168,76,0.18)`, borderRadius:16, padding:24, maxWidth:320, width:'100%' }}
+            <div style={{ background:'#111', border:`1px solid rgba(199,178,122,0.18)`, borderRadius:16, padding:24, maxWidth:320, width:'100%' }}
               onClick={e => e.stopPropagation()}>
-              <div style={{ fontSize:18, fontWeight:500, color:'#F5F0E8', marginBottom:8, fontFamily:'Playfair Display, serif' }}>Fill all missing chords?</div>
+              <div style={{ fontSize:18, fontWeight:500, color:'#EDEBE6', marginBottom:8, fontFamily:'Space Grotesk, sans-serif' }}>Fill all missing chords?</div>
               <div style={{ fontSize:13, color:'#5a5a5a', lineHeight:1.7, marginBottom:20, fontFamily:'Inter, sans-serif' }}>
-                This will look up chords and lyrics for <strong style={{ color:'#F5F0E8' }}>{missingCount} song{missingCount !== 1 ? 's' : ''}</strong> using Claude. Songs Claude doesn't recognize are skipped, and it stops early after 3 misses in a row.
+                This will look up chords and lyrics for <strong style={{ color:'#EDEBE6' }}>{missingCount} song{missingCount !== 1 ? 's' : ''}</strong> using Claude. Songs Claude doesn't recognize are skipped, and it stops early after 3 misses in a row.
               </div>
               <div style={{ display:'flex', gap:10 }}>
                 <button onClick={() => setFillAllConfirm(false)}

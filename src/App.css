@@ -1,10 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Fragment+Mono:ital@0;1&family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
-  background: #080808;
-  color: #F5F0E8;
+  background: #0d0d0f;
+  color: #EDEBE6;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -19,7 +19,7 @@ input, select, textarea, button {
   appearance: none;
 }
 
-select option { background: #111; color: #F5F0E8; }
+select option { background: #131215; color: #EDEBE6; }
 
 ::-webkit-scrollbar { display: none; }
 html, body { overflow-x: hidden; width: 100%; }
@@ -45,22 +45,8 @@ html, body { overflow-x: hidden; width: 100%; }
 /* === Touch & tap === */
 button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 
-/* === Song card: hover/active states === */
-.song-card {
-  transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), border-left-color 0.2s, transform 0.15s;
-}
-.song-card:hover {
-  box-shadow: 0 6px 36px rgba(0,0,0,0.85), 0 0 0 1px rgba(201,168,76,0.09) !important;
-  border-left-color: rgba(201,168,76,0.75) !important;
-}
-.song-card:active { transform: scale(0.993); opacity: 0.95; }
-
-/* === Setlist card hover === */
-.setlist-card { transition: border-left-color 0.2s, box-shadow 0.25s; }
-.setlist-card:hover {
-  border-left-color: rgba(201,168,76,0.75) !important;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.7) !important;
-}
+/* === Row press state (instrument-rack tactile feedback) === */
+.press:active { transform: scale(0.97); }
 
 /* === Expanded card detail: slides in === */
 .card-detail { animation: detailIn 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
@@ -69,46 +55,30 @@ button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* === Gold focus ring on all inputs === */
+/* === Focus ring on all inputs (subtle gold) === */
 input:focus, select:focus, textarea:focus,
 .focus-gold:focus {
-  border-color: rgba(201,168,76,0.35) !important;
-  box-shadow: 0 0 0 3px rgba(201,168,76,0.05) !important;
+  border-color: rgba(199,178,122,0.35) !important;
+  box-shadow: 0 0 0 3px rgba(199,178,122,0.05) !important;
   outline: none !important;
 }
 
-/* === Gig Mode: song transition === */
-.gig-song { animation: gigIn 0.28s cubic-bezier(0.22, 1, 0.36, 1); }
-@keyframes gigIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
+/* === Gig Mode: directional slide between songs === */
+@keyframes gigSlideInRight { from { opacity: 0; transform: translateX(28px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes gigSlideInLeft  { from { opacity: 0; transform: translateX(-28px); } to { opacity: 1; transform: translateX(0); } }
+
+/* === Key readout pulse on transpose === */
+@keyframes keyPop { 0% { transform: scale(1); } 40% { transform: scale(1.28); } 100% { transform: scale(1); } }
+
+/* === Bottom nav active icon pop === */
+@keyframes navPop { 0% { transform: scale(1); } 35% { transform: scale(1.22); } 100% { transform: scale(1); } }
+.nav-active-icon { animation: navPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
 
 /* === Filter/tag pill press === */
 .pill:active { transform: scale(0.94); }
 
-/* === Filter row: right-edge fade === */
-.filter-row-wrap { position: relative; }
-.filter-row-wrap::after {
-  content: '';
-  position: absolute;
-  right: 0; top: 0; bottom: 0;
-  width: 40px;
-  background: linear-gradient(to left, #080808 20%, transparent);
-  pointer-events: none;
-}
-
-/* === Bottom nav active icon pulse === */
-@keyframes navPop {
-  0%   { transform: scale(1); }
-  35%  { transform: scale(1.18); }
-  100% { transform: scale(1); }
-}
-.nav-active-icon { animation: navPop 0.22s cubic-bezier(0.22, 1, 0.36, 1); }
-
 /* === Responsive: 320px — tighten margins === */
 @media (max-width: 340px) {
-  .song-card { margin-left: 10px !important; margin-right: 10px !important; }
   .gig-chords { font-size: 14px !important; }
 }
 
