@@ -261,7 +261,9 @@ async function fetchChordData({ name, artist, key }, { allowWebFallback = true }
       'Content-Type': 'application/json',
       ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}),
     },
-    body: JSON.stringify({ songName: name, artist, key }),
+    // deep = single fill: let the server give Claude web search for real,
+    // grounded chords. Batch fills stay memory-only to avoid per-song search cost.
+    body: JSON.stringify({ songName: name, artist, key, deep: allowWebFallback }),
   }
 
   // 1) Claude — knowledge-based, won't burn the Gemini quota.

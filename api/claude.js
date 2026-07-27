@@ -26,15 +26,26 @@ export default async function handler(req, res) {
   const songName = cleanField(body.songName)
   const artist = cleanField(body.artist)
   const key = cleanField(body.key, 20)
+  // Single fills request "deep" mode: Claude gets web search for real, grounded
+  // chords. Batch "Fill all" stays memory-only to avoid per-song search cost.
+  const deep = body.deep === true
 
   // Chord-fill only. Caller-controlled model/tokens are clamped to safe bounds.
+  // A full multi-section chart + lyrics can run long — budget generously so the
+  // chart never truncates mid-song. Deep mode adds room for search-tool turns.
   const safeModel = ALLOWED_MODELS.includes(body.model) ? body.model : 'claude-sonnet-5'
-  const safeMaxTokens = Math.min(Math.max(parseInt(body.max_tokens, 10) || 1500, 256), 2000)
+  const defaultMax = deep ? 6000 : 4000
+  const safeMaxTokens = Math.min(Math.max(parseInt(body.max_tokens, 10) || defaultMax, 256), 8000)
 
   let payload
   {
     if (!songName) return res.status(400).json({ error: 'songName required' })
+    const searchLine = deep
+      ? `Search the web for the real chord chart and lyrics — check Chordify, Ultimate Guitar, Shironet, Tab4U, and Jewish/Israeli music sites. Base your answer on what you actually find; do not guess.`
+      : `Use only chords you genuinely know for THIS exact song.`
     const prompt = `You are an expert accompanist for Jewish and Israeli music — niggunim, Shabbos/Yom Tov zemiros, chassidic, and Israeli pop. Give the chords and lyrics for the song "${songName}"${artist ? ` by ${artist}` : ''}${key ? ` (often played in ${key})` : ''}.
+
+${searchLine}
 
 Return your answer in EXACTLY this format and nothing else — no preamble, no commentary, no markdown fences:
 
@@ -68,6 +79,10 @@ Rules:
       max_tokens: safeMaxTokens,
       thinking: { type: 'disabled' },
       messages: [{ role: 'user', content: prompt }],
+      // Deep (single) fills: server-side web search grounds chords in real
+      // sources instead of Claude's spotty memory of niche songs. Capped so one
+      // fill can't spawn a runaway search bill.
+      ...(deep ? { tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }] } : {}),
     }
   }
 
