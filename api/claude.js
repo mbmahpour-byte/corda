@@ -1,4 +1,4 @@
-import { applyCors, verifyUser, cleanField } from './_auth.js'
+import { applyCors, verifyUser, cleanField, checkRateLimit } from './_auth.js'
 
 // Only these models may be requested through this proxy.
 const ALLOWED_MODELS = ['claude-sonnet-5', 'claude-haiku-4-5-20251001']
@@ -12,6 +12,11 @@ export default async function handler(req, res) {
   // Gate: only signed-in Supabase users may spend our Anthropic quota.
   const user = await verifyUser(req)
   if (!user) return res.status(401).json({ error: 'Unauthorized' })
+
+  // Cost guard. High enough to clear a full "Fill all missing" burst (~62).
+  if (!(await checkRateLimit(req, { limit: 120, windowSeconds: 60 }))) {
+    return res.status(429).json({ error: 'Too many requests. Wait a moment and try again.' })
+  }
 
   if (!process.env.ANTHROPIC_API_KEY) {
     return res.status(500).json({ error: 'ANTHROPIC_API_KEY is not set on the server.' })

@@ -1,4 +1,4 @@
-import { applyCors, verifyUser, cleanField } from './_auth.js'
+import { applyCors, verifyUser, cleanField, checkRateLimit } from './_auth.js'
 
 export default async function handler(req, res) {
   applyCors(req, res)
@@ -9,6 +9,11 @@ export default async function handler(req, res) {
   // Gate: only signed-in Supabase users may spend our Gemini quota.
   const user = await verifyUser(req)
   if (!user) return res.status(401).json({ error: 'Unauthorized' })
+
+  // Cost guard — Gemini web search is pricier and only used for single fills.
+  if (!(await checkRateLimit(req, { limit: 30, windowSeconds: 60 }))) {
+    return res.status(429).json({ error: 'Too many requests. Wait a moment and try again.' })
+  }
 
   const body = req.body || {}
   const songName = cleanField(body.songName)
