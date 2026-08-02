@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import anime from 'animejs'
 import { supabase } from './supabase'
 import './App.css'
 
@@ -1085,9 +1086,34 @@ function AuthScreen() {
 
   const ready = email.trim() && password.trim()
 
+  // anime.js: logo, card, and tagline rise in on load. Elements start at
+  // opacity 0 (inline) to avoid a flash before the effect runs.
+  useEffect(() => {
+    const els = document.querySelectorAll('.auth-rise')
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      els.forEach(el => { el.style.opacity = 1 })
+      return
+    }
+    anime({
+      targets: '.auth-rise',
+      opacity: [0, 1],
+      translateY: [16, 0],
+      delay: anime.stagger(90, { start: 60 }),
+      easing: 'easeOutQuad',
+      duration: 600,
+    })
+  }, [])
+
   return (
-    <div style={{ minHeight:'100dvh', background:'#0d0d0f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
-      <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
+    <div style={{ position:'relative', overflow:'hidden', minHeight:'100dvh', background:'#0d0d0f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
+      {/* Stage backdrop — piano under one gold light */}
+      <div aria-hidden style={{ position:'absolute', inset:0, zIndex:0, pointerEvents:'none' }}>
+        <img src="/img/stage.jpg" alt="" style={{ width:'100%', height:'100%', objectFit:'cover', objectPosition:'70% 30%', opacity:0.3 }} />
+        <div style={{ position:'absolute', inset:0, background:'radial-gradient(ellipse at 68% 32%, transparent 0%, #0d0d0f 68%)' }} />
+        <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(13,13,15,0.4), #0d0d0f)' }} />
+      </div>
+
+      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
         <svg width="30" height="30" viewBox="0 0 20 20" fill="none">
           <rect x="0.5" y="0.5" width="19" height="19" rx="5" fill="#131215" stroke="#232328"/>
           <text x="10" y="14.8" fontFamily="Space Grotesk, sans-serif" fontSize="14" fontWeight="700" fill={GOLD} textAnchor="middle">C</text>
@@ -1095,7 +1121,7 @@ function AuthScreen() {
         <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.015em' }}>Corda</span>
       </div>
 
-      <div className="auth-card" style={{ width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1c1c1a', borderRadius:22, padding:30 }}>
+      <div className="auth-card auth-rise" style={{ opacity:0, position:'relative', zIndex:1, width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1c1c1a', borderRadius:22, padding:30 }}>
         <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.2em', marginBottom:20, textAlign:'center' }}>
           {mode === 'signin' ? 'Sign in to your library' : 'Create your library'}
         </div>
@@ -1163,7 +1189,7 @@ function AuthScreen() {
         </button>
       </div>
 
-      <div style={{ marginTop:24, fontSize:11, color:'#333', textAlign:'center', lineHeight:1.6 }}>
+      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, marginTop:24, fontSize:11, color:'#333', textAlign:'center', lineHeight:1.6 }}>
         Performance chord book for live musicians
       </div>
     </div>
