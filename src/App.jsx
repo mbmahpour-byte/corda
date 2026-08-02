@@ -1088,12 +1088,9 @@ function AuthScreen() {
   return (
     <div style={{ minHeight:'100dvh', background:'#0d0d0f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
       <div style={{ display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
-        <svg width="20" height="20" viewBox="0 0 16 16" fill="none">
-          <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
-          <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
-          <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
-          <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
-          <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
+        <svg width="30" height="30" viewBox="0 0 20 20" fill="none">
+          <rect x="0.5" y="0.5" width="19" height="19" rx="5" fill="#131215" stroke="#232328"/>
+          <text x="10" y="14.8" fontFamily="Space Grotesk, sans-serif" fontSize="14" fontWeight="700" fill={GOLD} textAnchor="middle">C</text>
         </svg>
         <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.015em' }}>Corda</span>
       </div>
@@ -1573,12 +1570,9 @@ export default function App() {
       <div style={s.header}>
         <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', paddingBottom:13 }}>
           <div style={{ display:'flex', alignItems:'center', gap:9 }}>
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style={{ flexShrink:0 }}>
-              <line x1="0" y1="4" x2="11" y2="4" stroke={GOLD} strokeWidth="0.75"/>
-              <line x1="0" y1="7.5" x2="11" y2="7.5" stroke={GOLD} strokeWidth="0.75"/>
-              <line x1="0" y1="11" x2="11" y2="11" stroke={GOLD} strokeWidth="0.75"/>
-              <line x1="10" y1="3.5" x2="10" y2="11.5" stroke={GOLD} strokeWidth="1"/>
-              <ellipse cx="8.3" cy="12" rx="2.3" ry="1.5" fill={GOLD} transform="rotate(-15 8.3 12)"/>
+            <svg width="24" height="24" viewBox="0 0 20 20" fill="none" style={{ flexShrink:0 }}>
+              <rect x="0.5" y="0.5" width="19" height="19" rx="5" fill="#131215" stroke="#232328"/>
+              <text x="10" y="14.8" fontFamily="Space Grotesk, sans-serif" fontSize="14" fontWeight="700" fill={GOLD} textAnchor="middle">C</text>
             </svg>
             <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:19, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.02em', lineHeight:1 }}>Corda</span>
           </div>
