@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   if (!user) return res.status(401).json({ error: 'Unauthorized' })
 
   // Cost guard. High enough to clear a full "Fill all missing" burst (~62).
-  if (!(await checkRateLimit(req, { limit: 120, windowSeconds: 60 }))) {
+  if (!(await checkRateLimit(req, { scope: 'claude', limit: 120, windowSeconds: 60 }))) {
     return res.status(429).json({ error: 'Too many requests. Wait a moment and try again.' })
   }
 

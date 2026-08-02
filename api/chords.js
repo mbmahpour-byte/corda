@@ -11,7 +11,7 @@ export default async function handler(req, res) {
   if (!user) return res.status(401).json({ error: 'Unauthorized' })
 
   // Cost guard — Gemini web search is pricier and only used for single fills.
-  if (!(await checkRateLimit(req, { limit: 30, windowSeconds: 60 }))) {
+  if (!(await checkRateLimit(req, { scope: 'chords', limit: 30, windowSeconds: 60 }))) {
     return res.status(429).json({ error: 'Too many requests. Wait a moment and try again.' })
   }
 

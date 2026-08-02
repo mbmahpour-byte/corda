@@ -37,10 +37,12 @@ function bearer(req) {
 
 // Per-user fixed-window rate limit backed by the check_rate_limit RPC (see
 // sql/phase2_rate_limits.sql). The RPC scopes to the caller via auth.uid(), so
-// we call it with the user's own token. Fails OPEN (returns true) if the RPC is
-// unreachable or not yet installed — availability over strictness for a
-// best-effort cost guard. Returns false only when the limit is genuinely hit.
-export async function checkRateLimit(req, { limit, windowSeconds = 60 }) {
+// we call it with the user's own token. `scope` isolates each endpoint's counter
+// so, e.g., /api/claude and /api/chords don't share (and drain) one bucket.
+// Fails OPEN (returns true) if the RPC is unreachable or not yet installed —
+// availability over strictness for a best-effort cost guard. Returns false only
+// when the limit is genuinely hit.
+export async function checkRateLimit(req, { scope, limit, windowSeconds = 60 }) {
   const token = bearer(req)
   if (!token || !SUPABASE_URL || !SUPABASE_ANON_KEY) return true
   try {
@@ -51,7 +53,7 @@ export async function checkRateLimit(req, { limit, windowSeconds = 60 }) {
         apikey: SUPABASE_ANON_KEY,
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ p_limit: limit, p_window: windowSeconds }),
+      body: JSON.stringify({ p_scope: scope, p_limit: limit, p_window: windowSeconds }),
     })
     if (!r.ok) return true  // RPC missing/misconfigured — don't block legit users
     return (await r.json()) === true
