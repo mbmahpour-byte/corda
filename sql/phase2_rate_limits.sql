@@ -94,8 +94,8 @@ as $$
    where bucket < floor((extract(epoch from now()) - 86400) / 60);
 $$;
 
--- OPTIONAL: schedule the sweep hourly with pg_cron. Left commented because
--- pg_cron must be enabled first (Supabase: Dashboard → Database → Extensions →
--- enable "pg_cron"). Uncomment and run these two lines once it's on.
---   create extension if not exists pg_cron;
---   select cron.schedule('prune-rate-limits', '0 * * * *', 'select prune_rate_limits()');
+-- Schedule the sweep hourly with pg_cron. Requires the pg_cron extension; the
+-- create extension below enables it (or turn it on via Supabase: Dashboard →
+-- Database → Extensions → enable "pg_cron" if the role lacks permission).
+create extension if not exists pg_cron;
+select cron.schedule('prune-rate-limits', '0 * * * *', 'select prune_rate_limits()');
