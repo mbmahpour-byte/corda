@@ -1,4 +1,4 @@
-const CACHE = 'corda-v3'
+const CACHE = 'corda-v4'
 const SHELL = ['/', '/manifest.json', '/icon-192.png', '/icon-512.png', '/favicon.svg']
 
 self.addEventListener('install', e => {
