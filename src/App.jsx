@@ -1113,21 +1113,25 @@ function AuthScreen() {
         <div style={{ position:'absolute', inset:0, background:'linear-gradient(180deg, rgba(13,13,15,0.4), #0d0d0f)' }} />
       </div>
 
-      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:9, marginBottom:36 }}>
+      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, display:'flex', alignItems:'center', gap:10, marginBottom:34 }}>
         <svg width="30" height="30" viewBox="0 0 20 20" fill="none">
-          <rect x="0.5" y="0.5" width="19" height="19" rx="5" fill="#131215" stroke="#232328"/>
-          <text x="10" y="14.8" fontFamily="Space Grotesk, sans-serif" fontSize="14" fontWeight="700" fill={GOLD} textAnchor="middle">C</text>
+          <rect x="0.5" y="0.5" width="19" height="19" rx="4" fill="#131215" stroke="#232328"/>
+          <text x="10" y="14.8" fontFamily="Space Grotesk, sans-serif" fontStyle="italic" fontSize="14" fontWeight="700" fill={GOLD} textAnchor="middle">C</text>
         </svg>
-        <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.015em' }}>Corda</span>
+        <span style={{ fontFamily:'Space Grotesk, sans-serif', fontStyle:'italic', fontSize:32, fontWeight:700, color:'#EDEBE6', letterSpacing:'-0.02em' }}>Corda</span>
       </div>
 
-      <div className="auth-card auth-rise" style={{ opacity:0, position:'relative', zIndex:1, width:'100%', maxWidth:360, background:'linear-gradient(160deg,#131311,#0f0f0e)', border:'1px solid #1c1c1a', borderRadius:22, padding:30 }}>
-        <div style={{ fontSize:9, fontWeight:700, color:'#555', textTransform:'uppercase', letterSpacing:'0.2em', marginBottom:20, textAlign:'center' }}>
+      <div className="auth-card auth-rise" style={{ opacity:0, position:'relative', zIndex:1, width:'100%', maxWidth:360, background:'#131215', border:'1px solid #1e1e22', borderRadius:12, padding:'30px 28px' }}>
+        <div style={{ fontSize:15, fontWeight:500, color:'#EDEBE6', textAlign:'center', fontFamily:'Space Grotesk, sans-serif', letterSpacing:'-0.01em' }}>
           {mode === 'signin' ? 'Sign in to your library' : 'Create your library'}
         </div>
+        <div style={{ fontSize:12.5, color:'#8f8b82', marginTop:5, marginBottom:22, textAlign:'center', lineHeight:1.5 }}>
+          {mode === 'signin' ? 'Your chord book, wherever you play.' : 'Start building your set.'}
+        </div>
 
-        {/* Google OAuth */}
+        {/* Google OAuth — dark on-brand button (neutral chassis + colored G) */}
         <button
+          className="press"
           onClick={async () => {
             setError('')
             const { error } = await supabase.auth.signInWithOAuth({
@@ -1139,8 +1143,10 @@ function AuthScreen() {
             })
             if (error) setError(error.message)
           }}
-          style={{ width:'100%', padding:'11px 14px', background:'#fff', border:'none', borderRadius:10, color:'#1a1a1a', fontSize:13, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:18, letterSpacing:'0.01em' }}>
-          <svg width="18" height="18" viewBox="0 0 18 18">
+          onMouseEnter={e => { e.currentTarget.style.background = '#1f1f24'; e.currentTarget.style.borderColor = '#33333a' }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#191a1e'; e.currentTarget.style.borderColor = '#2a2a30' }}
+          style={{ width:'100%', padding:'12px 14px', background:'#191a1e', border:'1px solid #2a2a30', borderRadius:0, color:'#EDEBE6', fontSize:13.5, fontWeight:600, cursor:'pointer', fontFamily:'Inter, sans-serif', display:'flex', alignItems:'center', justifyContent:'center', gap:11, marginBottom:18, letterSpacing:'0.01em', transition:'background 0.15s, border-color 0.15s' }}>
+          <svg width="17" height="17" viewBox="0 0 18 18">
             <path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.874 2.684-6.615z"/>
             <path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.184l-2.908-2.258c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z"/>
             <path fill="#FBBC05" d="M3.964 10.707c-.18-.54-.282-1.117-.282-1.707s.102-1.167.282-1.707V4.961H.957C.347 6.175 0 7.55 0 9s.347 2.825.957 4.039l3.007-2.332z"/>
@@ -1151,45 +1157,45 @@ function AuthScreen() {
 
         {/* Divider */}
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
-          <div style={{ flex:1, height:1, background:'#1e1e1e' }} />
-          <span style={{ fontSize:10, color:'#333', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase' }}>or</span>
-          <div style={{ flex:1, height:1, background:'#1e1e1e' }} />
+          <div style={{ flex:1, height:1, background:'#1e1e22' }} />
+          <span style={{ fontSize:10, color:'#6a675f', fontFamily:'Space Mono, monospace', letterSpacing:'0.12em', textTransform:'uppercase' }}>or</span>
+          <div style={{ flex:1, height:1, background:'#1e1e22' }} />
         </div>
 
         <div style={{ marginBottom:12 }}>
-          <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.14em' }}>Email</label>
+          <label style={{ fontSize:10, color:'#8f8b82', fontWeight:400, display:'block', marginBottom:7, textTransform:'uppercase', letterSpacing:'0.16em', fontFamily:'Space Mono, monospace' }}>Email</label>
           <input type="email" value={email} onChange={e => setEmail(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()} placeholder="you@example.com"
             className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#0e0e10', border:'1px solid #1e1e22', borderRadius:4, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoComplete="email" autoCorrect="off" autoCapitalize="none" spellCheck={false} />
         </div>
 
         <div style={{ marginBottom: error || success ? 14 : 22 }}>
-          <label style={{ fontSize:9, color:'#555', fontWeight:600, display:'block', marginBottom:6, textTransform:'uppercase', letterSpacing:'0.14em' }}>Password</label>
+          <label style={{ fontSize:10, color:'#8f8b82', fontWeight:400, display:'block', marginBottom:7, textTransform:'uppercase', letterSpacing:'0.16em', fontFamily:'Space Mono, monospace' }}>Password</label>
           <input type="password" value={password} onChange={e => setPassword(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && submit()}
             placeholder={mode === 'signup' ? 'At least 6 characters' : '••••••••'}
             className="focus-gold"
-            style={{ width:'100%', padding:'11px 14px', background:'#111', border:'1px solid #1e1e1e', borderRadius:8, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
+            style={{ width:'100%', padding:'11px 14px', background:'#0e0e10', border:'1px solid #1e1e22', borderRadius:4, color:'#EDEBE6', fontSize:15, boxSizing:'border-box', outline:'none', fontFamily:'Inter, sans-serif' }}
             autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} />
         </div>
 
-        {error && <div style={{ fontSize:12, color:'#c04040', marginBottom:14, lineHeight:1.5 }}>{error}</div>}
-        {success && <div style={{ fontSize:12, color:'#5a9e5a', marginBottom:14, lineHeight:1.6 }}>{success}</div>}
+        {error && <div style={{ fontSize:12, color:'#d05a5a', marginBottom:14, lineHeight:1.5 }}>{error}</div>}
+        {success && <div style={{ fontSize:12, color:'#6bab6b', marginBottom:14, lineHeight:1.6 }}>{success}</div>}
 
-        <button onClick={submit} disabled={loading || !ready}
-          style={{ width:'100%', padding:14, background: ready ? GOLD : '#181818', border:'none', borderRadius:10, color: ready ? '#000' : '#3a3a3a', fontSize:13, fontWeight:700, cursor: ready ? 'pointer' : 'default', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase', transition:'background 0.15s, color 0.15s' }}>
+        <button onClick={submit} disabled={loading || !ready} className={ready ? 'press' : ''}
+          style={{ width:'100%', padding:14, background: ready ? GOLD : '#17171a', border:'none', borderRadius:0, color: ready ? '#000' : '#48453f', fontSize:13, fontWeight:700, cursor: ready ? 'pointer' : 'default', fontFamily:'Inter, sans-serif', letterSpacing:'0.08em', textTransform:'uppercase', transition:'background 0.15s, color 0.15s' }}>
           {loading ? '…' : mode === 'signin' ? 'Sign in' : 'Create account'}
         </button>
 
         <button onClick={() => { setMode(m => m === 'signin' ? 'signup' : 'signin'); setError(''); setSuccess('') }}
-          style={{ width:'100%', marginTop:16, background:'none', border:'none', color:'#5a5a5a', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, lineHeight:1.5 }}>
+          style={{ width:'100%', marginTop:16, background:'none', border:'none', color:'#8f8b82', fontSize:12, cursor:'pointer', fontFamily:'Inter, sans-serif', padding:0, lineHeight:1.5 }}>
           {mode === 'signin' ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
         </button>
       </div>
 
-      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, marginTop:24, fontSize:11, color:'#333', textAlign:'center', lineHeight:1.6 }}>
+      <div className="auth-rise" style={{ opacity:0, position:'relative', zIndex:1, marginTop:24, fontSize:11, color:'#6a675f', textAlign:'center', lineHeight:1.6 }}>
         Performance chord book for live musicians
       </div>
     </div>
