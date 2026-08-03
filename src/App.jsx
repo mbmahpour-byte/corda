@@ -50,6 +50,20 @@ const DISPLAY = "'Space Grotesk', sans-serif"
 // Monospace used for all chord charts, key/tempo readouts, tick labels.
 const MONO = "'Space Mono', ui-monospace, 'SFMono-Regular', monospace"
 
+// Google Identity Services (One Tap + personalized button). Public Web client
+// ID; safe to expose. Must also be listed under Supabase Auth → Google →
+// "Authorized Client IDs" so signInWithIdToken accepts GIS-minted tokens.
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID
+
+// One Tap requires a nonce: Google is handed the SHA-256 hash, Supabase the raw
+// value, and it verifies hash(raw) === token.nonce. Returns [raw, hashedHex].
+async function makeNonce() {
+  const raw = crypto.randomUUID() + crypto.randomUUID()
+  const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw))
+  const hashed = Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('')
+  return [raw, hashed]
+}
+
 const CHROMATIC = ['C','C#','D','Eb','E','F','F#','G','Ab','A','Bb','B']
 const KEY_TO_CHROMA = {
   'C':0,'C#':1,'Db':1,'D':2,'Eb':3,'E':4,'F':5,'F#':6,'Gb':6,'G':7,'Ab':8,'G#':8,'A':9,'Bb':10,'A#':10,'B':11
@@ -1069,6 +1083,8 @@ function AuthScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [gisReady, setGisReady] = useState(false)  // GIS button rendered → hide the redirect fallback
+  const gsiBtnRef = useRef(null)
 
   async function submit() {
     if (!email.trim() || !password.trim()) return
@@ -1104,6 +1120,56 @@ function AuthScreen() {
     })
   }, [])
 
+  // Google Identity Services: load the script, render the personalized button
+  // ("Continue as <name>" for returning users), and surface the One Tap prompt.
+  // The credential is exchanged with Supabase via signInWithIdToken; the global
+  // onAuthStateChange listener then swaps in the app. Falls back silently to the
+  // redirect button if no client ID is set or the script/prompt is unavailable.
+  useEffect(() => {
+    if (!GOOGLE_CLIENT_ID) return
+    let cancelled = false
+
+    async function initGis() {
+      const [rawNonce, hashedNonce] = await makeNonce()
+      if (cancelled || !window.google?.accounts?.id || !gsiBtnRef.current) return
+
+      window.google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        nonce: hashedNonce,
+        use_fedcm_for_prompt: true,
+        cancel_on_tap_outside: true,
+        callback: async ({ credential }) => {
+          const { error } = await supabase.auth.signInWithIdToken({
+            provider: 'google',
+            token: credential,
+            nonce: rawNonce,
+          })
+          if (error) setError(error.message)
+        },
+      })
+
+      // Rendered button width must be an integer px; match the card's inner width.
+      const width = Math.round(gsiBtnRef.current.offsetWidth) || 300
+      window.google.accounts.id.renderButton(gsiBtnRef.current, {
+        type: 'standard', theme: 'filled_black', size: 'large',
+        text: 'continue_with', shape: 'rectangular', logo_alignment: 'left', width,
+      })
+      setGisReady(true)
+      window.google.accounts.id.prompt()  // One Tap
+    }
+
+    const existing = document.getElementById('gsi-script')
+    if (existing) { initGis(); return () => { cancelled = true } }
+
+    const s = document.createElement('script')
+    s.src = 'https://accounts.google.com/gsi/client'
+    s.async = true
+    s.id = 'gsi-script'
+    s.onload = initGis
+    document.head.appendChild(s)
+    return () => { cancelled = true }
+  }, [])
+
   return (
     <div style={{ position:'relative', overflow:'hidden', minHeight:'100dvh', background:'#0d0d0f', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Inter, sans-serif' }}>
       {/* Stage backdrop — piano under one gold light */}
@@ -1129,7 +1195,12 @@ function AuthScreen() {
           {mode === 'signin' ? 'Your chord book, wherever you play.' : 'Start building your set.'}
         </div>
 
-        {/* Google OAuth — dark on-brand button (neutral chassis + colored G) */}
+        {/* GIS renders the personalized "Continue as <name>" button here; One
+            Tap surfaces separately. Empty until initGis runs. */}
+        <div ref={gsiBtnRef} style={{ display:'flex', justifyContent:'center', marginBottom: gisReady ? 18 : 0, colorScheme:'dark' }} />
+
+        {/* Fallback — dark on-brand redirect button when GIS is unavailable */}
+        {!gisReady && (
         <button
           className="press"
           onClick={async () => {
@@ -1154,6 +1225,7 @@ function AuthScreen() {
           </svg>
           Continue with Google
         </button>
+        )}
 
         {/* Divider */}
         <div style={{ display:'flex', alignItems:'center', gap:12, marginBottom:18 }}>
