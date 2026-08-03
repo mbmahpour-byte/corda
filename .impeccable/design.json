@@ -1,62 +1,90 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-12T00:00:00Z",
+  "generatedAt": "2026-08-02T00:00:00Z",
   "title": "Design System: Corda",
   "extensions": {
     "colorMeta": {
       "gold": {
         "role": "primary",
-        "displayName": "Stage Gold",
-        "canonical": "#C9A84C",
-        "tonalRamp": ["#2A2410", "#4A3F1C", "#6B5A29", "#8C7736", "#A88F43", "#C9A84C", "#DCC178", "#EEDCA8", "#F7EED0"]
+        "displayName": "Rack Gold",
+        "canonical": "#C7B27A",
+        "tonalRamp": ["#241E12", "#3B321F", "#54472B", "#6E5D39", "#8C7749", "#A8925C", "#C7B27A", "#DACAA0", "#EEE3C8"]
       },
       "void-bg": {
         "role": "neutral",
-        "displayName": "Void",
-        "canonical": "#080808",
-        "tonalRamp": ["#080808", "#0F0F0E", "#141414", "#181818", "#1E1E1E", "#2A2A2A", "#444444", "#5A5A5A", "#8A8A8A"]
+        "displayName": "Chassis",
+        "canonical": "#0d0d0f",
+        "tonalRamp": ["#0d0d0f", "#131215", "#1e1e22", "#232328", "#2a2a30", "#3a3a42", "#55555f", "#7a7982", "#a8a7b0"]
+      },
+      "panel": {
+        "role": "neutral",
+        "displayName": "Panel",
+        "canonical": "#131215",
+        "tonalRamp": ["#0d0d0f", "#131215", "#1a1a1e", "#1e1e22", "#232328", "#2a2a30", "#3a3a42", "#55555f", "#7a7982"]
+      },
+      "hairline": {
+        "role": "neutral",
+        "displayName": "Hairline Rule",
+        "canonical": "#1e1e22",
+        "tonalRamp": ["#0d0d0f", "#131215", "#1a1a1e", "#1e1e22", "#232328", "#2a2a30", "#3a3a42", "#55555f", "#7a7982"]
+      },
+      "seam": {
+        "role": "neutral",
+        "displayName": "Seam",
+        "canonical": "#232328",
+        "tonalRamp": ["#0d0d0f", "#131215", "#1e1e22", "#232328", "#2a2a30", "#3a3a42", "#55555f", "#7a7982", "#a8a7b0"]
       },
       "ink": {
         "role": "neutral",
-        "displayName": "Cream Ink",
-        "canonical": "#F5F0E8",
-        "tonalRamp": ["#3A3833", "#5A5750", "#7A766D", "#9A958B", "#BAB4A8", "#D6CFC2", "#F0EBE2", "#F5F0E8", "#FBF8F2"]
+        "displayName": "Warm Ink",
+        "canonical": "#EDEBE6",
+        "tonalRamp": ["#3a3833", "#5c5b50", "#7a7970", "#98968b", "#b6b4a8", "#d0cec4", "#e3e0da", "#EDEBE6", "#f7f5f0"]
       },
-      "muted": {
+      "ink-secondary": {
         "role": "neutral",
-        "displayName": "Muted Metal",
-        "canonical": "#5A5A5A",
-        "tonalRamp": ["#1A1A1A", "#2A2A2A", "#383838", "#444444", "#5A5A5A", "#767676", "#949494", "#B4B4B4", "#D6D6D6"]
+        "displayName": "Secondary Ink",
+        "canonical": "#c8c6cc",
+        "tonalRamp": ["#3a393f", "#55555b", "#727178", "#8e8d94", "#aaa9b0", "#c8c6cc", "#dad9de", "#e8e7eb", "#f4f3f6"]
+      },
+      "tertiary": {
+        "role": "neutral",
+        "displayName": "Tertiary Metal",
+        "canonical": "#7a7982",
+        "tonalRamp": ["#1e1e22", "#2a2a30", "#3a3a42", "#4a4a52", "#5c5b63", "#7a7982", "#98979f", "#b6b5bc", "#d4d3d8"]
+      },
+      "dim": {
+        "role": "neutral",
+        "displayName": "Dim Silkscreen",
+        "canonical": "#5c5b63",
+        "tonalRamp": ["#1a1a1e", "#232328", "#2f2f36", "#45454d", "#5c5b63", "#76757d", "#949399", "#b2b1b6", "#d0cfd3"]
       },
       "danger": {
         "role": "tertiary",
-        "displayName": "Signal Red",
-        "canonical": "#C04040",
-        "tonalRamp": ["#2A0F0F", "#4A1616", "#6B1D1D", "#8A2020", "#A83030", "#C04040", "#D46A6A", "#E49898", "#F2C8C8"]
+        "displayName": "Destructive Red",
+        "canonical": "#8a4b4b",
+        "tonalRamp": ["#2a1414", "#3f1c1c", "#542424", "#6b2828", "#8A2020", "#8a4b4b", "#a86e6e", "#c69898", "#e4c8c8"]
       },
       "success": {
         "role": "tertiary",
         "displayName": "Signal Green",
         "canonical": "#5A9E5A",
-        "tonalRamp": ["#122212", "#1E381E", "#2A4A2A", "#356035", "#457645", "#5A9E5A", "#7DB87D", "#A6D2A6", "#CFE9CF"]
+        "tonalRamp": ["#122212", "#1e381e", "#2A4A2A", "#356035", "#457645", "#5A9E5A", "#7db87d", "#a6d2a6", "#cfe9cf"]
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "Playfair — Gig Mode song names and the app wordmark. The one largest voice." },
-      "headline": { "displayName": "Headline", "purpose": "Playfair 500 — key display, section titles, expanded song name." },
-      "body": { "displayName": "Body", "purpose": "Inter 400 — lyrics, notes, field values, general UI text." },
-      "label": { "displayName": "Label", "purpose": "Inter 600 tracked, often uppercase — metadata, pills, button text." },
-      "mono": { "displayName": "Chord (Mono)", "purpose": "Fragment Mono — all chord charts, so chords column-align above lyrics." }
+      "display": { "displayName": "Large Title", "purpose": "Space Grotesk 700, 34px uppercase — iOS-style screen titles and the Gig Mode song name. The largest voice; collapses into a pinned compact bar on scroll." },
+      "headline": { "displayName": "Headline / Song name", "purpose": "Space Grotesk 500, 18px — card song names and setlist track names. Display register for anything that names a piece of music." },
+      "body": { "displayName": "Body / Chrome", "purpose": "Inter 400, 0.8125rem — artist names, notes, field values, metadata, general UI text." },
+      "label": { "displayName": "Tick Label (Mono)", "purpose": "Space Mono 700, 9-11px tracked uppercase dim — section markers, the instrument-panel silkscreen. Tab labels use Space Mono 600." },
+      "mono": { "displayName": "Chord & Readout (Mono)", "purpose": "Space Mono 700, 13-16px gold — chord charts and Gig Mode key readout, fixed-width so chords column-align over lyrics." }
     },
     "shadows": [
-      { "name": "setlist-hover", "value": "0 4px 24px rgba(0,0,0,0.7)", "purpose": "Setlist rows on hover — lifts off the void in response to the pointer. Absent at rest." },
-      { "name": "song-card-hover", "value": "0 6px 36px rgba(0,0,0,0.85), 0 0 0 1px rgba(201,168,76,0.09)", "purpose": "Song-card hover — deep black shadow plus a faint gold edge-catch. Surfaces are flat at rest; shadow appears only on state." },
-      { "name": "focus-ring", "value": "0 0 0 3px rgba(201,168,76,0.05)", "purpose": "Input/select/textarea focus — soft gold glow paired with a gold border shift, never a hard OS outline." }
+      { "name": "focus-ring", "value": "0 0 0 3px rgba(199,178,122,0.05)", "purpose": "Input/select/textarea focus — a soft gold glow paired with a gold border shift to rgba(199,178,122,0.35), never a hard OS outline. The only elevation event in a flat system." }
     ],
     "motion": [
-      { "name": "ease-expo-out", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Default entrance easing — tab fades, card-detail slide, Gig Mode song transition, nav-icon pop." },
-      { "name": "ease-standard", "value": "cubic-bezier(0.4, 0, 0.2, 1)", "purpose": "State transitions — card shadow/border on hover." },
-      { "name": "press", "value": "transform: scale(0.94–0.99)", "purpose": "Tactile press feedback on pills, cards, and buttons." }
+      { "name": "ease-expo-out", "value": "cubic-bezier(0.22, 1, 0.36, 1)", "purpose": "Default entrance/exit easing — tab fades, card-detail slide, Gig Mode song transition, nav-icon pop, auth entrance." },
+      { "name": "spring-overshoot", "value": "cubic-bezier(0.34, 1.56, 0.64, 1)", "purpose": "The one sanctioned overshoot — the ALL/FAVORITES segmented-control sliding highlight (0.4s) and expand animations only. Never on chrome buttons." },
+      { "name": "press", "value": "transform: scale(0.94-0.97)", "purpose": "Tactile press feedback — 0.97 on rows/buttons (.press), 0.94 on filter pills (.pill). A small mechanical give." }
     ],
     "breakpoints": [
       { "name": "narrow", "value": "340px" }
@@ -67,91 +95,93 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The one loud control on a screen — Stage Gold fill, used once for the main action.",
+      "description": "The one loud control on a screen — Rack Gold fill, used once for the main action.",
       "html": "<button class=\"ds-btn-primary\">Fill with Chords</button>",
-      "css": ".ds-btn-primary { background: #C9A84C; color: #080808; font-family: Inter, sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 18px; border: none; border-radius: 8px; cursor: pointer; transition: transform 0.15s cubic-bezier(0.22,1,0.36,1), filter 0.2s; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:active { transform: scale(0.97); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.35); }"
+      "css": ".ds-btn-primary { background: #C7B27A; color: #0d0d0f; font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 14px 18px; border: none; border-radius: 0; cursor: pointer; transition: transform 0.15s cubic-bezier(0.22,1,0.36,1), filter 0.2s; } .ds-btn-primary:hover { filter: brightness(1.08); } .ds-btn-primary:active { transform: scale(0.97); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(199,178,122,0.35); }"
     },
     {
       "name": "Ghost Button",
       "kind": "button",
       "refersTo": "button-ghost",
-      "description": "Default for every action that isn't the single primary — gold border and text on a dark panel.",
+      "description": "Default for every action that isn't the single primary — gold hairline border and gold text on the chassis.",
       "html": "<button class=\"ds-btn-ghost\">Transpose</button>",
-      "css": ".ds-btn-ghost { background: #141414; color: #C9A84C; font-family: Inter, sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; padding: 10px 18px; border: 1px solid rgba(201,168,76,0.4); border-radius: 8px; cursor: pointer; transition: transform 0.15s, border-color 0.2s, background 0.2s; } .ds-btn-ghost:hover { border-color: rgba(201,168,76,0.75); background: #181818; } .ds-btn-ghost:active { transform: scale(0.97); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }"
+      "css": ".ds-btn-ghost { background: transparent; color: #C7B27A; font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase; padding: 14px 18px; border: 1px solid rgba(199,178,122,0.22); border-radius: 0; cursor: pointer; transition: transform 0.15s, border-color 0.2s; } .ds-btn-ghost:hover { border-color: rgba(199,178,122,0.5); } .ds-btn-ghost:active { transform: scale(0.97); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(199,178,122,0.1); }"
     },
     {
       "name": "Filter Pill (active)",
       "kind": "chip",
       "refersTo": "pill-active",
-      "description": "Selected filter — gold fill, black text, reads as lit.",
-      "html": "<button class=\"ds-pill ds-pill-active\">Wedding</button>",
-      "css": ".ds-pill { font-family: Inter, sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 100px; border: none; cursor: pointer; transition: transform 0.12s; } .ds-pill:active { transform: scale(0.94); } .ds-pill-active { background: #C9A84C; color: #080808; }"
+      "description": "Selected filter — reads as lit: gold text on a lighter seam fill.",
+      "html": "<button class=\"ds-pill ds-pill-active\">Worship</button>",
+      "css": ".ds-pill { font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 100px; border: none; cursor: pointer; transition: transform 0.12s; } .ds-pill:active { transform: scale(0.94); } .ds-pill-active { background: #1c1c20; color: #C7B27A; }"
     },
     {
       "name": "Filter Pill (inactive)",
       "kind": "chip",
       "refersTo": "pill",
-      "description": "Unselected filter — panel surface, muted-metal text, recedes.",
-      "html": "<button class=\"ds-pill ds-pill-idle\">Kumzitz</button>",
-      "css": ".ds-pill-idle { background: #1E1E1E; color: #5A5A5A; font-family: Inter, sans-serif; font-weight: 600; font-size: 11px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 100px; border: none; cursor: pointer; transition: transform 0.12s, color 0.2s; } .ds-pill-idle:hover { color: #F0EBE2; } .ds-pill-idle:active { transform: scale(0.94); }"
+      "description": "Unselected filter — chassis background, dim silkscreen text, recedes.",
+      "html": "<button class=\"ds-pill ds-pill-idle\">Jazz</button>",
+      "css": ".ds-pill-idle { background: #0d0d0f; color: #5c5b63; font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 11px; letter-spacing: 0.06em; padding: 6px 14px; border-radius: 100px; border: none; cursor: pointer; transition: transform 0.12s, color 0.2s; } .ds-pill-idle:hover { color: #EDEBE6; } .ds-pill-idle:active { transform: scale(0.94); }"
     },
     {
       "name": "Song Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "Library list row — flat panel at rest; hover blooms a deep black shadow and a gold leading edge.",
-      "html": "<article class=\"ds-song-card\"><div class=\"ds-song-name\">Adon Olam</div><div class=\"ds-song-meta\">Key of G · Kumzitz · 72 BPM</div></article>",
-      "css": ".ds-song-card { background: linear-gradient(#0F0F0E, #141414); border-radius: 10px; padding: 16px; border: 1px solid rgba(255,255,255,0.03); transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.15s; cursor: pointer; } .ds-song-card:hover { box-shadow: 0 6px 36px rgba(0,0,0,0.85), 0 0 0 1px rgba(201,168,76,0.09); } .ds-song-card:active { transform: scale(0.993); } .ds-song-name { font-family: Inter, sans-serif; font-weight: 600; font-size: 15px; color: #F5F0E8; } .ds-song-meta { margin-top: 5px; font-family: Inter, sans-serif; font-size: 11px; letter-spacing: 0.06em; color: #5A5A5A; }"
+      "description": "Inset panel for chord/detail — flat near-black rectangle on the chassis, square-ish 8px corners, no shadow at rest.",
+      "html": "<div class=\"ds-card\"><div class=\"ds-card-title\">Golden Hour</div><div class=\"ds-card-meta\">JVKE</div></div>",
+      "css": ".ds-card { background: #131215; border: 1px solid #1e1e22; border-radius: 8px; padding: 16px; } .ds-card-title { font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 18px; color: #EDEBE6; } .ds-card-meta { font-family: Inter, sans-serif; font-size: 13px; color: #7a7982; margin-top: 4px; }"
     },
     {
-      "name": "Search Input",
+      "name": "Search Field",
       "kind": "input",
       "refersTo": "input",
-      "description": "Dark panel field with a soft gold focus glow, no hard OS outline.",
-      "html": "<input class=\"ds-input\" placeholder=\"Search songs or artist\" />",
-      "css": ".ds-input { background: #0F0F0E; color: #F5F0E8; font-family: Inter, sans-serif; font-size: 13px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.06); border-radius: 8px; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; } .ds-input::placeholder { color: #5A5A5A; } .ds-input:focus { outline: none; border-color: rgba(201,168,76,0.35); box-shadow: 0 0 0 3px rgba(201,168,76,0.05); }"
+      "description": "Dark panel fill, hairline border, gold glow ring on focus. Search field is the rounded rack-chrome exception; data fields are square.",
+      "html": "<input class=\"ds-input\" placeholder=\"Search songs\" />",
+      "css": ".ds-input { background: #0f0f11; border: 1px solid #1e1e22; border-radius: 12px; padding: 10px 12px; color: #EDEBE6; font-family: Inter, sans-serif; font-size: 13px; } .ds-input::placeholder { color: #5c5b63; } .ds-input:focus { outline: none; border-color: rgba(199,178,122,0.35); box-shadow: 0 0 0 3px rgba(199,178,122,0.05); }"
     },
     {
-      "name": "Chord Chart Couplet",
-      "kind": "custom",
-      "refersTo": "mono",
-      "description": "The signature pattern — a gold chord row column-aligned in Fragment Mono above its cream lyric row.",
-      "html": "<pre class=\"ds-chord\"><span class=\"ds-chord-row\">G       C        D</span>\n<span class=\"ds-lyric-row\">Shine a light on the dark</span></pre>",
-      "css": ".ds-chord { font-family: 'Fragment Mono', ui-monospace, monospace; font-size: 15px; line-height: 1.35; margin: 0; white-space: pre; overflow-x: auto; } .ds-chord-row { color: #C9A84C; display: block; } .ds-lyric-row { color: #F5F0E8; display: block; }"
+      "name": "Bottom Tab Bar",
+      "kind": "nav",
+      "refersTo": "nav",
+      "description": "Fixed four-tab bar, blurred translucent chassis, hairline top border. Active tab gold; inactive dim; active icon plays a one-shot navPop pulse.",
+      "html": "<nav class=\"ds-nav\"><button class=\"ds-nav-item ds-nav-active\"><span>&#9834;</span>Songs</button><button class=\"ds-nav-item\"><span>&#9654;</span>Gig</button><button class=\"ds-nav-item\"><span>&#9839;</span>Key</button><button class=\"ds-nav-item\"><span>&#8801;</span>Setlist</button></nav>",
+      "css": ".ds-nav { display: flex; gap: 4px; background: rgba(13,13,15,0.82); backdrop-filter: blur(20px) saturate(160%); border-top: 1px solid #1e1e22; padding: 8px 12px; } .ds-nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; background: none; border: none; cursor: pointer; font-family: 'Space Mono', ui-monospace, monospace; font-weight: 700; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #5c5b63; } .ds-nav-item span { font-size: 18px; } .ds-nav-active { color: #C7B27A; }"
     }
   ],
   "narrative": {
-    "northStar": "The Studio Rack",
-    "overview": "Corda looks like pro audio gear, not a webapp. The surface is machined and near-black; every control is precise and restrained; a single warm gold reads as the one status light on the panel. It is designed for the hardest moment there is — a keyboardist glancing at a phone mid-set, one-handed, in a dark room, under an audience — so the whole system optimizes for calm command: read it in a fraction of a second, act, keep playing. Sharp, fast, pro-grade. Beauty is in the tight tolerances, never in decoration. The palette is a void with one light: black is the room, near-black tinted steps are the rack panels, warm cream ink is what you read, and Stage Gold is the single warm signal spent sparingly on what matters. Corda rejects the cluttered guitar-tab dump, the blue-and-white SaaS dashboard, the gamified consumer music app, and skeuomorphic fake-hardware.",
+    "northStar": "The Instrument Rack",
+    "overview": "Corda looks like a piece of pro rack gear — a machined front panel of stacked modules — not a webapp. Surfaces are near-black and square-cornered; controls are grouped into physically-routed strips with visible seams; rows are separated by hairline dividers, not shadows or margins. A single warm gold reads as the one status light on the panel. It is designed for the hardest moment there is — a keyboardist glancing at a phone mid-set, one-handed, in a dark room, under an audience — so the whole system optimizes for calm command: read it in a fraction of a second, act, keep playing. Sharp, fast, pro-grade. Beauty is in the tight tolerances and the grid, never in decoration. Corda explicitly rejects four things: an ad-heavy cramped guitar-tab dump; a blue-and-white SaaS dashboard with hero-metric card grids; a bright gamified consumer music app; and skeuomorphic fake-hardware with wood grain and LED meters.",
     "keyCharacteristics": [
-      "Void-black surface, one gold signal light — never a second accent competing for attention.",
-      "Glanceable-first: high cream-on-black contrast, generous tap targets, type sized to read at arm's length in the dark.",
-      "Music-print typography: Playfair titles, Fragment Mono chord charts that column-align.",
-      "Precise, restrained controls — tight radii, crisp states, nothing that bounces."
+      "Square corners and 1px hairline dividers — rows are separated by rules, not cards floating in space.",
+      "One gold signal light — never a second accent competing for attention.",
+      "Grouped controls built as seamed strips (1px gaps on #232328) so transpose, gig nav and reorder read as routed hardware.",
+      "Glanceable-first: high ink-on-near-black contrast, generous tap targets, type sized to read at arm's length in the dark.",
+      "Three-font system: Space Grotesk titles/lyrics, Space Mono chord/readout labels that column-align, Inter chrome."
     ],
     "rules": [
-      { "name": "The One Light Rule", "body": "There is exactly one accent: Stage Gold. No second brand color ever joins it. Red and green exist only to signal danger and success, never to decorate.", "section": "colors" },
-      { "name": "The Warm-White Rule", "body": "Reading text is #F5F0E8, never pure #FFFFFF. Pure white glares against #080808; the warm cream is what makes long chord charts readable on a bright stage.", "section": "colors" },
-      { "name": "The Column-Align Rule", "body": "Chord charts are always Fragment Mono. A chord sitting over the wrong syllable is a performance error. Proportional fonts are forbidden anywhere a chord sits above a lyric.", "section": "typography" },
-      { "name": "The Serif-For-Music Rule", "body": "Playfair names music — song titles, keys, wordmark. Inter runs the machine — labels, buttons, controls. Never cross them.", "section": "typography" },
-      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest; depth comes from tint steps alone. Shadows appear only as a response to state (hover, focus), never as a persistent ambient lift.", "section": "elevation" },
-      { "name": "The Shadow-Is-Black Rule", "body": "Shadows are pure black at high opacity to get depth on a near-black surface. Gold is a light source, never a shadow.", "section": "elevation" }
+      { "name": "The One Light Rule", "body": "There is exactly one accent: Rack Gold. No second brand color ever joins it. Destructive-red and success-green exist only to signal danger and success, never to decorate. If a screen has two colors fighting to be the highlight, one of them is wrong.", "section": "colors" },
+      { "name": "The Warm-White Rule", "body": "Reading text is #EDEBE6, never pure #FFFFFF. Pure white glares against #0d0d0f; the warm ink is what makes long chord charts readable at a glance on a bright stage.", "section": "colors" },
+      { "name": "The Column-Align Rule", "body": "Chord charts and readouts are always Space Mono (or another fixed-width face). A chord sitting over the wrong syllable is a performance error, not a style nit. Proportional fonts are forbidden anywhere a chord sits above a lyric.", "section": "typography" },
+      { "name": "The Three-Jobs Rule", "body": "Space Grotesk names music (titles, song names, lyrics). Space Mono runs the panel (chords, keys, tick labels). Inter runs the chrome (controls, metadata, artist names). Do not use a display title in Inter or a chord chart in a proportional font.", "section": "typography" },
+      { "name": "The Flat Rule", "body": "Surfaces are flat. Separation comes from hairlines and seams, never from ambient shadow or lift. If an element is casting a drop-shadow, it's wrong.", "section": "elevation" },
+      { "name": "The Seam-Is-Structure Rule", "body": "Grouped controls are a single 1px-gap grid on a #232328 background so each segment reads as a physically routed strip. Don't fake the grouping with margins or borders — route it through the seam.", "section": "elevation" }
     ],
     "dos": [
-      "Do keep Stage Gold (#C9A84C) as the single accent — active pills, primary action, focus, favorites.",
-      "Do read text in warm cream (#F5F0E8), never pure white, against the #080808 void.",
-      "Do set every chord chart in Fragment Mono so chords column-align over their lyrics.",
-      "Do convey depth with warm near-black tint steps (#0F0F0E→#1E1E1E) and let pure-black shadows appear only on hover/focus, never at rest.",
-      "Do size and space stage-facing views to be read one-handed, at arm's length, in the dark.",
-      "Do give controls crisp, restrained feedback (scale 0.94–0.99 on press) with a reduced-motion path for every animation."
+      "Do keep Rack Gold (#C7B27A) as the single accent — active pills, primary action, focus, favorites, chords. One light on the panel.",
+      "Do read text in warm ink (#EDEBE6), never pure white, against the #0d0d0f chassis.",
+      "Do separate list rows with 1px hairline rules (#1e1e22) and group controls into seamed strips (#232328) — the grid is the structure.",
+      "Do set every chord chart and readout in Space Mono so chords column-align over their lyrics.",
+      "Do keep corners square; round only physical-control chrome (search field, seam strips, transport) at 10-12px.",
+      "Do size and space stage-facing views to be read one-handed, at arm's length, in the dark — legibility beats density.",
+      "Do give controls crisp scale(0.97) press feedback; reserve spring/overshoot easing for the segmented pill and expand animations."
     ],
     "donts": [
-      "Don't add a second accent color. Red and green are state signals only (danger / success), never decoration.",
-      "Don't look like a cluttered guitar-tab site — no cramped ad-slabs, no amateur chord dumps.",
-      "Don't drift into generic SaaS-dashboard territory — no blue-and-white card grids, no hero-metric template.",
-      "Don't go bright, playful, or gamified like a consumer music app.",
-      "Don't fake hardware — no wood grain, no imitation LED meters, no skeuomorphic textures.",
-      "Don't use pure #FFFFFF text or gold as fill-by-the-yard; both destroy the void-with-one-light effect.",
+      "Don't add a second accent color. Destructive-red and success-green are state signals only, never decoration — that breaks The One Light Rule.",
+      "Don't float cards or drop ambient shadows — separation is hairlines and seams, not lift. A shadow at rest is wrong.",
+      "Don't round primary actions, list rows or fields — square corners are the rack. Rounding is only for control-like chrome.",
+      "Don't look like a cluttered guitar-tab site, a blue-and-white SaaS dashboard, or a bright gamified music app. Space, grid and hierarchy are the whole point.",
+      "Don't fake hardware — no wood grain, no imitation LED meters, no skeuomorphic textures. The instrument feeling comes from the grid and restraint, not mimicry.",
+      "Don't use pure #FFFFFF text or gold as a fill-by-the-yard; both destroy the rack-with-one-light effect.",
       "Don't let a chord chart render in a proportional font — a chord over the wrong syllable is a live performance error."
     ]
   }

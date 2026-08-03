@@ -72,7 +72,7 @@ input:focus, select:focus, textarea:focus,
 
 /* === Bottom nav active icon pop === */
 @keyframes navPop { 0% { transform: scale(1); } 35% { transform: scale(1.22); } 100% { transform: scale(1); } }
-.nav-active-icon { animation: navPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.nav-active-icon { animation: navPop 0.3s cubic-bezier(0.22, 1, 0.36, 1); }
 
 /* === Filter/tag pill press === */
 .pill:active { transform: scale(0.94); }
